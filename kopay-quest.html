@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Kopay Quest · Programas Kopay 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --panel:#f7f3e8; --ink:#20180f; --muted:#6b6152;
+    --ok:#2fa84f; --bad:#e0402c; --coin:#fbd000; --coin2:#e0a800;
+    --kopay:#103328; --menta:#7EE39B; --naranja:#EE7B45; --dorado:#C9A75C;
+    /* variables de entorno (las cambia el JS por mundo) */
+    --sky1:#3FA9E0; --sky2:#A8E6C1; --gr:#8B5A34; --gr2:#5E3A20; --grTop:#3EA832;
+    --deco:#2d8425; --deco2:#1f6b1c; --accent:#7EE39B;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:"Nunito",system-ui,sans-serif;background:#070c14;color:var(--ink);
+    min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:16px;
+    -webkit-font-smoothing:antialiased;overflow-x:hidden}
+  .stage{width:100%;max-width:436px}
+  .phone{position:relative;border-radius:34px;background:#000;padding:10px;
+    box-shadow:0 26px 64px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.07)}
+  .screen{border-radius:26px;overflow:hidden;position:relative;background:var(--sky1);
+    display:flex;flex-direction:column;height:min(85dvh,780px);min-height:600px;image-rendering:pixelated}
+  .px{font-family:"Press Start 2P",monospace;letter-spacing:0}
+
+  /* ---------- HUD ---------- */
+  .hud{background:#000;color:#fff;padding:9px 12px;display:flex;align-items:center;gap:8px;z-index:8}
+  .hud .blk{font-size:8px;line-height:1.7}
+  .hud .blk b{display:block;font-size:10px;color:#fff}
+  .hud .lives{display:flex;align-items:center;gap:3px}
+  .coinico{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--coin);
+    border:2px solid var(--coin2);vertical-align:-1px;margin-right:4px}
+  .flexsp{flex:1}
+  .strip{background:#000;padding:6px 10px;display:flex;gap:3px;align-items:center;z-index:7}
+  .strip i{height:5px;flex:1;background:#3a3f52;border-radius:1px;transition:background .3s}
+  .strip i.done{background:var(--coin)} .strip i.now{background:#fff}
+
+  /* ---------- MUNDO ---------- */
+  .world{position:relative;height:178px;flex:0 0 auto;overflow:hidden;
+    background:linear-gradient(180deg,var(--sky1) 0%,var(--sky2) 100%);transition:background .8s ease}
+  .deco{position:absolute;inset:0;z-index:1}
+  .ground{position:absolute;left:0;right:0;bottom:0;height:34px;background:var(--gr);
+    border-top:5px solid var(--grTop);z-index:2;
+    background-image:linear-gradient(90deg,rgba(0,0,0,.18) 2px,transparent 2px),
+      linear-gradient(180deg,rgba(0,0,0,.18) 2px,transparent 2px);
+    background-size:17px 17px}
+  .pit{position:absolute;bottom:0;height:34px;width:0;background:#05070c;transition:width .3s;z-index:3}
+
+  /* decorado genérico */
+  .cloud{position:absolute;background:#fff;border-radius:20px;opacity:.95}
+  .cloud:before,.cloud:after{content:'';position:absolute;background:#fff;border-radius:50%}
+  .cloud:before{width:22px;height:22px;top:-11px;left:7px}
+  .cloud:after{width:16px;height:16px;top:-8px;left:26px}
+  .drift{animation:drift 30s linear infinite}
+  @keyframes drift{from{transform:translateX(-60px)}to{transform:translateX(430px)}}
+  .hill{position:absolute;bottom:34px;background:var(--deco);border-radius:60px 60px 0 0;opacity:.92}
+  .bush{position:absolute;bottom:34px;background:var(--deco2);border-radius:22px 22px 0 0}
+  .pipe{position:absolute;bottom:34px;width:34px;background:var(--deco);border:3px solid rgba(0,0,0,.35)}
+  .pipe:before{content:'';position:absolute;top:-11px;left:-6px;width:46px;height:12px;
+    background:var(--deco);border:3px solid rgba(0,0,0,.35)}
+  .stal{position:absolute;top:0;width:0;height:0;border-left:9px solid transparent;
+    border-right:9px solid transparent;border-top:26px solid var(--deco)}
+  .star{position:absolute;width:3px;height:3px;background:#fff;opacity:.85;animation:tw 2.4s steps(2) infinite}
+  @keyframes tw{50%{opacity:.15}}
+  .sun{position:absolute;border-radius:50%;background:radial-gradient(circle,#FFE9A8,var(--accent) 70%);opacity:.9}
+  .torch{position:absolute;width:8px;height:16px;background:#6b5236}
+  .torch:before{content:'';position:absolute;top:-13px;left:-3px;width:14px;height:15px;border-radius:50% 50% 40% 40%;
+    background:radial-gradient(circle at 50% 70%,#fff3a0,#ff9d2e 55%,#e0402c);animation:flick .5s steps(2) infinite}
+  @keyframes flick{50%{transform:scaleY(.78) translateY(2px);opacity:.85}}
+  .lava{position:absolute;left:0;right:0;bottom:0;height:12px;z-index:3;
+    background:linear-gradient(180deg,#ff9d2e,#e0402c);animation:lavap 1.4s steps(2) infinite}
+  @keyframes lavap{50%{filter:brightness(1.25)}}
+  .col{position:absolute;bottom:34px;width:26px;background:rgba(255,255,255,.09);border:3px solid rgba(0,0,0,.3)}
+
+  /* bloque, hero, bandera */
+  .qblock{position:absolute;top:22px;width:44px;height:44px;margin-left:-22px;
+    background:linear-gradient(180deg,#f2a03c,#d97b18);border:3px solid #7a3f06;border-radius:5px;
+    display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;z-index:5;
+    box-shadow:inset 0 -4px 0 rgba(0,0,0,.2),inset 0 3px 0 rgba(255,255,255,.28);
+    transition:left .5s cubic-bezier(.3,.8,.4,1)}
+  .qblock.hit{animation:bump .34s ease}
+  .qblock.used{background:linear-gradient(180deg,#9c7a52,#6f5537);border-color:#4a3822;color:#4a3822}
+  @keyframes bump{35%{transform:translateY(-13px)}}
+  .coinpop{position:absolute;top:24px;width:20px;height:26px;margin-left:-10px;border-radius:50%;z-index:6;
+    background:radial-gradient(circle at 40% 35%,#fff28a,var(--coin) 55%,var(--coin2));
+    border:2px solid var(--coin2);opacity:0}
+  .coinpop.go{animation:coinfly .85s ease-out both}
+  @keyframes coinfly{0%{opacity:1;transform:translateY(0) scaleX(1)}
+    45%{opacity:1;transform:translateY(-56px) scaleX(.35)}
+    100%{opacity:0;transform:translateY(-78px) scaleX(1)}}
+  .plusN{position:absolute;top:2px;z-index:7;font-size:9px;color:#fff;margin-left:-30px;width:60px;
+    text-align:center;text-shadow:2px 2px 0 #000;opacity:0}
+  .plusN.go{animation:plusUp .95s ease-out both}
+  @keyframes plusUp{0%{opacity:0;transform:translateY(12px)}30%{opacity:1}100%{opacity:0;transform:translateY(-20px)}}
+
+  .hero{position:absolute;bottom:34px;width:40px;margin-left:-20px;z-index:5;
+    transition:left .5s cubic-bezier(.3,.8,.4,1)}
+  .hero svg{width:100%;display:block}
+  .hero.walk{animation:bob .34s steps(2) infinite}
+  @keyframes bob{50%{transform:translateY(-2px)}}
+  .hero.jump{animation:jump .55s ease}
+  @keyframes jump{40%{transform:translateY(-54px)}}
+  .hero.die{animation:die 1.15s cubic-bezier(.3,.1,.7,1) forwards;z-index:9}
+  @keyframes die{22%{transform:translateY(-46px) rotate(160deg)}
+    100%{transform:translateY(210px) rotate(540deg);opacity:.9}}
+
+  .flagpole{position:absolute;right:16px;bottom:34px;width:4px;height:100px;background:#dfe6ee;z-index:4}
+  .flagpole:before{content:'';position:absolute;top:-8px;left:-4px;width:12px;height:12px;border-radius:50%;background:var(--coin)}
+  .flag{position:absolute;left:4px;top:78px;width:26px;height:18px;background:var(--menta);
+    clip-path:polygon(0 0,100% 50%,0 100%);transition:top .9s ease}
+  .flag.up{top:2px}
+
+  /* ---------- PANEL ---------- */
+  .panel{flex:1;overflow-y:auto;background:var(--panel);padding:13px 13px 18px;border-top:4px solid #000}
+  .wtag{font-size:7.5px;color:var(--muted);letter-spacing:.5px;margin-bottom:9px}
+  .sc{background:#fff;border:3px solid var(--ink);border-radius:3px;padding:11px 12px;margin-bottom:12px;
+    box-shadow:4px 4px 0 rgba(32,24,15,.18)}
+  .sc .s{font-size:7.5px;color:var(--muted);margin-bottom:6px;line-height:1.7}
+  .sc p{margin:0;font-size:14px;line-height:1.5;font-weight:600}
+  .q{font-size:14.5px;font-weight:800;line-height:1.45;margin:0 0 12px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{width:100%;text-align:left;border:3px solid var(--ink);background:#fff;color:var(--ink);border-radius:3px;
+    padding:11px 12px;font-family:inherit;font-size:13.5px;font-weight:700;line-height:1.4;cursor:pointer;
+    box-shadow:4px 4px 0 rgba(32,24,15,.2);transition:transform .08s,box-shadow .08s;display:flex;gap:9px;align-items:flex-start}
+  .opt:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 rgba(32,24,15,.24)}
+  .opt:active{transform:translate(3px,3px);box-shadow:1px 1px 0 rgba(32,24,15,.2)}
+  .opt:focus-visible{outline:3px solid var(--menta);outline-offset:2px}
+  .opt .ico{width:17px;height:17px;flex:0 0 auto;margin-top:1px}
+  .opt.ok{border-color:var(--ok);background:#e8f7ee}
+  .opt.no{border-color:var(--bad);background:#fdeae7}
+  .opt.mute{opacity:.4}
+  .ms{display:flex;flex-direction:column;gap:7px;margin-bottom:11px}
+  .mi{display:flex;align-items:center;gap:9px;border:3px solid var(--ink);background:#fff;border-radius:3px;
+    padding:10px 11px;cursor:pointer;font-size:13px;font-weight:700;text-align:left;font-family:inherit;
+    color:var(--ink);width:100%;box-shadow:3px 3px 0 rgba(32,24,15,.18)}
+  .mi .bx{width:19px;height:19px;border:3px solid var(--ink);flex:0 0 auto;display:flex;align-items:center;
+    justify-content:center;font-size:11px;color:#fff;background:#fff}
+  .mi.on .bx{background:var(--kopay)}
+  .mi.ok{border-color:var(--ok);background:#e8f7ee} .mi.ok .bx{background:var(--ok)}
+  .mi.no{border-color:var(--bad);background:#fdeae7} .mi.no .bx{background:var(--bad)}
+  .mi:focus-visible{outline:3px solid var(--menta);outline-offset:2px}
+  .slots{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+  .slot{display:flex;align-items:center;gap:8px;border:3px dashed rgba(32,24,15,.3);border-radius:3px;
+    padding:9px 10px;font-size:12.5px;font-weight:700;color:#9c9080;min-height:40px}
+  .slot .n{width:20px;height:20px;background:#ded5c2;color:#7d7263;font-size:10px;font-weight:800;
+    display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .slot.full{border-style:solid;border-color:var(--ink);background:#fff;color:var(--ink)}
+  .slot.full .n{background:var(--kopay);color:#fff}
+  .pool{display:flex;flex-wrap:wrap;gap:7px}
+  .pc{border:3px solid var(--ink);background:#fff;border-radius:3px;padding:9px 12px;font-size:12.5px;
+    font-weight:800;cursor:pointer;font-family:inherit;color:var(--ink);box-shadow:3px 3px 0 rgba(32,24,15,.18)}
+  .pc:active{transform:translate(2px,2px);box-shadow:1px 1px 0 rgba(32,24,15,.18)}
+  .pc:focus-visible{outline:3px solid var(--menta);outline-offset:2px}
+  .pc.used{opacity:.28;pointer-events:none}
+  .pc.err{border-color:var(--bad);background:#fdeae7;animation:shk .34s}
+  @keyframes shk{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+  .cta{width:100%;border:3px solid var(--ink);border-radius:3px;padding:12px;font-family:inherit;
+    font-size:14px;font-weight:800;cursor:pointer;background:var(--kopay);color:#fff;
+    box-shadow:4px 4px 0 rgba(32,24,15,.25)}
+  .cta:active{transform:translate(3px,3px);box-shadow:1px 1px 0 rgba(32,24,15,.25)}
+  .cta.dis{background:#b7b0a2;cursor:not-allowed}
+
+  /* ---------- HOJA ---------- */
+  .sheet{position:absolute;left:0;right:0;bottom:0;z-index:40;background:var(--panel);border-top:5px solid #000;
+    padding:14px 14px 16px;transform:translateY(115%);transition:transform .34s cubic-bezier(.2,.9,.2,1);
+    max-height:82%;overflow-y:auto}
+  .sheet.up{transform:none}
+  .sv{font-size:11px;margin-bottom:9px;line-height:1.5}
+  .sheet.g .sv{color:var(--ok)} .sheet.b .sv{color:var(--bad)}
+  .sw{font-size:13.5px;line-height:1.55;font-weight:600}
+  .note{margin-top:11px;background:var(--kopay);color:#fff;border-radius:3px;padding:11px 12px;
+    font-size:12.5px;line-height:1.5;font-weight:600}
+  .note b{color:var(--menta)}
+  .nx{margin-top:12px;width:100%;border:3px solid var(--ink);border-radius:3px;padding:12px;font-family:inherit;
+    font-size:13px;font-weight:800;cursor:pointer;background:#fff;color:var(--ink);box-shadow:4px 4px 0 rgba(32,24,15,.25)}
+  .nx:active{transform:translate(3px,3px);box-shadow:1px 1px 0 rgba(32,24,15,.25)}
+
+  /* ---------- PORTADAS ---------- */
+  .cover{position:absolute;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;text-align:center;padding:26px 22px;overflow-y:auto;background:#000;color:#fff}
+  .cover.sky{background:linear-gradient(180deg,var(--sky1),var(--sky2))}
+  .title{font-size:clamp(15px,4.6vw,20px);line-height:1.6;color:#fff;text-shadow:3px 3px 0 #000;margin-bottom:4px}
+  .title em{font-style:normal;color:var(--menta)}
+  .sub{font-size:8px;color:#dfe6ee;line-height:2;margin-top:8px}
+  .coverHero{width:70px;margin:14px auto 6px}
+  .lead{font-size:13.5px;line-height:1.55;font-weight:600;color:#fff;max-width:31ch;margin:12px auto 16px}
+  .lead b{color:var(--coin)}
+  .rulesbox{background:rgba(0,0,0,.42);border:3px solid #fff;border-radius:3px;padding:12px 13px;
+    max-width:310px;text-align:left;margin:0 auto 18px}
+  .rulesbox div{display:flex;gap:9px;font-size:12.5px;font-weight:700;margin-bottom:9px;line-height:1.4}
+  .rulesbox div:last-child{margin-bottom:0}
+  .go{border:3px solid #000;cursor:pointer;font-family:"Press Start 2P",monospace;font-size:12px;
+    background:var(--coin);color:#000;border-radius:3px;padding:14px 22px;box-shadow:5px 5px 0 rgba(0,0,0,.5);line-height:1.5}
+  .go:active{transform:translate(4px,4px);box-shadow:1px 1px 0 rgba(0,0,0,.5)}
+  .scorebox{background:rgba(0,0,0,.4);border:3px solid #fff;border-radius:3px;padding:13px;max-width:300px;
+    margin:0 auto 16px;text-align:left}
+  .scorebox div{display:flex;justify-content:space-between;font-size:9px;line-height:2.1;color:#fff;gap:12px}
+  .scorebox div b{color:var(--coin)}
+  .weak{background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.35);border-radius:3px;padding:11px 12px;
+    max-width:310px;margin:0 auto 16px;text-align:left}
+  .weak h3{margin:0 0 8px;font-family:"Press Start 2P",monospace;font-size:7.5px;color:#ff9c8a;line-height:1.7}
+  .weak ul{margin:0;padding:0}
+  .weak li{list-style:none;font-size:12px;font-weight:600;color:#fff;margin-bottom:7px;line-height:1.4;display:flex;gap:7px}
+  .shot{display:flex;align-items:center;gap:10px;text-align:left;background:rgba(251,208,0,.16);
+    border:3px dashed var(--coin);border-radius:3px;padding:11px 12px;max-width:310px;margin:0 auto 16px}
+  .shot .ic{font-size:23px;flex:0 0 auto}
+  .shot .tx{font-size:12px;line-height:1.45;font-weight:600;color:#fff}
+  .shot .tx b{color:var(--coin);font-weight:800}
+  .wcard{background:rgba(0,0,0,.45);border:3px solid #fff;border-radius:3px;padding:16px 14px;max-width:320px;margin:0 auto 18px}
+  .wcard .wn{font-family:"Press Start 2P",monospace;font-size:9px;color:var(--coin);line-height:1.9}
+  .wcard .wt{font-family:"Press Start 2P",monospace;font-size:13px;color:#fff;line-height:1.7;margin:6px 0 10px}
+  .wcard .wd{font-size:12.5px;font-weight:600;line-height:1.5;color:#e9f3ea}
+  .shake{animation:shake .4s}
+  @keyframes shake{20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+  @media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.08s !important}}
+</style>
+</head>
+<body>
+<div class="stage"><div class="phone"><div class="screen" id="screen">
+
+  <div class="hud px" id="hud" hidden>
+    <div class="blk">KOPAY<b id="hCoins"><span class="coinico"></span>000</b></div>
+    <div class="flexsp"></div>
+    <div class="blk" style="text-align:center">MUNDO<b id="hWorld">1-1</b></div>
+    <div class="flexsp"></div>
+    <div class="lives" id="hLives"></div>
+  </div>
+  <div class="strip" id="strip" hidden></div>
+
+  <div class="world" id="world" hidden>
+    <div class="deco" id="deco"></div>
+    <div class="ground"></div>
+    <div class="pit" id="pit"></div>
+    <div class="flagpole"><div class="flag" id="flag"></div></div>
+    <div class="qblock px" id="qblock">?</div>
+    <div class="coinpop" id="coinpop"></div>
+    <div class="plusN px" id="plusN">+100</div>
+    <div class="hero" id="hero"></div>
+  </div>
+
+  <div class="panel" id="panel" hidden></div>
+
+  <div class="sheet" id="sheet">
+    <div class="sv px" id="sv"></div>
+    <div class="sw" id="sw"></div>
+    <div id="sx"></div>
+    <button class="nx" id="nx">CONTINUAR ▸</button>
+  </div>
+
+  <div class="cover sky" id="intro">
+    <div class="title px">KOPAY<br><em>QUEST</em></div>
+    <div class="coverHero" id="introHero"></div>
+    <div class="sub px">PROGRAMAS KOPAY 2026</div>
+    <p class="lead">Cruza <b>4 mundos</b> distintos respondiendo bien. Cada acierto rompe un bloque y suelta monedas… cada error te <b>cuesta una vida</b> 💀</p>
+    <div class="rulesbox">
+      <div><span>🌍</span><span>Cada mundo cambia de escenario y de tema.</span></div>
+      <div><span>💀</span><span>Tienes <b>3 vidas</b>. Se acaban y es GAME OVER.</span></div>
+      <div><span>🪙</span><span>Monedas por acierto. Racha de 3 = bonus doble.</span></div>
+      <div><span>🚩</span><span>Llega al castillo y captura tu marcador.</span></div>
+    </div>
+    <button class="go" id="start">▸ START</button>
+  </div>
+
+</div></div></div>
+
+<script>
+/* ================= SPRITE ================= */
+const PAL={'1':'#103328','2':'#F3C8A0','3':'#EE7B45','4':'#7EE39B','5':'#5E3A20','6':'#C9A75C','0':null};
+const SPR=['000444444000','004444444400','044444444440','002222222200','002212212200',
+  '002222222200','000222222000','003333333300','033336633330','033333333330',
+  '003333333300','000111111000','000111111000','000111111000','005500005500'];
+function heroSVG(rows){
+  const R=rows||SPR.length; let r='';
+  SPR.slice(0,R).forEach((row,y)=>{[...row].forEach((ch,x)=>{
+    const c=PAL[ch]; if(c) r+=`<rect x="${x}" y="${y}" width="1" height="1" fill="${c}"/>`;});});
+  return `<svg viewBox="0 0 12 ${R}" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">${r}</svg>`;
+}
+const GEM=`<svg viewBox="0 0 12 12" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+<rect x="4" y="1" width="4" height="1" fill="#C9A75C"/><rect x="2" y="2" width="8" height="1" fill="#C9A75C"/>
+<rect x="1" y="3" width="10" height="3" fill="#7EE39B"/><rect x="3" y="3" width="2" height="2" fill="#fff"/>
+<rect x="2" y="6" width="8" height="2" fill="#2fa84f"/><rect x="4" y="8" width="4" height="2" fill="#103328"/></svg>`;
+
+/* ================= ENTORNOS ================= */
+const ENTORNOS={
+  1:{ nombre:"PRADERA", vars:{'--sky1':'#3FA9E0','--sky2':'#A8E6C1','--gr':'#8B5A34','--gr2':'#5E3A20',
+      '--grTop':'#3EA832','--deco':'#2d8425','--deco2':'#1f6b1c','--accent':'#7EE39B'},
+    deco:`<div class="cloud drift" style="width:46px;height:15px;top:18px;left:20px"></div>
+          <div class="cloud drift" style="width:32px;height:12px;top:46px;left:180px;animation-duration:42s"></div>
+          <div class="hill" style="left:-16px;width:104px;height:52px"></div>
+          <div class="hill" style="right:-20px;width:80px;height:40px;background:var(--deco2)"></div>
+          <div class="bush" style="left:46%;width:58px;height:20px"></div>
+          <div class="pipe" style="left:26%;height:26px"></div>` },
+  2:{ nombre:"SUBTERRANEO", vars:{'--sky1':'#0A1626','--sky2':'#13293F','--gr':'#3A4A5E','--gr2':'#22303F',
+      '--grTop':'#6C7F96','--deco':'#26506b','--deco2':'#1a3a4f','--accent':'#7EE39B'},
+    deco:`<div class="stal" style="left:14%"></div><div class="stal" style="left:38%;border-top-width:34px"></div>
+          <div class="stal" style="left:64%;border-top-width:20px"></div><div class="stal" style="left:86%;border-top-width:30px"></div>
+          <div class="pipe" style="left:8%;height:34px;background:#1f7a4d"></div>
+          <div class="pipe" style="right:22%;height:22px;background:#1f7a4d"></div>
+          <div class="star" style="left:30%;top:60px"></div><div class="star" style="left:72%;top:44px"></div>` },
+  3:{ nombre:"ATARDECER", vars:{'--sky1':'#F0913C','--sky2':'#7A3A6B','--gr':'#5E3A5A','--gr2':'#3D2440',
+      '--grTop':'#C9A75C','--deco':'#59306B','--deco2':'#3F2150','--accent':'#F2A03C'},
+    deco:`<div class="sun" style="right:34px;top:26px;width:56px;height:56px"></div>
+          <div class="hill" style="left:-10px;width:120px;height:56px"></div>
+          <div class="hill" style="left:44%;width:92px;height:44px;background:var(--deco2)"></div>
+          <div class="bush" style="right:26%;width:50px;height:18px"></div>
+          <div class="cloud drift" style="width:38px;height:12px;top:22px;left:40px;opacity:.55;animation-duration:46s"></div>` },
+  4:{ nombre:"CASTILLO", vars:{'--sky1':'#1A1016','--sky2':'#2C1522','--gr':'#4A3A44','--gr2':'#2E232B',
+      '--grTop':'#7A6270','--deco':'#3A2A34','--deco2':'#241820','--accent':'#EE7B45'},
+    deco:`<div class="col" style="left:10%;height:78px"></div><div class="col" style="left:44%;height:96px"></div>
+          <div class="col" style="right:14%;height:70px"></div>
+          <div class="torch" style="left:24%;bottom:96px"></div><div class="torch" style="right:30%;bottom:104px"></div>
+          <div class="star" style="left:20%;top:18px"></div><div class="star" style="left:60%;top:30px"></div>
+          <div class="lava"></div>` }
+};
+
+/* ================= CONTENIDO — solo del PDF Programas Kopay 2026 ================= */
+const Q=[
+/* ---------- MUNDO 1 · PRADERA — EL PORTAFOLIO ---------- */
+{ w:1, tag:'MUNDO 1-1 · PORTAFOLIO', type:'choice',
+  scene:{s:'JUNTA DE ARRANQUE · KOPAY 2026',p:'Tu líder explica el proyecto: dejamos de vender por <b>cantidad de sesiones</b>.'},
+  q:'¿Hacia qué modelo migramos?',
+  opts:[{t:'A programas diseñados según el objetivo de la clienta',ok:true},
+        {t:'A paquetes de 2, 5, 8 y 12 sesiones',ok:false},
+        {t:'Al precio por sesión más bajo del mercado',ok:false},
+        {t:'A cotizar solo por zona del cuerpo',ok:false}],
+  ok:'Migramos de la venta por sesiones a los Programas Kopay, diseñados según el objetivo de cada clienta.',
+  no:'Migramos a <b>programas según el objetivo</b> de la clienta. Los paquetes por número de sesiones son justo el modelo que dejamos atrás.',
+  note:'Propósito: elevar percepción de valor, mejorar cierres, subir ticket promedio y diferenciar la marca.' },
+
+{ w:1, tag:'MUNDO 1-2 · PORTAFOLIO', type:'choice',
+  scene:{s:'REPASO EXPRESS',p:'Una compañera nueva te pregunta cuántas sesiones trae cada programa.'},
+  q:'¿Cuál es la combinación correcta?',
+  opts:[{t:'Descubre 2 · Avanza 5 · Impulsa 8 · Transforma 12',ok:true},
+        {t:'Descubre 2 · Avanza 4 · Impulsa 6 · Transforma 10',ok:false},
+        {t:'Descubre 3 · Avanza 5 · Impulsa 10 · Transforma 15',ok:false},
+        {t:'Descubre 1 · Avanza 5 · Impulsa 8 · Transforma 12',ok:false}],
+  ok:'Descubre 2, Avanza 5, Impulsa 8 y Transforma 12. Estos números se dicen de memoria.',
+  no:'Son <b>2 · 5 · 8 · 12</b>. Si dudas del número frente a la clienta, se cae la confianza en la recomendación.',
+  note:'Descubre es para probar; Transforma es el tratamiento más completo del ciclo del vello.' },
+
+{ w:1, tag:'MUNDO 1-3 · PORTAFOLIO', type:'multi',
+  scene:{s:'TABLA COMPARATIVA',p:'Marca <b>todo</b> lo que aparece en Transforma Kopay y <b>no</b> en Avanza Kopay.'},
+  q:'Selecciona todas las correctas:',
+  items:[{t:'Garantía Kopay',ok:true},{t:'Congelar promoción futura',ok:true},
+         {t:'Precio preferencial en retoques',ok:true},{t:'12 sesiones',ok:true},
+         {t:'Menos uso de rastrillo',ok:false},{t:'Reducción visible del vello',ok:false},
+         {t:'Piel más cómoda y uniforme',ok:false}],
+  ok:'Garantía Kopay, congelar promoción futura, precio preferencial en retoques y 12 sesiones. Lo demás lo dan los tres programas, solo que en distinto grado.',
+  no:'Son cuatro. Ojo: menos rastrillo, reducción visible y piel uniforme <b>también</b> están en Avanza; lo que cambia es la intensidad del resultado.',
+  note:'El precio preferencial en retoques lo comparten Impulsa y Transforma. La garantía y congelar promoción son solo de Transforma.' },
+
+/* ---------- MUNDO 2 · SUBTERRÁNEO — ESTRATEGIA Y PRECIOS ---------- */
+{ w:2, tag:'MUNDO 2-1 · ESTRATEGIA', type:'choice',
+  scene:{s:'WHATSAPP · 10:12 AM',p:'«Hola, ¿cuánto cuesta el láser de axilas?» Es el primer mensaje de la clienta.'},
+  q:'¿Qué programa presentas PRIMERO?',
+  opts:[{t:'Impulsa Kopay',ok:true},{t:'Avanza Kopay, es lo más accesible',ok:false},
+        {t:'Transforma Kopay, deja más utilidad',ok:false},{t:'Descubre Kopay, para que pruebe',ok:false}],
+  ok:'Impulsa es el programa inicial a ofrecer: es el caballo de batalla comercial y el protagonista en campañas y chats.',
+  no:'Va primero <b>Impulsa</b>. Regla Kopay: nunca inicies con el más barato ni con el más caro.',
+  note:'Orden en ventas digitales: 1) Impulsa · 2) Transforma · 3) Avanza solo si objeta precio.' },
+
+{ w:2, tag:'MUNDO 2-2 · PSICOLOGÍA DE PRECIOS', type:'choice',
+  scene:{s:'ANÁLISIS DEL MES',p:'Una sucursal abre siempre ofreciendo <b>Avanza</b> porque «así no se espantan».'},
+  q:'¿Qué está provocando esa práctica?',
+  opts:[{t:'Muchas se quedan en Avanza, compran «para probar» y baja el ticket promedio',ok:true},
+        {t:'La marca se percibe más premium',ok:false},
+        {t:'Sube el ticket porque después compran el siguiente programa',ok:false},
+        {t:'No pasa nada, el resultado es el mismo',ok:false}],
+  ok:'Abrir con Avanza hace que muchas se queden ahí y compren solo para probar: el ticket promedio cae.',
+  no:'Baja el ticket. Abrir con <b>Transforma</b> tampoco funciona: algunas lo ven alto de entrada y genera rechazo temprano.',
+  note:'Impulsa se siente inteligente, da confianza y parece la mejor inversión: es el punto medio psicológico.' },
+
+{ w:2, tag:'MUNDO 2-3 · ROLES', type:'multi',
+  scene:{s:'MAPA DE PROGRAMAS',p:'Cada programa tiene un rol distinto. Marca las afirmaciones <b>correctas</b>.'},
+  q:'Selecciona todas las correctas:',
+  items:[{t:'Avanza es el programa de entrada y rescata la objeción de precio',ok:true},
+         {t:'Impulsa es el programa principal y recomendado',ok:true},
+         {t:'Transforma es el premium y maximiza la utilidad',ok:true},
+         {t:'Impulsa facilita el upsell hacia Transforma',ok:true},
+         {t:'Avanza es el programa premium de la marca',ok:false},
+         {t:'Transforma es el programa de entrada',ok:false}],
+  ok:'Avanza entrada, Impulsa principal, Transforma premium. Además, Impulsa abre la puerta al upsell hacia Transforma.',
+  no:'Avanza = entrada y rescate por precio · Impulsa = principal recomendado · Transforma = premium y maximizador de utilidad.',
+  note:'Impulsa se percibe alcanzable, da resultados importantes y tiene ticket mayor que el de entrada.' },
+
+/* ---------- MUNDO 3 · ATARDECER — CIERRE EN CHAT ---------- */
+{ w:3, tag:'MUNDO 3-1 · WHATSAPP', type:'choice',
+  scene:{s:'CHAT ABIERTO',p:'La clienta pregunta precio de piernas completas. Vas a escribir tu respuesta.'},
+  q:'¿Cómo la estructuras?',
+  opts:[{t:'Presento los programas según su objetivo y cierro con una pregunta guiada',ok:true},
+        {t:'Mando la lista de precios por sesión y espero respuesta',ok:false},
+        {t:'Le pregunto cuánto quiere gastar y armo algo',ok:false},
+        {t:'Le mando solo el más barato para no perderla',ok:false}],
+  ok:'El guion Kopay presenta los programas por objetivo y termina con una pregunta guiada que invita a decidir.',
+  no:'Se presentan los <b>programas según su objetivo</b> y se cierra con pregunta guiada. Mandar precios sueltos regresa la conversación a la comparación por precio.',
+  note:'Ejemplo de cierre: «¿Cuál te gustaría: invertir menos hoy o avanzar más rápido?»' },
+
+{ w:3, tag:'MUNDO 3-2 · DETECTAR NECESIDAD', type:'choice',
+  scene:{s:'CLIENTA DECIDIDA',p:'«Ya me cansé de rasurarme, quiero que <b>casi no vuelva a salir</b> y no andar retocando».'},
+  q:'¿Qué le recomiendas?',
+  opts:[{t:'Transforma Kopay',ok:true},{t:'Descubre Kopay',ok:false},
+        {t:'Avanza Kopay',ok:false},{t:'Le paso la lista y que ella elija',ok:false}],
+  ok:'Transforma da la máxima reducción posible, crecimiento mínimo, resultados más duraderos y Garantía Kopay.',
+  no:'Es <b>Transforma</b>: pidió el resultado más completo y duradero. Detectar la necesidad antes de cotizar es parte del proceso.',
+  note:'La clienta no compra sesiones: compra el resultado que quiere ver en su piel.' },
+
+{ w:3, tag:'MUNDO 3-3 · OBJECIÓN', type:'choice',
+  scene:{s:'OBJECIÓN CLÁSICA',p:'Le presentaste Impulsa y responde: «Uy, está fuera de mi presupuesto ahorita».'},
+  q:'¿Cuál es el siguiente movimiento?',
+  opts:[{t:'Ofrecer Avanza como rescate por objeción de precio',ok:true},
+        {t:'Bajar el precio de Impulsa para no perder la venta',ok:false},
+        {t:'Insistir con Transforma porque da más resultado',ok:false},
+        {t:'Cerrar la conversación y esperar promoción',ok:false}],
+  ok:'Avanza existe justo para eso: es el programa de entrada que rescata la venta cuando hay objeción de precio.',
+  no:'Se ofrece <b>Avanza</b>. Bajar precios nos regresa a competir por precio, que es lo que el proyecto busca evitar.',
+  note:'Avanza también da inicio sólido del cambio: reducción visible, crecimiento más lento y menos rastrillo.' },
+
+/* ---------- MUNDO 4 · CASTILLO — MENTALIDAD Y PROCESO ---------- */
+{ w:4, tag:'MUNDO 4-1 · MENTALIDAD', type:'choice',
+  scene:{s:'SALA DEL CASTILLO',p:'El cambio del proyecto no es de nombres. Es de <b>mentalidad</b>.'},
+  q:'¿Cómo se resume?',
+  opts:[{t:'Menos precio y más valor: menos disparos y más transformación',ok:true},
+        {t:'Más sesiones por el mismo precio',ok:false},
+        {t:'Lo mismo de siempre, pero con otro nombre',ok:false},
+        {t:'Vender siempre el paquete más caro',ok:false}],
+  ok:'Venderemos menos precio y más valor. Menos disparos y más transformación real.',
+  no:'Es <b>menos precio y más valor</b>: pasamos de vender cantidad de sesiones a vender transformación y soluciones.',
+  note:'Beneficios del cambio: menos comparación por precio, percepción premium, claridad al decidir y más autoridad de marca.' },
+
+{ w:4, tag:'MUNDO 4-2 · TAREAS DE VENTAS', type:'multi',
+  scene:{s:'CHECKLIST DEL EQUIPO',p:'Marca <b>todas</b> las tareas inmediatas que nos tocan en ventas.'},
+  q:'Selecciona todas las correctas:',
+  items:[{t:'Dejar de ofrecer sesiones primero',ok:true},{t:'Recomendar programas',ok:true},
+         {t:'Detectar la necesidad antes de cotizar',ok:true},{t:'Usar la tabla comparativa',ok:true},
+         {t:'Cerrar con pregunta guiada',ok:true},
+         {t:'Empezar siempre por el programa más barato',ok:false},
+         {t:'Comparar nuestro precio por sesión con la competencia',ok:false}],
+  ok:'Esas cinco son las tareas inmediatas de capacitación para ventas.',
+  no:'Son cinco: dejar de ofrecer sesiones primero, recomendar programas, detectar la necesidad antes de cotizar, usar la tabla comparativa y cerrar con pregunta guiada.',
+  note:'Comparar precio por sesión con la competencia es exactamente el modelo anterior.' },
+
+{ w:4, tag:'MUNDO 4-3 · JEFE FINAL', type:'order',
+  scene:{s:'BATALLA FINAL',p:'Arma la atención completa <b>en orden</b>. Un paso mal y pierdes vida.'},
+  q:'Toca los pasos en orden:',
+  seq:['Detectar la necesidad','Presentar Impulsa','Mostrar Transforma','Ofrecer Avanza si objeta precio','Cerrar con pregunta guiada'],
+  ok:'Proceso dominado: detectas, presentas Impulsa, muestras Transforma, rescatas con Avanza y cierras guiando la decisión.',
+  no:'El orden es: detectar necesidad → Impulsa → Transforma → Avanza si objeta precio → cerrar con pregunta guiada.',
+  note:'Nunca inicies ofreciendo el más barato ni el más caro.' }
+];
+
+/* ================= ESTADO ================= */
+const $=s=>document.querySelector(s);
+let i=0, lives=3, coins=0, right=0, streak=0, weak=[], locked=false, mundoActual=0;
+const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const shuffle=a=>{a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]];}return a;};
+const wait=ms=>new Promise(r=>setTimeout(r,reduced?0:ms));
+const nivelesDe=w=>Q.filter(q=>q.w===w).length;
+const idxEnMundo=k=>Q.slice(0,k).filter(q=>q.w===Q[k].w).length;
+
+/* chiptune */
+let AC=null;
+function initA(){try{AC=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function bp(f,d=.08,w=0,type='square',g=.08){if(!AC)return;const o=AC.createOscillator(),gn=AC.createGain();
+  o.type=type;o.frequency.value=f;o.connect(gn);gn.connect(AC.destination);const s=AC.currentTime+w;
+  gn.gain.setValueAtTime(g,s);gn.gain.exponentialRampToValueAtTime(.001,s+d);o.start(s);o.stop(s+d);}
+const sJump=()=>{if(!AC)return;const o=AC.createOscillator(),g=AC.createGain();o.type='square';
+  o.connect(g);g.connect(AC.destination);const t=AC.currentTime;o.frequency.setValueAtTime(320,t);
+  o.frequency.exponentialRampToValueAtTime(880,t+.13);g.gain.setValueAtTime(.09,t);
+  g.gain.exponentialRampToValueAtTime(.001,t+.17);o.start(t);o.stop(t+.17);};
+const sCoin=()=>{bp(988,.07,0,'square',.09);bp(1319,.16,.07,'square',.09)};
+const sBump=()=>bp(160,.07,0,'square',.08);
+const sDie=()=>{[[494,0],[440,.12],[392,.24],[330,.36],[262,.5],[196,.66]].forEach(([f,w])=>bp(f,.15,w,'square',.09))};
+const sClear=()=>{[[523,0],[659,.1],[784,.2],[1046,.3],[784,.42],[1046,.52],[1319,.64]].forEach(([f,w])=>bp(f,.16,w,'square',.08))};
+const sWorld=()=>{[[392,0],[523,.1],[659,.2],[880,.32]].forEach(([f,w])=>bp(f,.18,w,'square',.08))};
+const sOver=()=>{[[392,0],[330,.18],[262,.36],[196,.6]].forEach(([f,w])=>bp(f,.28,w,'triangle',.1))};
+
+/* ================= ENTORNO ================= */
+function aplicarEntorno(w){
+  if(mundoActual===w) return;
+  mundoActual=w;
+  const e=ENTORNOS[w];
+  Object.entries(e.vars).forEach(([k,v])=>document.documentElement.style.setProperty(k,v));
+  $('#deco').innerHTML=e.deco;
+}
+
+/* ================= HUD ================= */
+function paintHUD(){
+  const q=Q[i];
+  $('#hCoins').innerHTML='<span class="coinico"></span>'+String(coins).padStart(3,'0');
+  $('#hWorld').textContent=q.w+'-'+(idxEnMundo(i)+1);
+  let h='';
+  for(let k=0;k<3;k++) h+=`<span style="display:inline-block;width:15px;${k<lives?'':'opacity:.22'}">${heroSVG(7)}</span>`;
+  $('#hLives').innerHTML=h;
+  [...$('#strip').children].forEach((el,k)=>el.className=k<i?'done':(k===i?'now':''));
+}
+function posicionar(){
+  const total=nivelesDe(Q[i].w), n=idxEnMundo(i);
+  const pct = total>1 ? 18+(n/(total-1))*56 : 46;
+  $('#hero').style.left=pct+'%';
+  $('#qblock').style.left=pct+'%';
+  $('#coinpop').style.left=pct+'%';
+  $('#plusN').style.left=pct+'%';
+}
+
+/* ================= RENDER ================= */
+function render(){
+  locked=false; const q=Q[i];
+  aplicarEntorno(q.w);
+  paintHUD(); posicionar();
+  const qb=$('#qblock'); qb.className='qblock px'; qb.textContent='?';
+  $('#hero').className='hero walk';
+  const p=$('#panel');
+  p.innerHTML=`<div class="wtag px">${esc(q.tag)} · ${ENTORNOS[q.w].nombre}</div>
+    <div class="sc"><div class="s px">${esc(q.scene.s)}</div><p>${q.scene.p}</p></div>
+    <p class="q">${esc(q.q)}</p><div id="zone"></div>`;
+  ({choice:rChoice,multi:rMulti,order:rOrder})[q.type](q,$('#zone'));
+  p.scrollTop=0;
+}
+function rChoice(q,z){
+  const box=document.createElement('div'); box.className='opts';
+  shuffle(q.opts).forEach(o=>{
+    const b=document.createElement('button'); b.className='opt';
+    b.innerHTML=`<span class="ico">${GEM}</span><span>${esc(o.t)}</span>`;
+    b.onclick=()=>{
+      if(locked)return;
+      [...box.children].forEach(x=>{x.disabled=true; if(x!==b)x.classList.add('mute');});
+      b.classList.add(o.ok?'ok':'no');
+      if(!o.ok){
+        const buena=q.opts.find(y=>y.ok).t;
+        [...box.children].forEach(x=>{
+          if(x.querySelector('span:last-child').textContent===buena){x.classList.remove('mute');x.classList.add('ok');}});
+      }
+      resolver(o.ok);
+    };
+    box.appendChild(b);
+  });
+  z.appendChild(box);
+}
+function rMulti(q,z){
+  const sel=new Set();
+  const box=document.createElement('div'); box.className='ms';
+  shuffle(q.items).forEach(it=>{
+    const b=document.createElement('button'); b.className='mi';
+    b.innerHTML=`<span class="bx">✓</span><span>${esc(it.t)}</span>`;
+    b.onclick=()=>{ if(locked)return;
+      b.classList.toggle('on'); bp(700,.05,0,'square',.06);
+      sel.has(it.t)?sel.delete(it.t):sel.add(it.t);
+      btn.className='cta'+(sel.size?'':' dis'); };
+    box.appendChild(b);
+  });
+  z.appendChild(box);
+  const btn=document.createElement('button'); btn.className='cta dis'; btn.textContent='CONFIRMAR';
+  btn.onclick=()=>{
+    if(locked||!sel.size)return;
+    const need=new Set(q.items.filter(x=>x.ok).map(x=>x.t));
+    const good=sel.size===need.size&&[...sel].every(x=>need.has(x));
+    [...box.children].forEach(el=>{el.disabled=true;el.classList.remove('on');
+      const t=el.querySelector('span:last-child').textContent;
+      if(need.has(t))el.classList.add('ok'); else if(sel.has(t))el.classList.add('no');});
+    btn.disabled=true; btn.className='cta dis'; resolver(good);
+  };
+  z.appendChild(btn);
+}
+function rOrder(q,z){
+  let step=0, limpio=true;
+  const slots=document.createElement('div'); slots.className='slots';
+  q.seq.forEach((_,k)=>{const s=document.createElement('div');s.className='slot';
+    s.innerHTML=`<span class="n px">${k+1}</span><span>—</span>`;slots.appendChild(s);});
+  z.appendChild(slots);
+  const pool=document.createElement('div'); pool.className='pool';
+  shuffle(q.seq).forEach(txt=>{
+    const c=document.createElement('button'); c.className='pc'; c.textContent=txt;
+    c.onclick=()=>{
+      if(locked)return;
+      if(txt===q.seq[step]){
+        c.classList.add('used');
+        const s=slots.children[step]; s.className='slot full';
+        s.innerHTML=`<span class="n px">${step+1}</span><span>${esc(txt)}</span>`;
+        step++; bp(500+step*70,.06,0,'square',.07);
+        if(step===q.seq.length){[...pool.children].forEach(x=>x.disabled=true); resolver(limpio);}
+      }else{ limpio=false; c.classList.add('err'); sBump(); setTimeout(()=>c.classList.remove('err'),360); }
+    };
+    pool.appendChild(c);
+  });
+  z.appendChild(pool);
+}
+
+/* ================= RESOLVER ================= */
+async function resolver(ok){
+  if(locked)return; locked=true;
+  const q=Q[i];
+  if(ok){
+    right++; streak++;
+    const bonus=streak>=3?200:100; coins+=bonus;
+    const h=$('#hero'); h.className='hero jump'; sJump();
+    await wait(160);
+    const qb=$('#qblock'); qb.classList.add('hit'); sBump();
+    await wait(120);
+    qb.classList.add('used'); qb.textContent='';
+    const cp=$('#coinpop'); cp.classList.remove('go'); void cp.offsetWidth; cp.classList.add('go'); sCoin();
+    const pn=$('#plusN'); pn.textContent='+'+bonus+(streak>=3?' RACHA!':'');
+    pn.classList.remove('go'); void pn.offsetWidth; pn.classList.add('go');
+    paintHUD();
+    await wait(520);
+    h.className='hero walk';
+  }else{
+    streak=0; lives--; weak.push(q.tag.split('· ')[1]||q.tag);
+    const pct=parseFloat($('#hero').style.left)||46;
+    const pit=$('#pit'); pit.style.left='calc('+pct+'% - 26px)'; pit.style.width='52px';
+    const h=$('#hero'); h.className='hero die'; sDie();
+    $('#screen').classList.add('shake');
+    setTimeout(()=>$('#screen').classList.remove('shake'),420);
+    await wait(1150);
+    pit.style.width='0'; paintHUD();
+  }
+  const sh=$('#sheet'); sh.className='sheet '+(ok?'g':'b');
+  $('#sv').innerHTML = ok?(streak>=3?'★ RACHA x'+streak+' ★':'¡CORRECTO!'):'¡PERDISTE UNA VIDA!';
+  $('#sw').innerHTML = ok?q.ok:q.no;
+  $('#sx').innerHTML = q.note?`<div class="note">🪙 ${q.note}</div>`:'';
+  const finMundo = i<Q.length-1 && Q[i+1].w!==q.w;
+  $('#nx').textContent = (lives<=0)?'GAME OVER ▸':(i>=Q.length-1?'IZAR BANDERA ▸':finMundo?'MUNDO COMPLETADO ▸':'CONTINUAR ▸');
+  requestAnimationFrame(()=>sh.classList.add('up'));
+}
+$('#nx').onclick=async()=>{
+  $('#sheet').classList.remove('up'); await wait(300);
+  if(lives<=0){ sOver(); mostrar(false); return; }
+  const wPrev=Q[i].w;
+  i++;
+  if(i>=Q.length){ await finalizar(); return; }
+  if(Q[i].w!==wPrev){ portadaMundo(Q[i].w); return; }
+  $('#hero').className='hero walk'; render();
+};
+
+/* ================= PORTADA DE MUNDO ================= */
+function portadaMundo(w){
+  sWorld();
+  const bonus=150; coins+=bonus;
+  const desc={1:'',2:'Bajas al subterráneo: aquí se decide qué ofrecer primero y por qué.',
+    3:'Cae la tarde: toca cerrar en el chat con clientas reales.',
+    4:'Llegaste al castillo. Mentalidad, tareas del equipo y el jefe final.'}[w];
+  const c=document.createElement('div'); c.className='cover';
+  c.style.background='linear-gradient(180deg,'+ENTORNOS[w].vars['--sky1']+','+ENTORNOS[w].vars['--sky2']+')';
+  c.innerHTML=`
+    <div class="wcard">
+      <div class="wn px">MUNDO ${w}</div>
+      <div class="wt px">${ENTORNOS[w].nombre}</div>
+      <div class="wd">${desc}</div>
+    </div>
+    <div class="coverHero">${heroSVG()}</div>
+    <div class="scorebox px">
+      <div><span>BONUS DE MUNDO</span><b>+${bonus}</b></div>
+      <div><span>MONEDAS</span><b>${coins}</b></div>
+      <div><span>ACIERTOS</span><b>${right}/${Q.length}</b></div>
+    </div>
+    <button class="go" id="entrar">▸ ENTRAR</button>`;
+  $('#screen').appendChild(c);
+  $('#entrar').onclick=()=>{ c.remove(); $('#hero').className='hero walk'; render(); };
+  $('#entrar').focus();
+}
+
+/* ================= FINALES ================= */
+async function finalizar(){
+  i=Q.length-1; posicionar();
+  $('#hero').style.left='88%'; $('#qblock').style.left='88%';
+  $('#flag').classList.add('up'); sClear();
+  await wait(1150);
+  mostrar(true);
+}
+function mostrar(win){
+  $('#hud').hidden=true; $('#strip').hidden=true; $('#world').hidden=true; $('#panel').hidden=true;
+  const uniq=[...new Set(weak)].slice(0,5);
+  const wk=uniq.length?`<div class="weak"><h3>REPASAR</h3><ul>
+    ${uniq.map(t=>`<li><span>▸</span><span>${esc(t)}</span></li>`).join('')}</ul></div>`:'';
+  const c=document.createElement('div'); c.className='cover'+(win?' sky':'');
+  if(win){
+    const perfecto=right===Q.length;
+    c.innerHTML=`
+      <div class="title px">${perfecto?'¡PERFECTO!':'¡CASTILLO<br>CONQUISTADO!'}</div>
+      <div class="coverHero">${heroSVG()}</div>
+      <div class="scorebox px">
+        <div><span>ACIERTOS</span><b>${right}/${Q.length}</b></div>
+        <div><span>MONEDAS</span><b>${coins}</b></div>
+        <div><span>VIDAS</span><b>${lives}</b></div>
+        <div><span>RANGO</span><b>${right===Q.length?'MAESTRA KOPAY':right>=10?'CERRADORA PRO':right>=8?'EN CAMINO':'NIVEL 1'}</b></div>
+      </div>
+      ${wk}
+      <div class="shot"><div class="ic">📸</div>
+        <div class="tx"><b>Toma captura</b> y súbela al grupo para registrar tu resultado.</div></div>
+      <button class="go" id="again">▸ JUGAR OTRA VEZ</button>`;
+  }else{
+    c.innerHTML=`
+      <div class="title px" style="color:#e0402c">GAME<br>OVER</div>
+      <div class="coverHero" style="opacity:.35;transform:rotate(180deg)">${heroSVG()}</div>
+      <div class="scorebox px">
+        <div><span>LLEGASTE A</span><b>MUNDO ${Q[i].w}-${idxEnMundo(i)+1}</b></div>
+        <div><span>ESCENARIO</span><b>${ENTORNOS[Q[i].w].nombre}</b></div>
+        <div><span>ACIERTOS</span><b>${right}/${Q.length}</b></div>
+        <div><span>MONEDAS</span><b>${coins}</b></div>
+      </div>
+      ${wk}
+      <p class="lead">Repasa la presentación de Programas Kopay y vuelve a intentarlo 💪</p>
+      <button class="go" id="again">▸ CONTINUAR</button>`;
+  }
+  $('#screen').appendChild(c);
+  $('#again').onclick=()=>{ c.remove(); i=0;lives=3;coins=0;right=0;streak=0;weak=[];mundoActual=0;
+    $('#flag').classList.remove('up');
+    $('#hud').hidden=false;$('#strip').hidden=false;$('#world').hidden=false;$('#panel').hidden=false;
+    render(); };
+  $('#again').focus();
+}
+
+/* ================= BOOT ================= */
+$('#introHero').innerHTML=heroSVG();
+$('#hero').innerHTML=heroSVG();
+aplicarEntorno(1);
+$('#start').onclick=()=>{
+  initA(); if(AC&&AC.state==='suspended')AC.resume();
+  bp(659,.09,0,'square',.09); bp(880,.14,.09,'square',.09);
+  $('#intro').remove();
+  const st=$('#strip'); st.innerHTML=''; Q.forEach(()=>st.appendChild(document.createElement('i')));
+  $('#hud').hidden=false; st.hidden=false; $('#world').hidden=false; $('#panel').hidden=false;
+  render();
+};
+</script>
+</body>
+</html>
