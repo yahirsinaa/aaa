@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#123d2c">
+<title>Sucursal Kopay · Simulador de Bienvenida</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#1f6b4d;--green2:#2f8b64;--deep:#123d2c;--mint:#e4f4eb;--cream:#fffaf0;
+  --gold:#d6a83a;--ink:#18382c;--rose:#f7dcd2;--red:#b64d45;--warn:#e08a3c;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%}
+body{font-family:Nunito,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  color:var(--ink);background:#0d1f18;min-height:100dvh;display:flex;justify-content:center;
+  align-items:flex-start;-webkit-font-smoothing:antialiased}
+.app{width:min(470px,100%);min-height:100dvh;background:var(--cream);position:relative;overflow:hidden;
+  display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+
+/* ---------- HUD ---------- */
+.hud{background:var(--deep);color:#fff;padding:10px 14px 11px;z-index:20;flex:0 0 auto}
+.hudTop{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:900;letter-spacing:.04em}
+.hudTop .turn{opacity:.7}
+.hudTop .pts{margin-left:auto;background:rgba(255,255,255,.13);padding:5px 10px;border-radius:99px}
+.trustRow{display:flex;align-items:center;gap:9px;margin-top:8px}
+.trustLbl{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;opacity:.8;white-space:nowrap}
+.trust{flex:1;height:11px;background:rgba(255,255,255,.16);border-radius:99px;overflow:hidden}
+.trust>i{display:block;height:100%;width:100%;border-radius:99px;background:linear-gradient(90deg,#6fd39b,#2f8b64);
+  transition:width .5s ease,background .4s}
+.trust.mid>i{background:linear-gradient(90deg,#f0c05a,#e08a3c)}
+.trust.low>i{background:linear-gradient(90deg,#e88b7f,#b64d45)}
+.clock{width:34px;height:34px;flex:0 0 auto;position:relative}
+.clock svg{transform:rotate(-90deg)}
+.clock b{position:absolute;inset:0;display:grid;place-items:center;font-size:12px;font-weight:900;color:#fff}
+.clock.rush b{color:#ffb3a7;animation:blink .5s steps(2) infinite}
+@keyframes blink{50%{opacity:.3}}
+
+/* ---------- ESCENA 2D ---------- */
+.scene{position:relative;height:225px;flex:0 0 auto;overflow:hidden;background:#dff0e6}
+.scene svg.bg{position:absolute;inset:0;width:100%;height:100%}
+.actor{position:absolute;bottom:6px;width:96px;transition:transform .9s cubic-bezier(.3,.9,.4,1),opacity .5s}
+.actor svg{width:100%;display:block}
+#cliente{right:16px;transform:translateX(150px)}
+#cliente.in{transform:translateX(0)}
+#cliente.out{transform:translateX(190px);opacity:0}
+#cliente.mad{transform:translateX(18px) rotate(-3deg)}
+#asesora{left:14px;width:88px;bottom:24px}
+.bounce{animation:bounce .6s ease}
+@keyframes bounce{40%{transform:translateY(-9px)}}
+.hearts{position:absolute;right:34px;bottom:120px;font-size:20px;opacity:0;pointer-events:none}
+.hearts.go{animation:up 1.1s ease-out forwards}
+@keyframes up{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-52px)}}
+
+/* burbuja */
+.bubble{position:absolute;left:12px;right:12px;top:12px;background:#fff;border-radius:18px;padding:12px 14px;
+  font-size:14.5px;line-height:1.4;font-weight:700;box-shadow:0 10px 26px rgba(18,61,44,.22);z-index:5;
+  border:2px solid rgba(31,107,77,.14)}
+.bubble:after{content:"";position:absolute;right:38px;bottom:-11px;width:0;height:0;
+  border:11px solid transparent;border-top-color:#fff;border-bottom:0}
+.bubble .who{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--green);margin-bottom:4px}
+.bubble.narr{background:var(--deep);color:#fff;border-color:rgba(255,255,255,.15)}
+.bubble.narr:after{border-top-color:var(--deep)}
+.bubble.narr .who{color:var(--gold)}
+
+/* ---------- PANEL ---------- */
+.panel{flex:1;overflow-y:auto;padding:14px 14px 26px;background:var(--cream)}
+.ask{font-size:16.5px;font-weight:900;line-height:1.3;margin:2px 0 12px}
+.hint{font-size:12.5px;font-weight:700;opacity:.62;margin:-8px 0 11px}
+.opt{width:100%;text-align:left;background:#fff;border:1.6px solid rgba(31,107,77,.16);border-radius:16px;
+  padding:14px 13px;margin:0 0 9px;display:flex;gap:11px;align-items:flex-start;cursor:pointer;
+  font-family:inherit;font-size:14.5px;font-weight:700;line-height:1.35;color:var(--ink);
+  box-shadow:0 4px 12px rgba(27,78,57,.06);transition:transform .1s,border-color .15s}
+.opt:active{transform:scale(.985)}
+.opt .l{min-width:27px;height:27px;border-radius:9px;background:var(--mint);display:grid;place-items:center;
+  color:var(--green);font-size:12px;font-weight:900;flex:0 0 auto}
+.opt.correct{background:#e8f6ed;border-color:#68ab82}
+.opt.wrong{background:#fff0ed;border-color:#d98577}
+.opt.dim{opacity:.45}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.chip{background:#fff;border:1.6px solid rgba(31,107,77,.16);border-radius:14px;padding:13px 10px;
+  font-family:inherit;font-size:13.5px;font-weight:800;color:var(--ink);cursor:pointer}
+.chip.on{background:var(--mint);border-color:var(--green2);color:var(--green)}
+.chip.correct{background:#e8f6ed;border-color:#68ab82}
+.chip.wrong{background:#fff0ed;border-color:#d98577}
+.seq{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.sq{background:#fff;border:1.6px dashed rgba(31,107,77,.26);border-radius:14px;padding:12px;
+  display:flex;align-items:center;gap:10px;font-family:inherit;font-size:13.5px;font-weight:800;
+  color:var(--ink);text-align:left;cursor:pointer}
+.sq .n{width:27px;height:27px;border-radius:50%;background:#eef3f0;color:var(--green);display:grid;
+  place-items:center;font-size:12px;font-weight:900;flex:0 0 auto}
+.sq.picked{background:var(--mint);border-style:solid;border-color:var(--green2)}
+.sq.picked .n{background:var(--green);color:#fff}
+.sq.err{background:#fff0ed;border-color:#d98577;animation:shk .35s}
+@keyframes shk{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.cta{width:100%;border:0;border-radius:15px;padding:14px;font-family:inherit;font-size:15px;font-weight:900;
+  cursor:pointer;background:var(--green);color:#fff;box-shadow:0 9px 20px rgba(31,107,77,.24);margin-top:2px}
+.cta.dis{background:#b9c6bf;box-shadow:none}
+.cta.gold{background:var(--gold);color:#3b2d09}
+
+/* ---------- HOJA DE FEEDBACK ---------- */
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--cream);border-top-left-radius:24px;
+  border-top-right-radius:24px;box-shadow:0 -14px 40px rgba(18,61,44,.28);padding:16px 16px 20px;
+  transform:translateY(112%);transition:transform .34s cubic-bezier(.2,.9,.2,1);z-index:60;max-height:86%;overflow-y:auto}
+.sheet.up{transform:none}
+.sTag{display:inline-block;font-size:11px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;
+  padding:6px 11px;border-radius:99px;margin-bottom:9px}
+.sheet.g .sTag{background:#d9f0e2;color:#1c5c3f}
+.sheet.b .sTag{background:#fde3dd;color:#8f3a31}
+.sTitle{font-size:19px;font-weight:900;line-height:1.2;margin-bottom:8px}
+.sText{font-size:14.5px;line-height:1.5;font-weight:700}
+.sNote{margin-top:12px;background:var(--deep);color:#fff;border-radius:14px;padding:12px 13px;
+  font-size:13.5px;line-height:1.45;font-weight:700}
+.sNote b{color:#8fe0b3}
+.sCost{margin-top:10px;font-size:13px;font-weight:900;color:var(--red)}
+
+/* ---------- PANTALLAS ---------- */
+.cover{position:absolute;inset:0;z-index:80;background:var(--cream);overflow-y:auto;padding:26px 20px 34px;
+  display:flex;flex-direction:column;justify-content:center}
+.cover.dark{background:linear-gradient(160deg,#2a1512,#5b2a24);color:#fff}
+.tag{display:inline-flex;align-self:flex-start;align-items:center;gap:6px;padding:7px 11px;border-radius:99px;
+  background:#fff2c9;color:#745715;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+h1{font-size:36px;line-height:1;letter-spacing:-.04em;margin:14px 0 8px;color:var(--green)}
+.cover.dark h1{color:#ffb9ac}
+.lead{font-size:16.5px;line-height:1.4;font-weight:800;margin:0 0 14px}
+.rules{background:#fff;border:1px solid rgba(31,107,77,.12);border-radius:18px;padding:14px;margin:6px 0 16px;
+  box-shadow:0 8px 22px rgba(27,78,57,.07)}
+.rules div{display:flex;gap:10px;font-size:13.5px;font-weight:700;line-height:1.35;margin-bottom:9px}
+.rules div:last-child{margin-bottom:0}
+input[type=text]{width:100%;padding:14px 15px;border:1.6px solid rgba(31,107,77,.2);border-radius:15px;
+  font-size:16px;font-family:inherit;font-weight:700;outline:none;background:#fff;color:var(--ink);margin:6px 0 12px}
+input[type=text]:focus{border-color:var(--green2);box-shadow:0 0 0 4px rgba(47,139,100,.12)}
+.ring{width:158px;height:158px;margin:14px auto 12px;border-radius:50%;display:grid;place-items:center;
+  background:conic-gradient(var(--gold) 0deg,var(--mint) 0deg);position:relative}
+.ring:before{content:"";position:absolute;inset:12px;background:var(--cream);border-radius:50%}
+.ringIn{position:relative;text-align:center}
+.ringIn b{font-size:42px;color:var(--green);line-height:1;display:block}
+.ringIn span{font-size:11px;font-weight:900;opacity:.65;letter-spacing:.06em}
+.stars{font-size:26px;letter-spacing:4px;text-align:center}
+.badge{display:block;text-align:center;font-weight:900;background:#fff0bd;color:#6f5114;padding:9px 12px;
+  border-radius:99px;margin:10px auto 14px;max-width:290px;font-size:13.5px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px}
+.stat{background:#fff;border:1px solid rgba(31,107,77,.11);border-radius:15px;padding:12px;text-align:center}
+.cover.dark .stat{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.2);color:#fff}
+.stat b{display:block;font-size:21px;color:var(--green);line-height:1.1}
+.cover.dark .stat b{color:#ffd9a8}
+.stat span{font-size:11px;font-weight:800;opacity:.68;text-transform:uppercase;letter-spacing:.04em}
+.errBox{background:#fff;border:1px solid rgba(182,77,69,.25);border-radius:16px;padding:13px;margin-bottom:14px}
+.cover.dark .errBox{background:rgba(0,0,0,.28);border-color:rgba(255,255,255,.18)}
+.errBox h3{margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--red)}
+.cover.dark .errBox h3{color:#ffb9ac}
+.errBox li{list-style:none;font-size:13.5px;font-weight:700;line-height:1.4;margin-bottom:8px;display:flex;gap:8px}
+.errBox li:last-child{margin-bottom:0}
+.errBox ul{margin:0;padding:0}
+.shot{display:flex;gap:11px;align-items:center;background:#fff9e8;border:2px dashed var(--gold);
+  border-radius:16px;padding:12px;margin-bottom:14px}
+.cover.dark .shot{background:rgba(214,168,58,.16)}
+.shot .ic{font-size:24px}
+.shot .tx{font-size:13px;font-weight:800;line-height:1.35}
+.credit{text-align:center;font-size:11.5px;font-weight:800;opacity:.62;margin-top:16px;line-height:1.7}
+.credit b{display:block;font-size:13px;opacity:1;color:var(--green)}
+.cover.dark .credit b{color:#ffd9a8}
+.secondary{background:#fff;color:var(--green);border:1.6px solid rgba(31,107,77,.2);box-shadow:none;margin-top:9px}
+.cover.dark .secondary{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.28)}
+@media(min-width:600px){.app{min-height:930px;margin:18px 0;border-radius:26px}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.1s!important}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <div class="hud" id="hud" hidden>
+    <div class="hudTop">
+      <span class="turn" id="hTurn">MOMENTO 1/8</span>
+      <span class="pts" id="hPts">0 pts</span>
+    </div>
+    <div class="trustRow">
+      <span class="trustLbl">Confianza</span>
+      <div class="trust" id="trustBar"><i id="trustFill"></i></div>
+      <div class="clock" id="clock">
+        <svg width="34" height="34"><circle cx="17" cy="17" r="14" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="4"/>
+        <circle id="clockArc" cx="17" cy="17" r="14" fill="none" stroke="#8fe0b3" stroke-width="4"
+          stroke-linecap="round" stroke-dasharray="88" stroke-dashoffset="0"/></svg>
+        <b id="clockNum">14</b>
+      </div>
+    </div>
+  </div>
+
+  <div class="scene" id="scene" hidden>
+    <svg class="bg" viewBox="0 0 400 225" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#f3fbf6"/><stop offset="1" stop-color="#dcefe4"/>
+        </linearGradient>
+        <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#c9a682"/><stop offset="1" stop-color="#b08e6b"/>
+        </linearGradient>
+      </defs>
+      <rect width="400" height="225" fill="url(#wall)"/>
+      <rect y="168" width="400" height="57" fill="url(#floor)"/>
+      <g opacity=".22" stroke="#7d6046" stroke-width="1.6">
+        <path d="M0 186h400M0 204h400M60 168v57M150 168v57M250 168v57M340 168v57"/>
+      </g>
+      <!-- puerta -->
+      <rect x="296" y="42" width="86" height="126" rx="6" fill="#e8f3ec" stroke="#9fc4b0" stroke-width="3"/>
+      <rect x="304" y="50" width="70" height="110" rx="4" fill="#cfe6f5" opacity=".85"/>
+      <path d="M304 160 L374 50" stroke="#fff" stroke-width="8" opacity=".45"/>
+      <circle cx="310" cy="112" r="4" fill="#9fc4b0"/>
+      <!-- letrero -->
+      <rect x="34" y="26" width="128" height="40" rx="12" fill="#1f6b4d"/>
+      <text x="98" y="53" font-family="Nunito,sans-serif" font-size="21" font-weight="900" fill="#fff" text-anchor="middle">KOPAY</text>
+      <!-- cuadro -->
+      <rect x="188" y="36" width="76" height="54" rx="8" fill="#fff" stroke="#d8c49a" stroke-width="3"/>
+      <circle cx="212" cy="58" r="9" fill="#f7dcd2"/><path d="M196 80c8-14 22-16 30-6l10 6z" fill="#a8d6bd"/>
+      <!-- planta -->
+      <rect x="252" y="132" width="30" height="36" rx="6" fill="#c98a5e"/>
+      <path d="M267 132c-16-6-22-22-14-34 10 4 18 16 14 34z" fill="#3f9c6d"/>
+      <path d="M267 132c14-8 16-24 8-34-10 6-14 20-8 34z" fill="#2f8b64"/>
+      <!-- mostrador -->
+      <rect x="6" y="120" width="124" height="86" rx="10" fill="#1f6b4d"/>
+      <rect x="6" y="120" width="124" height="14" rx="7" fill="#2f8b64"/>
+      <rect x="18" y="146" width="46" height="30" rx="5" fill="#fffaf0" opacity=".9"/>
+      <rect x="74" y="150" width="40" height="26" rx="4" fill="#123d2c"/>
+      <rect x="78" y="154" width="32" height="18" rx="2" fill="#8fe0b3" opacity=".8"/>
+    </svg>
+    <div class="actor" id="asesora"></div>
+    <div class="actor" id="cliente"></div>
+    <div class="hearts" id="hearts">💚</div>
+    <div class="bubble" id="bubble"><span class="who" id="bWho">CLIENTA</span><span id="bText"></span></div>
+  </div>
+
+  <div class="panel" id="panel" hidden></div>
+
+  <div class="sheet" id="sheet">
+    <span class="sTag" id="sTag"></span>
+    <div class="sTitle" id="sTitle"></div>
+    <div class="sText" id="sText"></div>
+    <div id="sExtra"></div>
+    <button class="cta" id="sNext">Continuar →</button>
+  </div>
+
+  <!-- INTRO -->
+  <div class="cover" id="intro">
+    <span class="tag">🏪 Simulador de sucursal</span>
+    <h1>Llegó una<br>clienta</h1>
+    <p class="lead">Acaba de entrar por la puerta. Tú estás en recepción. Todo lo que decidas en los próximos 8 momentos cambia lo que ella siente.</p>
+    <div class="rules">
+      <div><span>💚</span><span>Cuidas su <b>confianza</b>. Si llega a cero, <b>se va de la sucursal</b>.</span></div>
+      <div><span>⏱️</span><span>Tienes <b>14 segundos</b> por decisión. Dudar también cuesta.</span></div>
+      <div><span>⚡</span><span>Hay respuestas que la <b>espantan de golpe</b>. Piensa antes de tocar.</span></div>
+      <div><span>📸</span><span>Al final capturas tu evaluación y la mandas al grupo.</span></div>
+    </div>
+    <label style="font-weight:900;font-size:14px">¿Cómo te llamas?</label>
+    <input id="player" type="text" maxlength="26" placeholder="Escribe tu nombre">
+    <button class="cta" id="start">Abrir la sucursal →</button>
+    <p class="credit">Método Konecta · Fase Saludo y Bienvenida<b>Elaborado por: Yahir De la Cruz Escobar</b></p>
+  </div>
+
+</div>
+
+<script>
+/* ================= PERSONAJES 2D ================= */
+function clienteSVG(){
+  return `<svg viewBox="0 0 60 110" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="30" cy="106" rx="20" ry="4" fill="rgba(0,0,0,.14)"/>
+    <path d="M18 62h24l7 44H11z" fill="#8c6bb1"/>
+    <rect x="11" y="96" width="14" height="10" rx="3" fill="#3b2f4a"/>
+    <rect x="35" y="96" width="14" height="10" rx="3" fill="#3b2f4a"/>
+    <path d="M18 62c-6 4-9 12-9 22l7 2 3-14z" fill="#7a5ba0"/>
+    <path d="M42 62c6 4 9 12 9 22l-7 2-3-14z" fill="#7a5ba0"/>
+    <circle cx="12" cy="86" r="4.5" fill="#f0c9a8"/><circle cx="48" cy="86" r="4.5" fill="#f0c9a8"/>
+    <rect x="24" y="52" width="12" height="13" rx="5" fill="#f0c9a8"/>
+    <ellipse cx="30" cy="34" rx="18" ry="20" fill="#f0c9a8"/>
+    <path d="M12 34c0-14 8-22 18-22s18 8 18 22c0-6-6-9-18-9s-18 3-18 9z" fill="#4a3728"/>
+    <path d="M12 30c-3 12-2 22 1 30 2-10 1-20 3-26z" fill="#4a3728"/>
+    <path d="M48 30c3 12 2 22-1 30-2-10-1-20-3-26z" fill="#4a3728"/>
+    <g id="cf"></g>
+  </svg>`;
+}
+const CARAS={
+  feliz:`<circle cx="23" cy="34" r="2.6" fill="#2b2119"/><circle cx="37" cy="34" r="2.6" fill="#2b2119"/>
+    <path d="M24 42q6 6 12 0" stroke="#2b2119" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    <circle cx="18" cy="39" r="3" fill="#f4a9a0" opacity=".55"/><circle cx="42" cy="39" r="3" fill="#f4a9a0" opacity=".55"/>`,
+  neutral:`<circle cx="23" cy="34" r="2.6" fill="#2b2119"/><circle cx="37" cy="34" r="2.6" fill="#2b2119"/>
+    <path d="M25 43h10" stroke="#2b2119" stroke-width="2.4" fill="none" stroke-linecap="round"/>`,
+  duda:`<circle cx="23" cy="35" r="2.6" fill="#2b2119"/><circle cx="37" cy="35" r="2.6" fill="#2b2119"/>
+    <path d="M18 28l8 3M42 28l-8 3" stroke="#2b2119" stroke-width="2" stroke-linecap="round"/>
+    <path d="M25 44q5-4 10 0" stroke="#2b2119" stroke-width="2.4" fill="none" stroke-linecap="round"/>`,
+  molesta:`<circle cx="23" cy="35" r="2.6" fill="#2b2119"/><circle cx="37" cy="35" r="2.6" fill="#2b2119"/>
+    <path d="M18 29l8 4M42 29l-8 4" stroke="#2b2119" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M25 45q5-5 10 0" stroke="#2b2119" stroke-width="2.6" fill="none" stroke-linecap="round"/>`
+};
+function asesoraSVG(){
+  return `<svg viewBox="0 0 60 110" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17 60h26l6 46H11z" fill="#1f6b4d"/>
+    <path d="M17 60c-6 4-9 13-9 24l7 2 3-15z" fill="#2f8b64"/>
+    <path d="M43 60c6 4 9 13 9 24l-7 2-3-15z" fill="#2f8b64"/>
+    <circle cx="11" cy="86" r="4.5" fill="#f4d3b4"/><circle cx="49" cy="86" r="4.5" fill="#f4d3b4"/>
+    <rect x="24" y="50" width="12" height="13" rx="5" fill="#f4d3b4"/>
+    <rect x="22" y="63" width="16" height="7" rx="3" fill="#fffaf0"/>
+    <ellipse cx="30" cy="32" rx="18" ry="20" fill="#f4d3b4"/>
+    <path d="M12 32c0-15 9-23 18-23s18 8 18 23c0-8-7-11-18-11s-18 3-18 11z" fill="#2b2119"/>
+    <path d="M46 20c6 6 7 20 4 30-1-12-3-22-9-26z" fill="#2b2119"/>
+    <circle cx="23" cy="32" r="2.6" fill="#2b2119"/><circle cx="37" cy="32" r="2.6" fill="#2b2119"/>
+    <path d="M24 40q6 6 12 0" stroke="#2b2119" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    <circle cx="18" cy="37" r="3" fill="#f4a9a0" opacity=".5"/><circle cx="42" cy="37" r="3" fill="#f4a9a0" opacity=".5"/>
+    <rect x="20" y="70" width="20" height="9" rx="3" fill="#d6a83a"/>
+  </svg>`;
+}
+
+/* ================= CONTENIDO — Fase Saludo y Bienvenida ================= */
+const MOMENTOS=[
+{ who:'NARRADOR', narr:true,
+  say:'La puerta se abre. Entra una mujer que no conoces, mira alrededor sin saber a dónde ir. Tú estás sentada en recepción.',
+  ask:'¿Qué haces primero?', cara:'duda', type:'choice',
+  opts:[
+    {t:'Me pongo de pie, sonrío, la saludo y me presento.',ok:true},
+    {t:'Le pregunto de inmediato qué área quiere cotizar.',cost:30,
+      why:'Arrancar cotizando la convierte en una venta antes de ser una persona. Primero se recibe, luego se vende.'},
+    {t:'Espero sentada a que ella se acerque y me diga qué necesita.',cost:55,
+      why:'Quedarte sentada la deja parada sin saber qué hacer. La bienvenida la inicias tú, no la clienta.'},
+    {t:'Le acerco el folleto de promociones para que lo vea mientras.',cost:35,
+      why:'El folleto no genera confianza: la deja sola. Primero contacto humano, después material.'}],
+  ok:'Te levantaste, sonreíste y la recibiste. Ella suelta los hombros: ya sabe con quién está.',
+  note:'La bienvenida inicia generando <b>confianza</b>, antes de avanzar con la venta.' },
+
+{ who:'CLIENTA', say:'Hola… buenas tardes.', cara:'duda',
+  ask:'¿Cuál bienvenida se parece más a Kopay?', type:'choice',
+  opts:[
+    {t:'«Hola, bienvenida a Kopay. Mi nombre es Karla. ¿Es la primera vez que nos visitas?»',ok:true},
+    {t:'«Hola. ¿Qué quieres cotizar?»',cost:35,
+      why:'Ni tu nombre ni bienvenida: la clienta no sabe con quién habla y siente que va de pasada.'},
+    {t:'«Buenas. Dame tus datos para registrarte.»',cost:40,
+      why:'Pedir datos sin presentarte se siente como trámite. El dato se gana después de la confianza.'},
+    {t:'«Hola, pásale, ahorita en un momento te atiendo.»',cost:30,
+      why:'La dejas esperando sin contacto. "Ahorita" es el momento en que muchas clientas se arrepienten.'}],
+  ok:'Le diste bienvenida, tu nombre y una pregunta abierta. Ella sonríe y responde.',
+  note:'Bienvenida + <b>tu nombre</b> + pregunta que abre conversación. Empatía y autoridad = confianza.' },
+
+{ who:'CLIENTA', say:'Sí, es mi primera vez. Vengo a pedir informes.', cara:'neutral',
+  ask:'¿Qué respuesta continúa mejor?', type:'choice',
+  opts:[
+    {t:'«¡Qué gusto! Será un placer ayudarte. ¿Me puedes dar tu nombre, teléfono y correo?»',ok:true},
+    {t:'«Claro. El paquete de piernas cuesta…»',cost:55,
+      why:'Soltar precio de entrada te regresa a competir por precio y te deja sin sus datos.'},
+    {t:'«Perfecto. ¿Qué promoción viste?»',cost:25,
+      why:'No está mal preguntar, pero saltarte el registro de datos deja la oportunidad sin seguimiento.'},
+    {t:'«Ok, llena este formato por favor.»',cost:40,
+      why:'Mandarla a llenar sola un formato corta la conversación que apenas empezaba.'}],
+  ok:'Reconociste su visita y pediste los datos con calidez. Ella saca su celular para dictarte el número.',
+  note:'Primero se recibe y se genera confianza; los datos se piden dentro de la conversación, no como trámite.' },
+
+{ who:'CLIENTA', say:'Claro, te los doy. ¿Qué necesitas de mí?', cara:'feliz',
+  ask:'Selecciona TODOS los datos que debes obtener en esta fase:', type:'multi',
+  hint:'Marca exactamente los correctos. Si sobra o falta uno, cuenta como error.',
+  items:[{t:'Nombre',ok:true},{t:'Teléfono',ok:true},{t:'Correo',ok:true},{t:'Cómo se enteró de Kopay',ok:true},
+         {t:'Ocupación',ok:false},{t:'Domicilio',ok:false}],
+  ok:'Tomaste nombre, teléfono, correo y cómo se enteró. Justo lo necesario, sin interrogarla.',
+  why:'Los datos de esta fase son <b>nombre, teléfono, correo y cómo se enteró de Kopay</b>. Pedir de más incomoda; pedir de menos deja la oportunidad sin seguimiento.',
+  note:'Cómo se enteró de Kopay también es un dato clave: nos dice qué campaña está funcionando.' },
+
+{ who:'CLIENTA', say:'Oye, y nada más de curiosidad… ¿cuánto sale piernas completas?', cara:'neutral',
+  ask:'Te pregunta el precio antes de terminar el registro. ¿Qué haces?', type:'choice',
+  opts:[
+    {t:'«Con mucho gusto te explico todo. Déjame terminar de anotar tus datos y te armo la información completa.»',ok:true},
+    {t:'Le doy el precio de una vez para que no se sienta ignorada.',cost:50,
+      why:'Un número suelto, sin contexto ni necesidad detectada, se convierte en comparación de precio y en «déjame lo pienso».'},
+    {t:'«Primero los datos, es la política de la sucursal.»',cost:40,
+      why:'Correcto en el fondo, frío en la forma. La política no le importa a la clienta; tu disposición sí.'},
+    {t:'Sigo escribiendo y no contesto para no perder el hilo.',cost:45,
+      why:'Ignorar una pregunta directa rompe la confianza que llevabas construida.'}],
+  ok:'Reconociste su interés sin soltar el precio en seco. Ella asiente y sigue dictándote su correo.',
+  note:'Esta fase construye confianza. La información y la propuesta llegan después, con la necesidad ya detectada.' },
+
+{ who:'CLIENTA', say:'Listo, ese es mi correo. ¿Algo más?', cara:'feliz',
+  ask:'Toca los pasos en el orden correcto de la bienvenida:', type:'order',
+  hint:'Un paso fuera de lugar y la secuencia se marca como error.',
+  seq:['Recibir de pie, sonreír y saludar','Presentarte y abrir la conversación',
+       'Obtener nombre, teléfono y correo','Preguntar cómo se enteró de Kopay','Registrar la información en el FCP'],
+  ok:'Secuencia dominada. Así se siente una bienvenida ordenada y natural.',
+  why:'El orden es: recibir y saludar → presentarte → obtener nombre, teléfono y correo → preguntar cómo se enteró → registrar en el FCP.',
+  note:'La secuencia no se recita: se nota en que la clienta nunca se siente interrogada.' },
+
+{ who:'CLIENTA', say:'Me enteré por una publicación que vi en Facebook.', cara:'feliz',
+  ask:'Ya tienes toda su información. ¿Dónde la registras?', type:'choice',
+  opts:[
+    {t:'En el FCP, en ese momento.',ok:true},
+    {t:'En una libreta y al rato la paso.',cost:40,
+      why:'Lo que no queda en el FCP no existe para el seguimiento: se pierde la oportunidad.'},
+    {t:'Me la aprendo y la registro al cierre del día.',cost:45,
+      why:'Al cierre del día ya se te olvidó un dato, y suele ser justo el teléfono.'},
+    {t:'Se la mando por WhatsApp a mi supervisora.',cost:35,
+      why:'El chat no es el sistema. El registro va donde el equipo puede darle seguimiento.'}],
+  ok:'Registraste todo en el FCP mientras la conversación seguía viva.',
+  note:'Registrar en el momento es lo que permite dar seguimiento después.' },
+
+{ who:'NARRADOR', narr:true,
+  say:'Tu capacitadora estuvo observando la escena completa desde el fondo de la sucursal.',
+  ask:'¿Qué está evaluando en esta fase?', type:'multi', cara:'feliz',
+  hint:'Marca exactamente lo que corresponde a Saludo y Bienvenida.',
+  items:[{t:'Actitud',ok:true},{t:'Sonrisa',ok:true},{t:'Seguridad',ok:true},{t:'Naturalidad',ok:true},
+         {t:'Contacto con la clienta',ok:true},{t:'Memorizar una frase exacta',ok:false},
+         {t:'Dar precio de inmediato',ok:false},{t:'Hablar de promociones primero',ok:false}],
+  ok:'Exacto: se observa actitud, sonrisa, seguridad, naturalidad y contacto con la clienta.',
+  why:'Se evalúa <b>actitud, sonrisa, seguridad, naturalidad y contacto con la clienta</b>. No se busca que recites una frase exacta.',
+  note:'Por eso la bienvenida se practica en voz alta hasta que suena tuya, no memorizada.' }
+];
+
+/* ================= ESTADO ================= */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const shuffle=a=>{a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]];}return a;};
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const TIEMPO=14;
+let i=0, trust=100, pts=0, aciertos=0, racha=0, mejorRacha=0, errores=[], nombre='', locked=false, tInt=null, tLeft=TIEMPO;
+
+function cara(c){ const g=$('#cliente').querySelector('#cf'); if(g) g.innerHTML=CARAS[c]||CARAS.neutral; }
+function humor(){ return trust>=70?'feliz':trust>=40?'neutral':'molesta'; }
+
+function pintarHUD(){
+  $('#hTurn').textContent='MOMENTO '+(i+1)+'/'+MOMENTOS.length;
+  $('#hPts').textContent=pts+' pts';
+  const f=$('#trustFill'), b=$('#trustBar');
+  f.style.width=Math.max(0,trust)+'%';
+  b.className='trust'+(trust<40?' low':trust<70?' mid':'');
+}
+function reloj(start){
+  clearInterval(tInt);
+  const arc=$('#clockArc'), num=$('#clockNum'), c=$('#clock');
+  if(!start){ c.classList.remove('rush'); return; }
+  tLeft=TIEMPO; num.textContent=tLeft; arc.style.strokeDashoffset=0; c.classList.remove('rush');
+  tInt=setInterval(()=>{
+    tLeft--; num.textContent=Math.max(0,tLeft);
+    arc.style.strokeDashoffset=88*(1-tLeft/TIEMPO);
+    if(tLeft<=4) c.classList.add('rush');
+    if(tLeft<=0){ clearInterval(tInt); seTardo(); }
+  },1000);
+}
+function seTardo(){
+  if(locked) return; locked=true;
+  const m=MOMENTOS[i];
+  racha=0; trust-=22; errores.push('Te tardaste en reaccionar: '+m.ask);
+  document.querySelectorAll('.opt,.chip,.sq,.cta').forEach(b=>b.disabled=true);
+  cara('molesta'); $('#cliente').classList.add('mad');
+  pintarHUD();
+  hoja(false,'⏱️ Se te fue el tiempo','La clienta lleva varios segundos parada esperando tu reacción. El silencio en recepción se siente eterno del otro lado.',
+    m.note,'−22 de confianza');
+}
+
+/* ================= RENDER ================= */
+function render(){
+  locked=false;
+  const m=MOMENTOS[i];
+  pintarHUD();
+  $('#bWho').textContent=m.who;
+  $('#bubble').className='bubble'+(m.narr?' narr':'');
+  $('#bText').textContent=m.say;
+  cara(m.cara||humor());
+  $('#cliente').classList.remove('mad');
+  const p=$('#panel');
+  p.innerHTML=`<p class="ask">${esc(m.ask)}</p>${m.hint?`<p class="hint">${esc(m.hint)}</p>`:''}<div id="zone"></div>`;
+  ({choice:rChoice,multi:rMulti,order:rOrder})[m.type](m,$('#zone'));
+  p.scrollTop=0;
+  reloj(true);
+}
+function rChoice(m,z){
+  const L=['A','B','C','D','E'];
+  shuffle(m.opts).forEach((o,k)=>{
+    const b=document.createElement('button'); b.className='opt';
+    b.innerHTML=`<span class="l">${L[k]}</span><span>${esc(o.t)}</span>`;
+    b.onclick=()=>{
+      if(locked)return; locked=true; clearInterval(tInt);
+      [...z.querySelectorAll('.opt')].forEach(x=>{x.disabled=true; if(x!==b)x.classList.add('dim');});
+      b.classList.add(o.ok?'correct':'wrong');
+      if(!o.ok){
+        [...z.querySelectorAll('.opt')].forEach(x=>{
+          if(x.querySelector('span:last-child').textContent===m.opts.find(y=>y.ok).t){
+            x.classList.remove('dim'); x.classList.add('correct');}});
+      }
+      resolver(o.ok,o);
+    };
+    z.appendChild(b);
+  });
+}
+function rMulti(m,z){
+  const sel=new Set();
+  const box=document.createElement('div'); box.className='chips';
+  shuffle(m.items).forEach(it=>{
+    const b=document.createElement('button'); b.className='chip'; b.textContent=it.t;
+    b.onclick=()=>{ if(locked)return; b.classList.toggle('on');
+      sel.has(it.t)?sel.delete(it.t):sel.add(it.t);
+      btn.className='cta'+(sel.size?'':' dis'); };
+    box.appendChild(b);
+  });
+  z.appendChild(box);
+  const btn=document.createElement('button'); btn.className='cta dis'; btn.textContent='Confirmar';
+  btn.onclick=()=>{
+    if(locked||!sel.size)return; locked=true; clearInterval(tInt);
+    const need=new Set(m.items.filter(x=>x.ok).map(x=>x.t));
+    const good=sel.size===need.size&&[...sel].every(x=>need.has(x));
+    [...box.children].forEach(el=>{el.disabled=true;el.classList.remove('on');
+      if(need.has(el.textContent))el.classList.add('correct');
+      else if(sel.has(el.textContent))el.classList.add('wrong');});
+    btn.disabled=true; btn.className='cta dis';
+    resolver(good,{cost:35,why:m.why});
+  };
+  z.appendChild(btn);
+}
+function rOrder(m,z){
+  let step=0, limpio=true;
+  const box=document.createElement('div'); box.className='seq';
+  shuffle(m.seq).forEach(txt=>{
+    const b=document.createElement('button'); b.className='sq';
+    b.innerHTML=`<span class="n">•</span><span>${esc(txt)}</span>`;
+    b.onclick=()=>{
+      if(locked||b.classList.contains('picked'))return;
+      if(txt===m.seq[step]){
+        step++; b.classList.add('picked'); b.querySelector('.n').textContent=step;
+        if(step===m.seq.length){ locked=true; clearInterval(tInt); resolver(limpio,{cost:35,why:m.why}); }
+      }else{
+        limpio=false; b.classList.add('err'); setTimeout(()=>b.classList.remove('err'),360);
+      }
+    };
+    box.appendChild(b);
+  });
+  z.appendChild(box);
+}
+
+/* ================= RESOLVER ================= */
+async function resolver(ok,o){
+  const m=MOMENTOS[i];
+  if(ok){
+    aciertos++; racha++; mejorRacha=Math.max(mejorRacha,racha);
+    const bono=Math.max(0,tLeft)*6 + (racha>=3?60:0);
+    pts+=100+bono;
+    trust=Math.min(100,trust+6);
+    cara('feliz');
+    const h=$('#hearts'); h.classList.remove('go'); void h.offsetWidth; h.classList.add('go');
+    $('#cliente').classList.add('bounce'); setTimeout(()=>$('#cliente').classList.remove('bounce'),650);
+    pintarHUD();
+    hoja(true, racha>=3?('🔥 Racha x'+racha):'✅ Bien hecho', m.ok, m.note, '+'+(100+bono)+' pts');
+  }else{
+    racha=0; trust-=(o.cost||35);
+    errores.push(m.ask);
+    cara('molesta'); $('#cliente').classList.add('mad');
+    pintarHUD();
+    if(trust<=0){ await wait(500); return seFue(o.why||m.why); }
+    hoja(false,'❌ La incomodaste', o.why||m.why||'Esa respuesta no corresponde a esta fase.',
+      m.note, '−'+(o.cost||35)+' de confianza');
+  }
+}
+function hoja(ok,tag,txt,note,cost){
+  const sh=$('#sheet'); sh.className='sheet '+(ok?'g':'b');
+  $('#sTag').textContent=tag;
+  $('#sTitle').textContent=ok?'Sigue contigo':'Cuida ese momento';
+  $('#sText').innerHTML=txt;
+  $('#sExtra').innerHTML=(note?`<div class="sNote">💡 ${note}</div>`:'')+(cost?`<div class="sCost">${cost}</div>`:'');
+  $('#sNext').textContent = i>=MOMENTOS.length-1 ? 'Ver mi evaluación →' : 'Continuar →';
+  requestAnimationFrame(()=>sh.classList.add('up'));
+}
+$('#sNext').onclick=async()=>{
+  $('#sheet').classList.remove('up'); await wait(300);
+  i++;
+  if(i>=MOMENTOS.length) return final();
+  render();
+};
+
+/* ================= FINALES ================= */
+async function seFue(motivo){
+  clearInterval(tInt);
+  $('#bubble').className='bubble narr';
+  $('#bWho').textContent='NARRADOR';
+  $('#bText').textContent='La clienta mira la puerta, dice «déjame lo pienso» y sale de la sucursal.';
+  cara('molesta');
+  await wait(700);
+  $('#cliente').classList.remove('mad'); $('#cliente').classList.add('out');
+  await wait(1100);
+  const c=document.createElement('div'); c.className='cover dark';
+  c.innerHTML=`
+    <span class="tag" style="background:rgba(255,255,255,.15);color:#ffd9a8">Se fue la clienta</span>
+    <h1>Perdiste la<br>oportunidad</h1>
+    <p class="lead">Llegaste al <b>momento ${i+1} de ${MOMENTOS.length}</b> y la confianza se agotó.</p>
+    <div class="errBox"><h3>Qué la hizo irse</h3><p style="font-size:14px;font-weight:700;line-height:1.45;margin:0">${motivo||'Se rompió la confianza antes de que pudieras ayudarla.'}</p></div>
+    ${listaErrores()}
+    <div class="stats">
+      <div class="stat"><b>${aciertos}/${MOMENTOS.length}</b><span>Aciertos</span></div>
+      <div class="stat"><b>${pts}</b><span>Puntos</span></div>
+    </div>
+    <p class="lead" style="font-size:14.5px">Una clienta que se va rara vez regresa. Repasa la fase y vuelve a intentarlo.</p>
+    <button class="cta" id="retry">Volver a abrir la sucursal</button>
+    <p class="credit">Método Konecta · Fase Saludo y Bienvenida<b>Elaborado por: Yahir De la Cruz Escobar</b></p>`;
+  $('#app').appendChild(c);
+  $('#retry').onclick=()=>location.reload();
+}
+function listaErrores(){
+  const u=[...new Set(errores)].slice(0,5);
+  if(!u.length) return '';
+  return `<div class="errBox"><h3>Momentos a repasar</h3><ul>
+    ${u.map(t=>`<li><span>▸</span><span>${esc(t)}</span></li>`).join('')}</ul></div>`;
+}
+function final(){
+  clearInterval(tInt);
+  const maxPts=MOMENTOS.length*100 + MOMENTOS.length*84;
+  const dominio=Math.round((aciertos/MOMENTOS.length)*100);
+  let titulo,estrellas,rango,texto;
+  if(aciertos===MOMENTOS.length && trust>=90){titulo='¡Bienvenida impecable!';estrellas='⭐⭐⭐';rango='Nivel: Conecta con seguridad';
+    texto='Recibiste, generaste confianza, obtuviste los datos y registraste sin sonar mecánica. Así se ve la fase bien hecha.';}
+  else if(dominio>=75){titulo='¡Muy buen avance!';estrellas='⭐⭐';rango='Nivel: Casi dominado';
+    texto='Tienes clara la estructura. Tu siguiente reto es que pedir los datos y abrir la conversación suene cada vez más natural.';}
+  else {titulo='La clienta se quedó, pero costó';estrellas='⭐';rango='Nivel: En práctica';
+    texto='Repasa la secuencia: recibe de pie, sonríe, saluda, preséntate, obtén nombre, teléfono y correo, pregunta cómo se enteró y registra en el FCP.';}
+  const c=document.createElement('div'); c.className='cover';
+  c.innerHTML=`
+    <span class="tag">🏆 Evaluación</span>
+    <h1>${titulo}</h1>
+    <div class="ring" style="background:conic-gradient(var(--gold) ${dominio*3.6}deg,var(--mint) 0deg)">
+      <div class="ringIn"><b>${dominio}%</b><span>DOMINIO</span></div></div>
+    <div class="stars">${estrellas}</div>
+    <span class="badge">${rango}</span>
+    <p class="lead" style="font-size:15px"><b>${esc(nombre)}</b>, ${texto}</p>
+    <div class="stats">
+      <div class="stat"><b>${aciertos}/${MOMENTOS.length}</b><span>Aciertos</span></div>
+      <div class="stat"><b>${Math.max(0,trust)}%</b><span>Confianza final</span></div>
+      <div class="stat"><b>${pts}</b><span>Puntos</span></div>
+      <div class="stat"><b>x${mejorRacha}</b><span>Mejor racha</span></div>
+    </div>
+    ${listaErrores()}
+    <div class="shot"><span class="ic">📸</span>
+      <span class="tx"><b>Toma captura de esta pantalla</b> y mándala al grupo para registrar tu resultado.</span></div>
+    <button class="cta secondary" id="again">Jugar de nuevo</button>
+    <p class="credit">Método Konecta · Fase Saludo y Bienvenida<b>Elaborado por: Yahir De la Cruz Escobar</b></p>`;
+  $('#app').appendChild(c);
+  $('#again').onclick=()=>location.reload();
+}
+
+/* ================= BOOT ================= */
+$('#asesora').innerHTML=asesoraSVG();
+$('#cliente').innerHTML=clienteSVG();
+cara('duda');
+$('#start').onclick=async()=>{
+  nombre=($('#player').value.trim()||'Participante');
+  $('#intro').remove();
+  $('#hud').hidden=false; $('#scene').hidden=false; $('#panel').hidden=false;
+  $('#bWho').textContent='NARRADOR'; $('#bubble').className='bubble narr';
+  $('#bText').textContent='Se abre la puerta…';
+  await wait(300);
+  $('#cliente').classList.add('in');
+  await wait(900);
+  render();
+};
+$('#player')?.addEventListener('keydown',e=>{ if(e.key==='Enter') $('#start').click(); });
+</script>
+</body>
+</html>
