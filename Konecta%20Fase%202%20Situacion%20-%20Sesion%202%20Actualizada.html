@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Método Konecta · Fase 2 · Situación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1B1614;
+  --paper:#FFFDFB;
+  --naranja:#F4711F;
+  --naranja-hondo:#B8410A;
+  --naranja-tenue:#FDEDE2;
+  --rosa:#F49BB3;
+  --rosa-tenue:#FDEEF2;
+  --gris:#8A8078;
+  --linea:#E8E1DA;
+  --stage-w:1280px;
+  --stage-h:720px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:#15100D;
+  font-family:"Instrument Sans",system-ui,-apple-system,sans-serif;
+  color:var(--ink);
+  overflow:hidden;
+  display:grid;
+  place-items:center;
+}
+/* ---------- ESCENARIO ---------- */
+#stage{
+  width:var(--stage-w); height:var(--stage-h);
+  position:relative; background:var(--paper);
+  transform-origin:center center;
+  box-shadow:0 30px 90px rgba(0,0,0,.5);
+  overflow:hidden;
+}
+.slide{
+  position:absolute; inset:0;
+  padding:54px 76px 72px;
+  display:none; flex-direction:column;
+  background:var(--paper);
+}
+.slide.is-active{display:flex;animation:enter .38s cubic-bezier(.2,.7,.3,1) both}
+/* los bloques no se aplastan: si no caben, se desbordan y se detecta */
+.slide > *{flex-shrink:0}
+.vrc,.step3,.chain,.flow,.orden{flex:none}
+@keyframes enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.slide.is-active{animation:none}}
+
+/* barra superior e inferior de marca */
+.slide::before,.slide::after{content:"";position:absolute;left:0;right:0;height:12px;background:var(--naranja)}
+.slide::before{top:0}
+.slide::after{bottom:0}
+
+/* ---------- TIPOGRAFÍA ---------- */
+h1,h2,h3,.display{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;line-height:.98;letter-spacing:-.025em}
+h1{font-size:76px}
+h2{font-size:52px}
+h3{font-size:30px;font-weight:600;letter-spacing:-.015em}
+p,li{font-size:22.5px;line-height:1.48}
+.lead{font-size:27px;line-height:1.4;color:#332D2A}
+.mono,.eyebrow,.tag,.badge{font-family:"DM Mono",ui-monospace,monospace}
+.eyebrow{
+  font-size:13.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gris);
+  display:flex;justify-content:space-between;align-items:center;gap:16px;
+}
+.eyebrow b{color:var(--naranja-hondo);font-weight:500}
+.sub{font-size:24px;color:var(--gris);font-weight:500;margin-top:10px}
+.hl{color:var(--naranja-hondo);font-weight:600}
+.dim{color:var(--gris)}
+.body-copy{max-width:62ch}
+
+/* ---------- MAPA DE LA CONVERSACIÓN (elemento firma) ---------- */
+.map{display:flex;align-items:center;gap:6px;margin:14px 0 0}
+.map .link{
+  font-family:"DM Mono",monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+  padding:5px 11px;border-radius:999px;background:#F2EEE9;color:#A79C93;white-space:nowrap;
+  transition:all .3s;
+}
+.map .arrow{color:#D8D0C8;font-size:11px}
+.map .link.on{background:var(--naranja);color:#fff;box-shadow:0 3px 10px rgba(244,113,31,.35)}
+
+/* mapa grande */
+.chain{display:flex;align-items:stretch;gap:0;margin-top:26px}
+.chain-item{flex:1;position:relative;padding:0 8px}
+.chain-item .kicker{
+  font-family:"DM Mono",monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+  color:#fff;background:var(--naranja);padding:7px 0;text-align:center;border-radius:6px;
+}
+.chain-item:nth-child(1) .kicker{background:#FBB980}
+.chain-item:nth-child(2) .kicker{background:#F79B4E}
+.chain-item:nth-child(3) .kicker{background:#F4711F}
+.chain-item:nth-child(4) .kicker{background:#D9540E}
+.chain-item:nth-child(5) .kicker{background:#B8410A}
+.chain-item .quote{
+  margin-top:14px;font-size:18px;line-height:1.35;color:#3A3330;
+  border-left:3px solid var(--linea);padding-left:12px;font-style:italic;
+}
+.chain-item::after{
+  content:"→";position:absolute;right:-9px;top:5px;color:#C9C0B8;font-size:18px;
+}
+.chain-item:last-child::after{display:none}
+
+/* ---------- COMPONENTES ---------- */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.card{
+  background:#fff;border:1.5px solid var(--linea);border-radius:14px;padding:20px 22px;
+}
+.card h3{margin-bottom:8px}
+.card p{font-size:19.5px;color:#3F3833}
+.card--acc{border-color:var(--naranja);background:var(--naranja-tenue)}
+.num{
+  font-family:"Bricolage Grotesque",sans-serif;font-size:15px;font-weight:800;color:#fff;
+  background:var(--naranja);width:30px;height:30px;border-radius:50%;
+  display:grid;place-items:center;flex:none;
+}
+.rule{height:1.5px;background:var(--linea);margin:18px 0}
+.pill{
+  display:inline-block;font-family:"DM Mono",monospace;font-size:12px;letter-spacing:.1em;
+  text-transform:uppercase;padding:6px 12px;border-radius:999px;
+  background:var(--naranja-tenue);color:var(--naranja-hondo);
+}
+.checklist{list-style:none;display:flex;flex-direction:column;gap:11px}
+.checklist li{display:flex;gap:12px;align-items:flex-start;font-size:21px}
+.checklist li::before{
+  content:"";width:20px;height:20px;border:2px solid var(--naranja);border-radius:5px;flex:none;margin-top:3px;
+}
+.ol{list-style:none;display:flex;flex-direction:column;gap:13px}
+.ol li{display:flex;gap:14px;align-items:flex-start}
+.quote-big{
+  font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:62px;line-height:1.02;
+  letter-spacing:-.03em;
+}
+
+/* burbujas de chat */
+.chat{display:flex;flex-direction:column;gap:14px;max-width:660px}
+.bubble{padding:16px 20px;border-radius:18px;font-size:20px;line-height:1.4;position:relative}
+.bubble .who{display:block;font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px;opacity:.65}
+.bubble--cli{background:#F2EEE9;border-bottom-left-radius:4px;align-self:flex-start}
+.bubble--ase{background:var(--naranja);color:#fff;border-bottom-right-radius:4px;align-self:flex-end}
+.bubble--ase .who{opacity:.8}
+mark{background:#FFE07A;color:inherit;padding:1px 5px;border-radius:4px;font-weight:600}
+
+/* ---------- MODO PRÁCTICA (inversión de color) ---------- */
+.slide--practice{background:var(--naranja);color:#fff}
+.slide--practice::before,.slide--practice::after{background:var(--naranja-hondo)}
+.slide--practice h1,.slide--practice h2,.slide--practice h3{color:#fff}
+.slide--practice .eyebrow{color:rgba(255,255,255,.7)}
+.slide--practice .eyebrow b{color:#fff}
+.slide--practice .card{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.3);color:#fff}
+.slide--practice .card p,.slide--practice li{color:rgba(255,255,255,.94)}
+.slide--practice .checklist li::before{border-color:rgba(255,255,255,.8)}
+.slide--practice .num{background:#fff;color:var(--naranja-hondo)}
+.slide--practice .map .link{background:rgba(255,255,255,.18);color:rgba(255,255,255,.7)}
+.slide--practice .map .link.on{background:#fff;color:var(--naranja-hondo);box-shadow:none}
+.slide--practice .map .arrow{color:rgba(255,255,255,.4)}
+.practice-flag{
+  display:inline-flex;align-items:center;gap:9px;background:#fff;color:var(--naranja-hondo);
+  font-family:"DM Mono",monospace;font-size:12.5px;letter-spacing:.16em;text-transform:uppercase;
+  padding:7px 14px;border-radius:6px;font-weight:500;
+}
+.practice-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:24px;margin-top:22px;flex:1}
+.pbox{background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.28);border-radius:14px;padding:18px 20px}
+.pbox .pt{font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.75;margin-bottom:10px}
+.pbox li{font-size:19.5px}
+
+/* ---------- TEMPORIZADOR ---------- */
+.timer{display:flex;align-items:center;gap:14px}
+.timer .t-read{font-family:"DM Mono",monospace;font-size:46px;font-weight:500;letter-spacing:-.02em;min-width:130px}
+.timer.is-done .t-read{animation:blink .7s steps(2) infinite}
+@keyframes blink{50%{opacity:.25}}
+.tbtn{
+  font-family:"DM Mono",monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+  background:#fff;color:var(--naranja-hondo);border:none;border-radius:8px;padding:10px 14px;cursor:pointer;
+}
+.tbtn:hover{transform:translateY(-1px)}
+.tbtn:focus-visible{outline:3px solid #FFE07A;outline-offset:2px}
+
+/* ---------- INTERACTIVOS ---------- */
+.reveal{opacity:0;transform:translateY(10px);transition:opacity .35s,transform .35s;pointer-events:none}
+.reveal.on{opacity:1;transform:none;pointer-events:auto}
+
+button.q,.clickable{
+  font-family:inherit;font-size:inherit;color:inherit;background:none;border:none;cursor:pointer;text-align:left;
+}
+.opt{
+  border:1.5px solid var(--linea);background:#fff;border-radius:12px;padding:14px 16px;
+  display:flex;gap:12px;align-items:center;transition:all .2s;font-size:20.5px;width:100%;
+}
+.opt:hover{border-color:var(--naranja);transform:translateY(-2px)}
+.opt:focus-visible{outline:3px solid var(--naranja);outline-offset:2px}
+.opt .k{font-family:"DM Mono",monospace;font-size:12px;color:#fff;background:#C9C0B8;border-radius:6px;padding:4px 8px;flex:none}
+.opt.ok{border-color:#1F9D55;background:#EEFBF3}
+.opt.ok .k{background:#1F9D55}
+.opt.no{border-color:#D64545;background:#FDF0F0;opacity:.75}
+.opt.no .k{background:#D64545}
+
+/* traductor de objeciones */
+.obj-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px}
+.obj{
+  border:1.5px solid var(--linea);border-radius:14px;padding:16px 18px;background:#fff;
+  cursor:pointer;transition:all .22s;min-height:132px;display:flex;flex-direction:column;justify-content:center;
+}
+.obj:hover{border-color:var(--naranja);box-shadow:0 8px 22px rgba(244,113,31,.14);transform:translateY(-3px)}
+.obj .said{font-size:22px;font-weight:600;line-height:1.24}
+.obj .cue{font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gris);margin-top:10px}
+.obj.open{background:var(--naranja-tenue);border-color:var(--naranja)}
+.obj .ans{display:none;margin-top:12px}
+.obj.open .ans{display:block;animation:enter .3s both}
+.obj.open .cue{display:none}
+.obj .means{font-size:17px;line-height:1.34;color:var(--naranja-hondo);font-weight:600}
+.obj .say{font-size:16.5px;line-height:1.36;color:#4A423D;margin-top:8px;border-left:3px solid var(--naranja);padding-left:10px;font-style:italic}
+
+/* escalera */
+.ladder{display:flex;align-items:flex-end;gap:10px;margin-top:8px}
+.rung{
+  flex:1;border-radius:12px 12px 0 0;padding:14px 12px 16px;color:#fff;cursor:pointer;
+  transition:transform .2s,filter .2s;text-align:left;
+}
+.rung:hover{transform:translateY(-5px);filter:brightness(1.06)}
+.rung .n{display:block;font-family:"DM Mono",monospace;font-size:12px;letter-spacing:.12em;opacity:.9}
+.rung .t{display:block;font-family:"Bricolage Grotesque",sans-serif;font-weight:600;font-size:17px;line-height:1.14;margin-top:7px}
+.rung:nth-child(1){background:#FBB980;height:132px}
+.rung:nth-child(2){background:#F79B4E;height:160px}
+.rung:nth-child(3){background:#F4711F;height:188px}
+.rung:nth-child(4){background:#D9540E;height:216px}
+.rung:nth-child(5){background:#B8410A;height:244px}
+.rung.sel{outline:3px solid var(--ink);outline-offset:3px}
+.exit{
+  border:2px dashed #D64545;color:#B02A2A;border-radius:12px;padding:12px 16px;
+  font-size:17px;line-height:1.35;background:#FDF3F3;
+}
+.ladder-panel{
+  margin-top:16px;background:#F7F3EE;border-radius:12px;padding:16px 20px;min-height:86px;
+  display:flex;flex-direction:column;justify-content:center;
+}
+.ladder-panel .lp-t{font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gris)}
+.ladder-panel .lp-s{font-size:20px;line-height:1.35;margin-top:7px;font-style:italic}
+
+/* tabla */
+table{width:100%;border-collapse:collapse}
+th,td{padding:13px 16px;font-size:20.5px;text-align:left;border-bottom:1.5px solid var(--linea)}
+th{font-family:"DM Mono",monospace;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gris)}
+td.no-col{color:#9A9089;text-decoration:line-through;text-decoration-color:#E0B4B4}
+td.si-col{font-weight:600;color:var(--naranja-hondo)}
+
+/* ilustraciones */
+.ill{display:block}
+.ill-corner{position:absolute;bottom:24px;right:64px;width:210px;opacity:1}
+.ill-corner-l{position:absolute;bottom:24px;left:64px;width:190px}
+
+
+/* ---------- AVISO DE RESPUESTAS OCULTAS ---------- */
+.spoiler{
+  display:flex; align-items:center; gap:9px;
+  background:#B8410A; border-radius:999px; padding:5px 14px 5px 11px;
+  font-size:12px; letter-spacing:.05em; white-space:nowrap;
+}
+.spoiler.hide{display:none}
+.spoiler .dot{width:11px;height:11px;border-radius:50%;background:#FFC24D;flex:none;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.35}}
+.spoiler.clear{background:#1F7A46}
+.spoiler.clear .dot{background:#BDF0D2;animation:none}
+
+@media (prefers-reduced-motion:reduce){.spoiler .dot{animation:none}}
+
+/* ---------- CHIPS DE PARTICIPACIÓN EN LÍNEA ---------- */
+.chip{
+  display:inline-flex; align-items:center; gap:8px;
+  background:#2B2521; color:#fff; border-radius:8px; padding:7px 13px;
+  font-family:"DM Mono",monospace; font-size:13.5px; letter-spacing:.05em;
+}
+.chip.chat{background:#1F6FEB}
+.chip.sala{background:#7A3FD1}
+.chip.micro{background:#1F9D55}
+.slide--practice .chip{background:#fff;color:var(--naranja-hondo)}
+
+/* traducción en lenguaje llano */
+.llano{font-size:18px;color:var(--gris);margin-top:6px;line-height:1.4}
+.slide--practice .llano{color:rgba(255,255,255,.8)}
+.figcap{font-family:"DM Mono",monospace;font-size:12.5px;letter-spacing:.05em;color:var(--gris);text-align:center;margin-top:8px;line-height:1.45}
+
+/* ---------- CHROME (barra de control) ---------- */
+#bar{
+  position:fixed;bottom:14px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:14px;z-index:50;
+  background:rgba(20,15,12,.82);backdrop-filter:blur(8px);
+  border-radius:999px;padding:8px 16px;color:#fff;
+  font-family:"DM Mono",monospace;font-size:12px;letter-spacing:.06em;
+}
+#bar button{
+  background:rgba(255,255,255,.14);border:none;color:#fff;border-radius:999px;
+  width:28px;height:28px;cursor:pointer;font-size:14px;line-height:1;
+}
+#bar button:hover{background:rgba(255,255,255,.28)}
+#bar .hint{opacity:.5}
+#prog{position:fixed;top:0;left:0;height:3px;background:var(--naranja);z-index:60;transition:width .3s}
+#menu{
+  position:fixed;inset:0;background:rgba(20,15,12,.96);z-index:70;display:none;
+  padding:48px 60px;overflow:auto;color:#fff;
+}
+#menu.on{display:block}
+#menu h2{color:#fff;margin-bottom:6px}
+#menu .mg{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:26px}
+#menu .mi{
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:10px;
+  padding:12px 14px;cursor:pointer;color:#fff;font-family:"Instrument Sans",sans-serif;font-size:14px;text-align:left;
+}
+#menu .mi:hover{background:var(--naranja);border-color:var(--naranja)}
+#menu .mi .mn{font-family:"DM Mono",monospace;font-size:10.5px;opacity:.6;display:block;margin-bottom:4px}
+#menu .mi.sec{background:rgba(244,113,31,.22);border-color:rgba(244,113,31,.5)}
+
+/* ---- extras de esta presentación ---- */
+.formula{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;letter-spacing:-.03em;line-height:1.04;text-align:center}
+.formula .plus{color:var(--gris)} .formula .res{color:var(--naranja)}
+.megaq{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;letter-spacing:-.028em;line-height:1.07;font-size:40px}
+.flow{display:flex;align-items:stretch;gap:0;margin-top:16px;flex:none}
+.flow-i{flex:1;position:relative;padding:0 7px;text-align:center}
+.flow-i .b{border-radius:10px;padding:13px 6px;color:#fff;font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:18px;line-height:1.1}
+.flow-i::after{content:"\2192";position:absolute;right:-8px;top:14px;color:#C9C0B8;font-size:19px}
+.flow-i:last-child::after{display:none}
+.flow-i .u{font-size:15px;color:#5A524C;margin-top:8px;line-height:1.3}
+.vrb{background:#F7F3EE;border-left:5px solid var(--naranja);border-radius:0 10px 10px 0;padding:12px 17px;font-size:20px;line-height:1.4;font-style:italic;color:#3A3330}
+.slide--practice .vrb{background:rgba(255,255,255,.16);border-left-color:#fff;color:#fff}
+.vrc{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:6px;border-radius:12px;overflow:hidden;flex:none}
+.vrc div{padding:12px 10px;color:#fff;font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:21px;text-align:center;letter-spacing:-.02em}
+.vrc.tres{grid-template-columns:repeat(3,1fr)}
+.vrc.tres div{font-size:26px;padding:13px 16px}
+.vrc div:nth-child(1){background:#FBB980}
+.vrc div:nth-child(2){background:#F4711F}
+.vrc div:nth-child(3){background:#D9540E}
+.vrc div:nth-child(4){background:#B8410A}
+.step3{display:flex;flex-direction:column;gap:12px;flex:none}
+.step3 .s{border-radius:14px;padding:15px 21px}
+.step3 .s .lab{font-family:"DM Mono",monospace;font-size:12.5px;letter-spacing:.13em;text-transform:uppercase}
+.step3 .s .txt{display:block;font-size:26px;font-weight:600;line-height:1.2;margin-top:5px}
+.step3 .s .sm{display:block;font-size:16px;color:#6B6259;margin-top:4px}
+.qa{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px}
+.qa .c{border:1.5px solid var(--linea);border-radius:14px;padding:16px 18px;background:#fff}
+.qa .c .t{font-family:"DM Mono",monospace;font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--gris)}
+.qa .c .d{font-size:19.5px;line-height:1.36;margin-top:8px}
+.err{display:flex;flex-direction:column;gap:12px;margin-top:16px;flex:none}
+.err .e{border-radius:12px;padding:14px 19px;display:flex;gap:16px;align-items:baseline}
+.err .e .k{font-family:"DM Mono",monospace;font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;min-width:118px;flex:none}
+.err .e .v{flex:1;font-size:20px;line-height:1.36}
+.err .e1{background:#FDF3F3;border:1.5px solid #E3B4B4} .err .e1 .k{color:#B02A2A}
+.err .e2{background:#F7F3EE;border:1.5px solid var(--linea)} .err .e2 .k{color:var(--gris)}
+.err .e3{background:var(--naranja-tenue);border:1.5px solid var(--naranja)} .err .e3 .k{color:var(--naranja-hondo)}
+.trans{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+.trans .t{border-radius:12px;padding:14px 17px;background:#F7F3EE}
+.trans .t .k{font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--gris)}
+.trans .t .v{font-size:19px;line-height:1.34;margin-top:7px}
+.prog{border-radius:13px;padding:15px 17px;border:2px solid;background:#fff;display:flex;flex-direction:column}
+.prog .pn{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:23px;letter-spacing:-.02em;line-height:1.05}
+.prog .ps{font-family:"DM Mono",monospace;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;margin-top:5px}
+.prog .pd{font-size:17px;line-height:1.32;margin-top:9px;color:#3F3833}
+.prog--desc{border-color:#B7B0D6} .prog--desc .pn,.prog--desc .ps{color:#5B5385}
+.prog--avan{border-color:#5FCB8E} .prog--avan .pn,.prog--avan .ps{color:#1F7A46}
+.prog--impu{border-color:#F4711F;background:var(--naranja-tenue)} .prog--impu .pn,.prog--impu .ps{color:#B8410A}
+.prog--tran{border-color:#C9A961} .prog--tran .pn,.prog--tran .ps{color:#8A6D25}
+.orden{display:flex;flex-direction:column;gap:11px;flex:none}
+.orden .o{display:flex;gap:16px;align-items:center;border-radius:12px;padding:13px 18px;border:2px solid}
+.orden .o .on{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:29px;min-width:32px}
+.orden .o .oe{flex:1}
+.orden .o .ot{display:block;font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:24px;letter-spacing:-.02em}
+.orden .o .ol{display:block;font-family:"DM Mono",monospace;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gris);margin-top:3px}
+.dyn{border:3px solid var(--naranja);background:var(--naranja-tenue);border-radius:16px;padding:18px 22px;flex:none}
+.dyn .h{font-family:"DM Mono",monospace;font-size:12.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--naranja-hondo)}
+.dyn .q{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:31px;line-height:1.12;letter-spacing:-.025em;margin-top:7px}
+.key{background:var(--naranja);border-radius:14px;padding:18px 24px;flex:none}
+.key .kt{font-family:"DM Mono",monospace;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.82)}
+.key .kv{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:31px;line-height:1.14;letter-spacing:-.025em;color:#fff;margin-top:6px}
+.internal{background:#2B2521;color:#fff;border-radius:14px;padding:17px 21px}
+.internal .it{font-family:"DM Mono",monospace;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:#FFC24D}
+.internal li{color:rgba(255,255,255,.92);font-size:18.5px}
+.internal .checklist li::before{border-color:#FFC24D}
+
+/* ---- notas de la capacitadora ---- */
+.notes{display:none}
+#notes{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:58px;z-index:55;
+  width:min(1080px,92vw);max-height:46vh;overflow:auto;
+  background:#2B2521;color:#F2EDE8;border-radius:14px;padding:20px 26px;
+  box-shadow:0 18px 50px rgba(0,0,0,.45);display:none;
+}
+#notes.on{display:block}
+#notes h4{font-family:"DM Mono",monospace;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:#FFC24D;margin-bottom:10px}
+#notes p{font-size:16.5px;line-height:1.55;margin-bottom:9px;color:#EDE6DF}
+#notes b{color:#fff}
+#notes .dyn-n{border-left:3px solid #FFC24D;padding-left:13px;margin-top:12px}
+#notes .dyn-n .lbl{font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:#FFC24D;display:block;margin-bottom:3px}
+</style>
+</head>
+<body>
+<div id="prog"></div>
+<div id="stage">
+<section class="slide" data-title="Portada · Sesión 2" data-sec="Portada">
+  <div class="eyebrow"><span>Formación Comercial Kopay</span><b>Método Konecta</b></div>
+  <div style="flex:1;display:flex;align-items:center">
+    <div style="max-width:900px">
+      <span class="pill">Sesión 2 · Fase 2</span>
+      <h1 style="margin-top:18px;font-size:68px">Comprender la situación</h1>
+      <p class="sub" style="font-size:28px;margin-top:12px">Capacitación Konecta</p>
+      <div class="rule" style="max-width:500px;margin-top:24px"></div>
+      <p class="lead" style="max-width:42ch">Antes de explicar o recomendar, primero necesitamos entender <b>desde dónde parte la clienta.</b></p>
+    </div>
+  </div>
+  <div class="notes"><h4>Guía para la capacitadora</h4><p>Presenta la sesión como una continuación directa de Saludo y Bienvenida. La meta de hoy es que aprendan a obtener información sin convertir la conversación en un formulario.</p></div>
+</section>
+
+<section class="slide" data-title="Repaso rápido · Fase 1" data-sec="Repaso">
+  <div class="eyebrow"><span>Sesión 2 · Repaso</span><b>Fase 1</b></div>
+  <div data-map></div>
+  <h2 style="margin-top:18px">La confianza se construye… y se sostiene</h2>
+  <div class="formula" style="font-size:60px;margin-top:54px">
+    <span>Empatía</span> <span class="plus">+</span> <span>Autoridad</span> <span class="plus">=</span> <span class="res">Confianza</span>
+  </div>
+  <div class="key" style="margin-top:48px">
+    <p class="kt">Recuerda</p>
+    <p class="kv">La confianza no se gana una vez — se sostiene durante toda la conversación.</p>
+  </div>
+  <div class="notes"><h4>Guía para la capacitadora</h4><p>Haz un repaso de 30–60 segundos. Pregunta al grupo qué conductas de la Fase 1 ayudan a generar confianza antes de pasar a Situación.</p></div>
+</section>
+
+<section class="slide" data-title="Reflexión · Antes de recomendar" data-sec="Reflexión">
+  <div class="eyebrow"><span>Pregunta de reflexión</span><b>Responder en vivo</b></div>
+  <div data-map></div>
+  <div style="flex:1;display:grid;place-items:center;text-align:center">
+    <p class="megaq" style="max-width:980px;font-size:48px">¿Qué riesgo corremos si empezamos a explicar o recomendar sin entender primero a la clienta?</p>
+  </div>
+  <div class="notes"><h4>Guía para la capacitadora</h4><p>No muestres una respuesta. Escucha 2 o 3 participaciones y conecta sus respuestas con la idea de que una recomendación sin contexto puede sentirse genérica o equivocada.</p></div>
+</section>
+
+<section class="slide" data-title="Fase 2 · Objetivo" data-sec="Fase 2" data-step="1">
+  <div class="eyebrow"><span>Fase 2 · Situación</span><b>Objetivo</b></div>
+  <div data-map></div>
+  <h2 style="margin-top:16px">Conocer el punto de partida</h2>
+  <p class="lead" style="margin-top:24px;max-width:760px">Conocer rápidamente el punto de partida de la clienta <b>antes de hablar de soluciones.</b></p>
+  <div class="key" style="margin-top:32px">
+    <p class="kt">Idea central</p>
+    <p class="kv">“No necesitamos saber todo. Necesitamos saber lo suficiente para comprender desde dónde parte.”</p>
+  </div>
+  <div class="card" style="margin-top:24px;border-width:2px;border-color:var(--naranja)">
+    <p style="font-size:21px"><b>Regla de control:</b> en esta fase todavía no explicamos beneficios ni recomendamos programas; primero comprendemos.</p>
+  </div>
+  <div class="notes"><h4>Guía para la capacitadora</h4><p>Esta regla se agregó para marcar claramente el límite de la fase y evitar que la asesora se adelante al cierre o a la recomendación.</p></div>
+</section>
+
+<section class="slide" data-title="Fase 2 · Las 3 preguntas base" data-sec="Fase 2" data-step="1">
+  <div class="eyebrow"><span>Fase 2 · Situación</span><b>Tres datos</b></div>
+  <div data-map></div>
+  <h2 style="margin-top:14px">Las 3 preguntas base</h2>
+  <ol class="ol" style="margin-top:22px;gap:17px">
+    <li><span class="num">1</span><span style="font-size:25px">¿Qué <span class="hl">método de depilación</span> usas actualmente?</span></li>
+    <li><span class="num">2</span><span style="font-size:25px">¿Qué <span class="hl">áreas</span> son las que deseas depilarte?</span></li>
+    <li><span class="num">3</span><span style="font-size:25px">¿Con qué <span class="hl">frecuencia</span> te depilas?</span></li>
+  </ol>
+  <div class="key" style="margin-top:28px">
+    <p class="kt">Frase clave de la sesión</p>
+    <p class="kv">“No quiero que memoricen tres frases. Quiero que aprendan a obtener tres datos.”</p>
+  </div>
+  <p class="llano" style="margin-top:18px"><b>Pregunta situacional:</b> la experiencia previa con láser es válida cuando aporta contexto, pero no forma parte de las 3 preguntas oficiales.</p>
+  <div class="notes"><h4>Guía para la capacitadora</h4><p>Recalca que pueden adaptar la redacción a su manera de hablar. Lo que sí debe conservarse es la información obtenida: método, áreas y frecuencia.</p></div>
+</section>
+
+<section class="slide" data-title="Fase 2 · Así NO" data-sec="Fase 2" data-step="1">
+  <div class="eyebrow"><span>Fase 2 · Situación</span><b>Así NO</b></div>
+  <div data-map></div>
+  <h2 style="margin-top:14px">Cuando parece interrogatorio</h2>
+  <div class="card" style="margin-top:26px;border-color:#D64545;background:#FDF3F3;padding:26px 30px">
+    <p style="font-size:25px;line-height:1.65">“¿Con qué te depilas?” / “¿Has usado láser?” / “¿Qué áreas?” / “¿Cada cuánto te depilas?” / “¿Qué marca de rastrillo?” / “¿Desde cuándo?”…</p>
+  </div>
+  <div class="err" style="margin-top:28px">
+    <div class="e e1"><span class="k">Qué provoca</span><span class="v">La clienta siente que está contestando un cuestionario, no teniendo una conversación.</span></div>
+    <div class="e e2"><span class="k">Qué corregir</span><span class="v">No acumules preguntas. Escucha la respuesta y enlaza la siguiente.</span></div>
+  </div>
+  <div class="notes"><h4>Guía para la capacitadora</h4><p>Lee las preguntas de corrido y rápido para que el grupo perciba la diferencia. No se trata de prohibir preguntas adicionales, sino de evitar preguntas innecesarias o desconectadas.</p></div>
+</section>
+
+<section class="slide" data-title="Fase 2 · Así SÍ" data-sec="Fase 2" data-step="1">
+  <div class="eyebrow"><span>Fase 2 · Situación</span><b>Así SÍ</b></div>
+  <div data-map></div>
+  <h2 style="margin-top:10px">Hazlo conversación</h2>
+  <div class="chat" style="margin-top:14px;width:100%;max-width:900px;gap:10px">
+    <div class="bubble bubble--ase" style="font-size:18px"><span class="who">Asesora</span>Cuéntame, ¿qué método utilizas actualmente para depilarte?</div>
+    <div class="bubble bubble--cli" style="font-size:18px"><span class="who">Clienta</span>Rastrillo.</div>
+    <div class="bubble bubble--ase" style="font-size:18px"><span class="who">Asesora</span>Perfecto, ¿y qué áreas son las que principalmente te interesa tratar?</div>
+    <div class="bubble bubble--cli" style="font-size:18px"><span class="who">Clienta</span>Piernas y axilas.</div>
+    <div class="bubble bubble--ase" style="font-size:18px"><span class="who">Asesora</span>Buenísimo. ¿Y cada cuánto te depilas normalmente?</div>
+    <div class="bubble bubble--cli" style="font-size:18px"><span class="who">Clienta</span>Casi todos los días.</div>
+  </div>
+  <div class="key" style="margin-top:16px;padding:14px 20px">
+    <p class="kv" style="font-size:27px">Mismos 3 datos. Una experiencia completamente distinta.</p>
+  </div>
+  <div class="notes"><h4>Guía para la capacitadora</h4><p>Señala las palabras puente: “perfecto”, “y…”, “buenísimo”. Ayudan a que la secuencia fluya, pero deben sonar naturales, no automáticas.</p></div>
+</section>
+
+<section class="slide slide--practice" data-title="Práctica en vivo" data-sec="Práctica" data-step="1">
+  <div class="eyebrow"><span>Sesión 2 · Práctica</span><b>Fase 2</b></div>
+  <div data-map></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
+    <h2>Práctica en vivo</h2><span class="practice-flag">Roleplay</span>
+  </div>
+  <div class="practice-grid">
+    <div class="pbox">
+      <p class="pt">Escenarios</p>
+      <ol class="ol" style="gap:13px">
+        <li><span class="num">1</span><span>Clienta que usa rastrillo y nunca ha probado láser.</span></li>
+        <li><span class="num">2</span><span>Clienta que usa cera y ya tuvo láser en otro lugar.</span></li>
+        <li><span class="num">3</span><span>Clienta que llega preguntando directamente por piernas.</span></li>
+      </ol>
+    </div>
+    <div class="pbox">
+      <p class="pt">Se evalúa</p>
+      <ul class="checklist">
+        <li>¿Obtuvimos método, áreas y frecuencia?</li>
+        <li>¿Sonó a conversación o a interrogatorio?</li>
+        <li>¿Evitó adelantarse a explicar o recomendar?</li>
+      </ul>
+    </div>
+  </div>
+  <div class="notes"><h4>Guía para la capacitadora</h4><p>Haz rondas cortas. Una persona interpreta a la clienta y otra a la asesora. Después pide al grupo que identifique los tres datos obtenidos y una mejora concreta.</p></div>
+</section>
+
+<section class="slide" data-title="Cierre · Fase 2" data-sec="Cierre">
+  <div class="eyebrow"><span>Fin de la Sesión 2</span><b>Método Konecta</b></div>
+  <h2 style="margin-top:14px">Antes de avanzar, necesitamos saber:</h2>
+  <div class="grid3" style="margin-top:28px">
+    <div class="card card--acc" style="text-align:center;padding:28px 18px"><h3>Método actual</h3></div>
+    <div class="card card--acc" style="text-align:center;padding:28px 18px"><h3>Áreas de interés</h3></div>
+    <div class="card card--acc" style="text-align:center;padding:28px 18px"><h3>Frecuencia</h3></div>
+  </div>
+  <div class="key" style="margin-top:30px">
+    <p class="kt">Tarea de la semana</p>
+    <p class="kv">Practicar estas 3 preguntas de forma natural, sin que se sienta como trámite.</p>
+  </div>
+  <p class="lead" style="margin-top:24px;text-align:center;max-width:none"><b>Comprender primero. Recomendar después.</b></p>
+  <div style="margin-top:auto;padding-top:12px;text-align:right"><p class="mono" style="font-size:11.5px;letter-spacing:.14em;color:#B3A99F;text-transform:uppercase">Formación Comercial Kopay · Método Konecta</p></div>
+  <div class="notes"><h4>Guía para la capacitadora</h4><p>Cierra preguntando: “¿Cuáles son los tres datos que necesito antes de avanzar?”. La respuesta esperada es: método, áreas y frecuencia.</p></div>
+</section>
+
+</div>
+<div id="notes"></div>
+<div id="bar">
+  <button id="prev" aria-label="Anterior">&lsaquo;</button>
+  <span id="count">1 / 9</span>
+  <button id="next" aria-label="Siguiente">&rsaquo;</button>
+  <span class="spoiler hide" id="spoiler"><span class="dot"></span><span id="spoilerTxt"></span></span>
+  <span class="hint">M índice · N notas · F pantalla completa</span>
+</div>
+<div id="menu" role="dialog" aria-label="Índice">
+  <h2>Método Konecta · Fase 2 · Situación</h2>
+  <p style="color:rgba(255,255,255,.6);font-size:16px">Haz clic en cualquier bloque para saltar. Pulsa M o Esc para cerrar.</p>
+  <div class="mg" id="menuGrid"></div>
+</div>
+<script>
+(function(){
+  const stage   = document.getElementById('stage');
+  const slides  = [...document.querySelectorAll('.slide')];
+  const count   = document.getElementById('count');
+  const prog    = document.getElementById('prog');
+  const menu    = document.getElementById('menu');
+  const mgrid   = document.getElementById('menuGrid');
+  let i = 0;
+
+  /* --- escalar el escenario al viewport --- */
+  function fit(){
+    const s = Math.min((innerWidth-40)/1280, (innerHeight-90)/720);
+    stage.style.transform = 'scale('+s+')';
+  }
+  addEventListener('resize', fit); fit();
+
+  /* --- mapa de fases (elemento firma, replicado) --- */
+  const FASES = ['Saludo y Bienvenida', 'Situación', 'Problema', 'Implicación', 'Necesidad Resuelta', 'Cierre'];
+  slides.forEach(sl=>{
+    const holder = sl.querySelector('[data-map]');
+    if(!holder) return;
+    const active = +sl.dataset.step;
+    holder.className = 'map';
+    holder.innerHTML = FASES.map((f,n)=>
+      '<span class="link'+(n===active?' on':'')+'">'+f+'</span>'
+    ).join('<span class="arrow">→</span>');
+  });
+
+  /* --- índice --- */
+  slides.forEach((sl,n)=>{
+    const b = document.createElement('button');
+    b.className = 'mi' + (sl.classList.contains('slide--practice') ? ' sec' : '');
+    b.innerHTML = '<span class="mn">'+String(n+1).padStart(2,'0')+' · '+(sl.dataset.sec||'')+'</span>'+sl.dataset.title;
+    b.onclick = ()=>{ go(n); menu.classList.remove('on'); };
+    mgrid.appendChild(b);
+  });
+
+  /* --- navegación --- */
+  function frags(){ return [...slides[i].querySelectorAll('[data-frag]')]; }
+  function go(n, revealAll){
+    i = Math.max(0, Math.min(slides.length-1, n));
+    slides.forEach(s=>s.classList.remove('is-active'));
+    slides[i].classList.add('is-active');
+    if(revealAll) frags().forEach(f=>f.classList.add('on'));
+    else frags().forEach(f=>f.classList.remove('on'));
+    count.textContent = (i+1)+' / '+slides.length;
+    prog.style.width = ((i+1)/slides.length*100)+'%';
+    stopAllTimers();
+    updateSpoiler();
+  }
+  function next(){
+    const f = frags().find(x=>!x.classList.contains('on'));
+    if(f){ f.classList.add('on'); updateSpoiler(); return; }
+    if(i < slides.length-1) go(i+1);
+  }
+  function prev(){
+    const on = frags().filter(x=>x.classList.contains('on'));
+    if(on.length){ on[on.length-1].classList.remove('on'); updateSpoiler(); return; }
+    if(i > 0) go(i-1, true);
+  }
+  document.getElementById('next').onclick = next;
+  document.getElementById('prev').onclick = prev;
+
+  addEventListener('keydown', e=>{
+    if(e.key === 'Escape'){ menu.classList.remove('on'); return; }
+    if(e.key === 'm' || e.key === 'M'){ menu.classList.toggle('on'); return; }
+    if(menu.classList.contains('on')) return;
+    if(e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' '){ e.preventDefault(); next(); }
+    if(e.key === 'ArrowLeft'  || e.key === 'PageUp'){ e.preventDefault(); prev(); }
+    if(e.key === 'Home') go(0);
+    if(e.key === 'End')  go(slides.length-1);
+    if(e.key === 'f' || e.key === 'F'){
+      document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+    }
+  });
+  menu.addEventListener('click', e=>{ if(e.target === menu) menu.classList.remove('on'); });
+
+  /* --- saltos desde el mapa de la sesión --- */
+  document.querySelectorAll('[data-goto]').forEach(b=>{
+    b.onclick = ()=> go(+b.dataset.goto - 1);
+  });
+
+  /* --- aviso de respuestas ocultas --- */
+  const spoiler = document.getElementById('spoiler');
+  const spoilerTxt = document.getElementById('spoilerTxt');
+  /* red de seguridad: si una diapositiva se desborda, se ajusta sola */
+  function fitSlide(sl){
+    sl.style.zoom = '';
+    const over = sl.scrollHeight - sl.clientHeight;
+    if(over > 2) sl.style.zoom = Math.max(.7, sl.clientHeight / sl.scrollHeight);
+  }
+  function updateSpoiler(){
+    const sl = slides[i];
+    fitSlide(sl);
+    const total = sl.querySelectorAll('[data-frag], [data-quiz], .obj').length;
+    if(!total){ spoiler.classList.add('hide'); return; }
+    spoiler.classList.remove('hide');
+    const hidden =
+      [...sl.querySelectorAll('[data-frag]')].filter(x=>!x.classList.contains('on')).length +
+      [...sl.querySelectorAll('[data-quiz]')].filter(x=>!x.dataset.done).length +
+      [...sl.querySelectorAll('.obj')].filter(x=>!x.classList.contains('open')).length;
+    if(hidden){
+      spoiler.classList.remove('clear');
+      spoilerTxt.textContent = hidden === 1 ? 'NO REVELES · 1 RESPUESTA OCULTA' : 'NO REVELES · ' + hidden + ' RESPUESTAS OCULTAS';
+    }else{
+      spoiler.classList.add('clear');
+      spoilerTxt.textContent = 'YA ESTÁ TODO A LA VISTA';
+    }
+  }
+
+  /* --- quiz --- */
+  document.querySelectorAll('[data-quiz]').forEach(group=>{
+    group.querySelectorAll('.q').forEach(btn=>{
+      btn.onclick = ()=>{
+        group.dataset.done = '1';
+        group.querySelectorAll('.q').forEach(b=>{
+          b.classList.add(b.dataset.ok === '1' ? 'ok' : 'no');
+          b.disabled = true;
+        });
+        let sib = group.nextElementSibling;
+        if(sib && sib.hasAttribute('data-answer')) sib.classList.add('on');
+        updateSpoiler();
+      };
+    });
+  });
+
+  /* --- traductor de objeciones --- */
+  document.querySelectorAll('.obj').forEach(o=>{
+    const toggle = ()=>{ o.classList.toggle('open'); updateSpoiler(); };
+    o.onclick = toggle;
+    o.onkeydown = e=>{ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggle(); } };
+  });
+
+  /* --- escalera --- */
+  document.querySelectorAll('[data-ladder]').forEach(l=>{
+    const panel = l.closest('.slide').querySelector('[data-ladder-panel]');
+    l.querySelectorAll('.rung').forEach(r=>{
+      r.onclick = ()=>{
+        l.querySelectorAll('.rung').forEach(x=>x.classList.remove('sel'));
+        r.classList.add('sel');
+        panel.querySelector('.lp-t').textContent = 'Intento ' + r.querySelector('.n').textContent + ' · ' + r.querySelector('.t').textContent;
+        const s = panel.querySelector('.lp-s');
+        s.textContent = r.dataset.say;
+        s.classList.remove('dim');
+      };
+    });
+  });
+
+  /* --- temporizadores --- */
+  const timers = [];
+  function fmt(s){ return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
+  document.querySelectorAll('.timer').forEach(t=>{
+    const total = +t.dataset.seconds;
+    const read  = t.querySelector('.t-read');
+    let left = total, id = null;
+    const state = { stop(){ clearInterval(id); id = null; t.querySelector('[data-t=start]').textContent = 'Iniciar'; } };
+    timers.push(state);
+    t.querySelector('[data-t=start]').onclick = function(){
+      if(id){ state.stop(); return; }
+      t.classList.remove('is-done');
+      this.textContent = 'Pausar';
+      id = setInterval(()=>{
+        left--; read.textContent = fmt(Math.max(0,left));
+        if(left <= 0){ state.stop(); t.classList.add('is-done'); }
+      }, 1000);
+    };
+    t.querySelector('[data-t=reset]').onclick = ()=>{
+      state.stop(); t.classList.remove('is-done');
+      left = total; read.textContent = fmt(total);
+    };
+  });
+  function stopAllTimers(){ timers.forEach(t=>t.stop()); }
+
+  const notesBox = document.getElementById('notes');
+  function fillNotes(){
+    const n = slides[i].querySelector('.notes');
+    notesBox.innerHTML = n ? n.innerHTML : '<h4>Guía para la capacitadora</h4><p>Sin notas para esta diapositiva.</p>';
+  }
+  addEventListener('keydown', e=>{
+    if(menu.classList.contains('on')) return;
+    if(e.key === 'n' || e.key === 'N'){ notesBox.classList.toggle('on'); fillNotes(); }
+  });
+  const _go = go;
+  go = function(a,b){ _go(a,b); fillNotes(); };
+
+  go(0);
+  fillNotes();
+})();
+</script>
+</body>
+</html>
