@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0A0A0A">
+<title>La libreta · Fase 5 Necesidad Resuelta</title>
+<style>
+*{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}
+html,body{margin:0;padding:0;background:#000}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  color:#fff;-webkit-text-size-adjust:100%}
+#wrap{max-width:520px;margin:0 auto;background:#0A0A0A;min-height:100%;padding-bottom:34px;overflow:hidden}
+button{font-family:inherit;cursor:pointer;border:0;background:none;color:#fff}
+
+#aviso{background:#7A2A18;padding:16px;font-size:14px;line-height:1.5}
+#aviso b{display:block;font-size:15px;margin-bottom:6px}
+
+/* ---------- cabecera ---------- */
+#bar{background:#141414;border-bottom:1px solid rgba(255,255,255,.13);padding:11px 14px 12px;overflow:hidden}
+#etapa{float:left;font-size:11px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:#FF8A45}
+#paso{float:right;font-size:11px;font-weight:bold;color:rgba(255,255,255,.42);
+  border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:4px 10px}
+
+/* ---------- escena ---------- */
+#escena{position:relative;background:#0E0E0E;padding:18px 14px 16px;overflow:hidden}
+#halo{position:absolute;top:-70px;left:50%;margin-left:-140px;width:280px;height:170px;border-radius:50%;
+  background:#F2601A;opacity:.13;-webkit-filter:blur(30px);filter:blur(30px)}
+#persona{position:relative;height:210px;text-align:center}
+#persona img{position:absolute;top:0;left:50%;margin-left:-84px;width:168px;height:210px;opacity:0;
+  -webkit-transition:opacity .35s;transition:opacity .35s}
+#persona img.cambia{-webkit-animation:brinca .45s;animation:brinca .45s}
+@-webkit-keyframes brinca{40%{-webkit-transform:translateY(-6px) scale(1.03)}}
+@keyframes brinca{40%{transform:translateY(-6px) scale(1.03)}}
+#persona img.on{opacity:1}
+#persona video{position:absolute;top:0;left:50%;margin-left:-84px;width:168px;height:210px;opacity:0;
+  -webkit-transition:opacity .3s;transition:opacity .3s}
+#persona video.on{opacity:1}
+#persona.respira{-webkit-animation:respira 3.4s ease-in-out infinite;animation:respira 3.4s ease-in-out infinite}
+@-webkit-keyframes respira{50%{-webkit-transform:translateY(-3px)}}
+@keyframes respira{50%{transform:translateY(-3px)}}
+#dice{background:#fff;color:#141414;border-radius:16px;padding:13px 15px;font-size:16px;line-height:1.5;
+  min-height:56px;position:relative;margin-top:10px}
+#dice:after{content:"";position:absolute;top:-9px;left:50%;margin-left:-9px;width:0;height:0;
+  border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:9px solid #fff}
+#dice .pal{display:inline-block;background:#FFE3D3;border-bottom:2px dashed #F2601A;border-radius:5px;
+  padding:1px 5px;margin:0 1px;font-weight:bold;color:#8A3410;cursor:pointer}
+#dice .pal.ya{background:#F2601A;color:#fff;border-bottom-color:#F2601A}
+#tiempo{height:4px;background:rgba(255,255,255,.12);border-radius:3px;margin-top:10px;overflow:hidden}
+#tiempo i{display:block;height:4px;width:100%;background:#F2601A}
+
+/* ---------- libreta ---------- */
+#libreta{background:#141414;border-top:1px solid rgba(255,255,255,.13);padding:11px 12px}
+#libTit{font-size:11px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;
+  color:rgba(255,255,255,.5);margin-bottom:9px;overflow:hidden}
+#libTit b{float:right;color:#FF8A45}
+.notas{overflow:hidden}
+.nota{float:left;width:50%;padding:0 4px 8px}
+.notaIn{border:1px dashed rgba(255,255,255,.26);border-radius:10px;padding:10px 8px;font-size:12.5px;
+  font-weight:bold;color:rgba(255,255,255,.3);text-align:center;min-height:42px}
+.notaIn.llena{border-style:solid;border-color:#F2601A;background:rgba(242,96,26,.13);color:#FF8A45}
+
+/* ---------- zona de juego ---------- */
+#dock{padding:13px 12px 8px}
+#tip{font-size:11px;font-weight:bold;color:rgba(255,255,255,.6);margin-bottom:10px;
+  text-transform:uppercase;letter-spacing:1px}
+.opt{display:block;width:100%;text-align:left;background:#1C1C1C;border:1px solid rgba(255,255,255,.13);
+  border-left:3px solid rgba(255,255,255,.26);border-radius:4px 12px 12px 4px;padding:14px 13px;
+  margin-bottom:9px;font-size:15px;line-height:1.4;color:#fff}
+.optPick{border-left-color:#F2601A;background:rgba(242,96,26,.16)}
+.optDim{opacity:.32}
+.optBien{border-left-color:#3E9C58;background:#16301F}
+.optMal{border-left-color:#B5473A;background:#2E1613}
+.dos{overflow:hidden;margin-bottom:10px}
+.dos button{float:left;width:50%;padding:0 5px}
+.dos span{display:block;background:#1C1C1C;border:1px solid rgba(255,255,255,.2);border-radius:14px;
+  padding:18px 6px;font-size:14px;font-weight:bold;text-align:center;line-height:1.3}
+.dos .izq span{border-color:rgba(255,255,255,.3)}
+.dos .der span{border-color:#F2601A;color:#FF8A45}
+.fb{border-left:3px solid #999;background:#1C1C1C;padding:12px 13px;margin-bottom:11px}
+.fb b{display:block;font-size:12px;font-weight:bold;margin-bottom:5px}
+.fb p{margin:0;font-size:14px;line-height:1.5;color:rgba(255,255,255,.68)}
+.btn{display:block;width:100%;background:#F2601A;color:#fff;border-radius:12px;padding:16px;
+  font-size:16px;font-weight:bold;text-align:center;margin-bottom:9px}
+.btnGhost{background:#1C1C1C;border:1px solid rgba(255,255,255,.26)}
+
+/* ---------- frase guía ---------- */
+#frase{background:#fff;color:#141414;border-radius:14px;padding:14px;font-size:15.5px;line-height:1.7;
+  margin-bottom:12px;font-weight:600}
+#frase .hueco{display:inline-block;min-width:110px;border-bottom:2px dashed #C24A12;color:#C24A12;
+  text-align:center;padding:0 6px}
+#frase .hueco.lleno{border-bottom-style:solid;background:#FFE3D3;border-radius:5px}
+.pieza{display:block;width:100%;text-align:left;background:#1C1C1C;border:1px solid rgba(255,255,255,.18);
+  border-radius:10px;padding:13px;margin-bottom:8px;font-size:14.5px;line-height:1.35;color:#fff}
+.pieza.usada{opacity:.28}
+.candados{overflow:hidden;margin-bottom:12px}
+.cand{float:left;width:33.33%;padding:0 4px}
+.candIn{border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:9px 6px;text-align:center;
+  font-size:11px;font-weight:bold;color:rgba(255,255,255,.4);line-height:1.3}
+.candIn.ok{border-color:#3E9C58;background:#16301F;color:#7BD69A}
+
+/* ---------- comparación final ---------- */
+.versus{margin-bottom:12px}
+.vs{border-radius:12px;padding:13px;margin-bottom:9px;font-size:14.5px;line-height:1.5}
+.vsA{background:#1C1C1C;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.75)}
+.vsB{background:rgba(242,96,26,.14);border:1px solid #F2601A}
+.vs b{display:block;font-size:10.5px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;
+  color:rgba(255,255,255,.45)}
+.vsB b{color:#FF8A45}
+
+/* ---------- pantallas ---------- */
+#intro,#fin{padding:26px 20px 30px}
+.kick{font-size:12px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:#FF8A45;margin-bottom:10px}
+h1{font-size:32px;line-height:1.1;margin:0 0 12px}
+.lead{font-size:15px;line-height:1.55;color:rgba(255,255,255,.62);margin:0 0 16px}
+.lead b{color:#fff}
+.regla{border-top:1px solid rgba(255,255,255,.13);padding:12px 0;font-size:13.5px;line-height:1.5;
+  color:rgba(255,255,255,.62);overflow:hidden}
+.regla i{float:left;width:20px;font-style:normal;font-weight:bold;color:#F2601A}
+.regla div{margin-left:24px}.regla b{color:#fff}
+label{display:block;font-size:13px;color:rgba(255,255,255,.62);margin:20px 0 8px}
+#nombre{width:100%;padding:15px;background:#1C1C1C;border:1px solid rgba(255,255,255,.26);border-radius:12px;
+  font-family:inherit;font-size:16px;font-weight:bold;color:#fff}
+.nota10{font-size:74px;font-weight:bold;color:#F2601A;line-height:1}
+.notaBaja{color:#D8D8D8}
+.notaDe{font-size:15px;color:rgba(255,255,255,.62);margin-left:8px}
+.fila{border-top:1px solid rgba(255,255,255,.13);padding:11px 0;font-size:13.5px;
+  color:rgba(255,255,255,.62);overflow:hidden}
+.fila b{float:right;color:#fff}
+.sect{font-size:12px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:#FF8A45;margin:20px 0 10px}
+.tip{font-size:13px;line-height:1.5;color:rgba(255,255,255,.62);border-left:1px solid rgba(255,255,255,.26);
+  padding-left:12px;margin-bottom:10px}
+.captura{border:1px dashed #F2601A;border-radius:12px;padding:13px;font-size:13px;line-height:1.5;
+  color:rgba(255,255,255,.62);margin-top:18px}
+.captura b{color:#FF8A45}
+.firma{margin-top:22px;font-size:11.5px;line-height:1.8;color:rgba(255,255,255,.38)}
+.firma b{display:block;color:#fff;font-size:12.5px}
+</style>
+</head>
+<body>
+<div id="wrap">
+
+  <div id="aviso">
+    <b>⚠ Este visor no está ejecutando la cápsula</b>
+    La estás abriendo desde una vista previa (Drive, Gmail, WhatsApp o Archivos) que bloquea el contenido
+    interactivo. Ábrela en Chrome o Safari, o pide el enlace en vez del archivo.
+  </div>
+  <noscript><div style="background:#7A2A18;padding:16px;font-size:14px">Activa JavaScript para hacer la cápsula.</div></noscript>
+
+  <div id="intro" style="display:none">
+    <div class="kick">Fase 5 · Necesidad Resuelta</div>
+    <h1>La libreta</h1>
+    <p class="lead">Mariana va a contarte su historia una sola vez. Al final tendrás que decirle <b>qué es lo que quiere lograr</b>… usando únicamente lo que hayas anotado.</p>
+    <div class="regla"><i>1</i><div><b>Calentamiento:</b> distingue lo que quiere evitar de lo que quiere lograr.</div></div>
+    <div class="regla"><i>2</i><div><b>La libreta:</b> ella habla, tú tocas las palabras que quieras guardar. <b>Solo caben 4.</b></div></div>
+    <div class="regla" style="border-bottom:1px solid rgba(255,255,255,.13)"><i>3</i><div><b>La frase guía:</b> ármala con tus notas. Lo que no anotaste, no existe.</div></div>
+    <label for="nombre">¿Cómo te llamas?</label>
+    <input id="nombre" maxlength="24" placeholder="Tu nombre" autocomplete="off">
+    <button class="btn" id="btnStart" style="margin-top:16px">Empezar</button>
+    <p class="firma">Método Konecta · Fase 5 Necesidad Resuelta<b>Elaborado por Yahir De la Cruz Escobar</b></p>
+  </div>
+
+  <div id="juego" style="display:none">
+    <div id="bar"><div id="etapa">Calentamiento</div><div id="paso">1 / 6</div></div>
+    <div id="escena">
+      <div id="halo"></div>
+      <div id="persona">
+        <img id="fija" alt="">
+      </div>
+      <div id="dice"></div>
+      <div id="tiempo" style="display:none"><i></i></div>
+    </div>
+    <div id="libreta" style="display:none">
+      <div id="libTit">Tu libreta<b id="libNum">0 / 4</b></div>
+      <div class="notas" id="notas"></div>
+    </div>
+    <div id="dock"><div id="tip">—</div><div id="zona"></div></div>
+  </div>
+
+  <div id="fin" style="display:none"></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+var VIDEOS = {};
+var POSTERS = {"abre": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjUwIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjI1MCI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyNTAiIGZpbGw9IiMwRTBFMEUiLz48Y2lyY2xlIGN4PSIxMDAiIGN5PSI2NiIgcj0iODgiIGZpbGw9IiNGMjYwMUEiIG9wYWNpdHk9Ii4wOSIvPjxwYXRoIGQ9Ik0xMDAgMTA0IGMtMjEgMC0zMiAxMi0zNCAzMCBsLTUgNjAgaDc4IGwtNS02MCBjLTItMTgtMTMtMzAtMzQtMzB6IiBmaWxsPSIjRjI2MDFBIi8+PHBhdGggZD0iTTg4IDEwNSBsMTIgMTYgMTItMTYgYy00LTItOC0zLTEyLTNzLTggMS0xMiAzeiIgZmlsbD0iI0Y2RjFFQSIvPjxwYXRoIGQ9Ik02MSAxOTIgaDc4IGwtNCAzNCBoLTcweiIgZmlsbD0iIzE0MTQxNCIvPjxyZWN0IHg9Ijc2IiB5PSIyMjYiIHdpZHRoPSIxMyIgaGVpZ2h0PSIxNiIgcng9IjUiIGZpbGw9IiNFQUI2OEMiLz48cmVjdCB4PSIxMTEiIHk9IjIyNiIgd2lkdGg9IjEzIiBoZWlnaHQ9IjE2IiByeD0iNSIgZmlsbD0iI0VBQjY4QyIvPjxlbGxpcHNlIGN4PSI4MyIgY3k9IjI0MyIgcng9IjExIiByeT0iNiIgZmlsbD0iI0MyNDkwRiIvPjxlbGxpcHNlIGN4PSIxMTgiIGN5PSIyNDMiIHJ4PSIxMSIgcnk9IjYiIGZpbGw9IiNDMjQ5MEYiLz48bGluZSB4MT0iNzAiIHkxPSIxMjQiIHgyPSI1NCIgeTI9IjE2OCIgc3Ryb2tlPSIjQzI0OTBGIiBzdHJva2Utd2lkdGg9IjE1IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48bGluZSB4MT0iMTMwIiB5MT0iMTI0IiB4Mj0iMTUwIiB5Mj0iMTYwIiBzdHJva2U9IiNDMjQ5MEYiIHN0cm9rZS13aWR0aD0iMTUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxjaXJjbGUgY3g9IjUyIiBjeT0iMTc0IiByPSI4IiBmaWxsPSIjRUFCNjhDIi8+PGNpcmNsZSBjeD0iMTU0IiBjeT0iMTY0IiByPSI4IiBmaWxsPSIjRUFCNjhDIi8+PHBhdGggZD0iTTY4IDc2IGMtMiAyNiAyIDQ2IDggNTggNC0yMiAyLTQwIDYtNTJ6IiBmaWxsPSIjMkExRjE4Ii8+PHBhdGggZD0iTTEzMiA3NiBjMiAyNi0yIDQ2LTggNTgtNC0yMi0yLTQwLTYtNTJ6IiBmaWxsPSIjMkExRjE4Ii8+PGVsbGlwc2UgY3g9IjEwMCIgY3k9IjcwIiByeD0iMjYiIHJ5PSIzMCIgZmlsbD0iI0VBQjY4QyIvPjxwYXRoIGQ9Ik0xMTQgNTYgYTI2IDMwIDAgMCAxIDAgNDAgeiIgZmlsbD0iI0QxOUM3MiIgb3BhY2l0eT0iLjI1Ii8+PHBhdGggZD0iTTczIDY0IGMwLTI0IDEyLTM0IDI3LTM0IHMyNyAxMCAyNyAzNCBjLTYtMTQtMTYtMTktMjctMTkgcy0yMSA1LTI3IDE5eiIgZmlsbD0iIzJBMUYxOCIvPjxwYXRoIGQ9Ik05NiAzMiBjMTIgMCAyMiA4IDI2IDIyIC04LTEwLTE4LTE0LTI2LTE0eiIgZmlsbD0iIzNDMkMyMSIvPjxlbGxpcHNlIGN4PSI5MSIgY3k9IjcxIiByeD0iMyIgcnk9IjMuNiIgZmlsbD0iIzE0MTQxNCIvPjxlbGxpcHNlIGN4PSIxMTEiIGN5PSI3MSIgcng9IjMiIHJ5PSIzLjYiIGZpbGw9IiMxNDE0MTQiLz48cGF0aCBkPSJNODUgNjAgcTYgLTQgMTIgLTEgTTEwNSA1OSBxNiAtMyAxMiAxIiBzdHJva2U9IiMyQTFGMTgiIHN0cm9rZS13aWR0aD0iMi40IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNOTMgODMgcTcgNyAxNCAwIiBzdHJva2U9IiMxNDE0MTQiIHN0cm9rZS13aWR0aD0iMi40IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48Y2lyY2xlIGN4PSI4MiIgY3k9Ijc4IiByPSI0LjUiIGZpbGw9IiNGMjYwMUEiIG9wYWNpdHk9Ii4yMiIvPjxjaXJjbGUgY3g9IjEyMCIgY3k9Ijc4IiByPSI0LjUiIGZpbGw9IiNGMjYwMUEiIG9wYWNpdHk9Ii4yMiIvPjwvc3ZnPg==", "piensa": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjUwIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjI1MCI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyNTAiIGZpbGw9IiMwRTBFMEUiLz48Y2lyY2xlIGN4PSIxMDAiIGN5PSI2NiIgcj0iODgiIGZpbGw9IiNGMjYwMUEiIG9wYWNpdHk9Ii4wOSIvPjxwYXRoIGQ9Ik0xMDAgMTA0IGMtMjEgMC0zMiAxMi0zNCAzMCBsLTUgNjAgaDc4IGwtNS02MCBjLTItMTgtMTMtMzAtMzQtMzB6IiBmaWxsPSIjRjI2MDFBIi8+PHBhdGggZD0iTTg4IDEwNSBsMTIgMTYgMTItMTYgYy00LTItOC0zLTEyLTNzLTggMS0xMiAzeiIgZmlsbD0iI0Y2RjFFQSIvPjxwYXRoIGQ9Ik02MSAxOTIgaDc4IGwtNCAzNCBoLTcweiIgZmlsbD0iIzE0MTQxNCIvPjxyZWN0IHg9Ijc2IiB5PSIyMjYiIHdpZHRoPSIxMyIgaGVpZ2h0PSIxNiIgcng9IjUiIGZpbGw9IiNFQUI2OEMiLz48cmVjdCB4PSIxMTEiIHk9IjIyNiIgd2lkdGg9IjEzIiBoZWlnaHQ9IjE2IiByeD0iNSIgZmlsbD0iI0VBQjY4QyIvPjxlbGxpcHNlIGN4PSI4MyIgY3k9IjI0MyIgcng9IjExIiByeT0iNiIgZmlsbD0iI0MyNDkwRiIvPjxlbGxpcHNlIGN4PSIxMTgiIGN5PSIyNDMiIHJ4PSIxMSIgcnk9IjYiIGZpbGw9IiNDMjQ5MEYiLz48bGluZSB4MT0iNzAiIHkxPSIxMjQiIHgyPSI1NCIgeTI9IjE2OCIgc3Ryb2tlPSIjQzI0OTBGIiBzdHJva2Utd2lkdGg9IjE1IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48bGluZSB4MT0iMTMwIiB5MT0iMTI2IiB4Mj0iMTE2IiB5Mj0iMTAwIiBzdHJva2U9IiNDMjQ5MEYiIHN0cm9rZS13aWR0aD0iMTUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxjaXJjbGUgY3g9IjUyIiBjeT0iMTc0IiByPSI4IiBmaWxsPSIjRUFCNjhDIi8+PGNpcmNsZSBjeD0iMTE0IiBjeT0iOTYiIHI9IjkiIGZpbGw9IiNFQUI2OEMiLz48cGF0aCBkPSJNNjggNzYgYy0yIDI2IDIgNDYgOCA1OCA0LTIyIDItNDAgNi01MnoiIGZpbGw9IiMyQTFGMTgiLz48cGF0aCBkPSJNMTMyIDc2IGMyIDI2LTIgNDYtOCA1OC00LTIyLTItNDAtNi01MnoiIGZpbGw9IiMyQTFGMTgiLz48ZWxsaXBzZSBjeD0iMTAwIiBjeT0iNzAiIHJ4PSIyNiIgcnk9IjMwIiBmaWxsPSIjRUFCNjhDIi8+PHBhdGggZD0iTTExNCA1NiBhMjYgMzAgMCAwIDEgMCA0MCB6IiBmaWxsPSIjRDE5QzcyIiBvcGFjaXR5PSIuMjUiLz48cGF0aCBkPSJNNzMgNjQgYzAtMjQgMTItMzQgMjctMzQgczI3IDEwIDI3IDM0IGMtNi0xNC0xNi0xOS0yNy0xOSBzLTIxIDUtMjcgMTl6IiBmaWxsPSIjMkExRjE4Ii8+PHBhdGggZD0iTTk2IDMyIGMxMiAwIDIyIDggMjYgMjIgLTgtMTAtMTgtMTQtMjYtMTR6IiBmaWxsPSIjM0MyQzIxIi8+PGVsbGlwc2UgY3g9Ijg4IiBjeT0iNzEiIHJ4PSIzIiByeT0iMy42IiBmaWxsPSIjMTQxNDE0Ii8+PGVsbGlwc2UgY3g9IjEwOCIgY3k9IjcxIiByeD0iMyIgcnk9IjMuNiIgZmlsbD0iIzE0MTQxNCIvPjxwYXRoIGQ9Ik04NSA1OCBxNiAyIDEyIDAgTTEwNSA2MCBxNiAtNCAxMiAtMSIgc3Ryb2tlPSIjMkExRjE4IiBzdHJva2Utd2lkdGg9IjIuNCIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PHBhdGggZD0iTTk0IDg1IGgxMiIgc3Ryb2tlPSIjMTQxNDE0IiBzdHJva2Utd2lkdGg9IjIuNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PGNpcmNsZSBjeD0iODIiIGN5PSI3OCIgcj0iNC41IiBmaWxsPSIjRjI2MDFBIiBvcGFjaXR5PSIuMjIiLz48Y2lyY2xlIGN4PSIxMjAiIGN5PSI3OCIgcj0iNC41IiBmaWxsPSIjRjI2MDFBIiBvcGFjaXR5PSIuMjIiLz48L3N2Zz4=", "incomoda": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjUwIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjI1MCI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyNTAiIGZpbGw9IiMwRTBFMEUiLz48Y2lyY2xlIGN4PSIxMDAiIGN5PSI2NiIgcj0iODgiIGZpbGw9IiNGMjYwMUEiIG9wYWNpdHk9Ii4wOSIvPjxwYXRoIGQ9Ik0xMDAgMTA0IGMtMjEgMC0zMiAxMi0zNCAzMCBsLTUgNjAgaDc4IGwtNS02MCBjLTItMTgtMTMtMzAtMzQtMzB6IiBmaWxsPSIjRjI2MDFBIi8+PHBhdGggZD0iTTg4IDEwNSBsMTIgMTYgMTItMTYgYy00LTItOC0zLTEyLTNzLTggMS0xMiAzeiIgZmlsbD0iI0Y2RjFFQSIvPjxwYXRoIGQ9Ik02MSAxOTIgaDc4IGwtNCAzNCBoLTcweiIgZmlsbD0iIzE0MTQxNCIvPjxyZWN0IHg9Ijc2IiB5PSIyMjYiIHdpZHRoPSIxMyIgaGVpZ2h0PSIxNiIgcng9IjUiIGZpbGw9IiNFQUI2OEMiLz48cmVjdCB4PSIxMTEiIHk9IjIyNiIgd2lkdGg9IjEzIiBoZWlnaHQ9IjE2IiByeD0iNSIgZmlsbD0iI0VBQjY4QyIvPjxlbGxpcHNlIGN4PSI4MyIgY3k9IjI0MyIgcng9IjExIiByeT0iNiIgZmlsbD0iI0MyNDkwRiIvPjxlbGxpcHNlIGN4PSIxMTgiIGN5PSIyNDMiIHJ4PSIxMSIgcnk9IjYiIGZpbGw9IiNDMjQ5MEYiLz48cGF0aCBkPSJNNjQgMTQwIHEzNiAxNCA3MiAwIGwwIDE2IHEtMzYgMTQtNzIgMHoiIGZpbGw9IiNDMjQ5MEYiLz48cGF0aCBkPSJNNjQgMTU0IHEzNiAxNCA3MiAwIGwwIDE0IHEtMzYgMTItNzIgMHoiIGZpbGw9IiNGMjYwMUEiLz48Y2lyY2xlIGN4PSIxMzgiIGN5PSIxNTAiIHI9IjgiIGZpbGw9IiNFQUI2OEMiLz48Y2lyY2xlIGN4PSI2MiIgY3k9IjE2NCIgcj0iOCIgZmlsbD0iI0VBQjY4QyIvPjxwYXRoIGQ9Ik02OCA3NiBjLTIgMjYgMiA0NiA4IDU4IDQtMjIgMi00MCA2LTUyeiIgZmlsbD0iIzJBMUYxOCIvPjxwYXRoIGQ9Ik0xMzIgNzYgYzIgMjYtMiA0Ni04IDU4LTQtMjItMi00MC02LTUyeiIgZmlsbD0iIzJBMUYxOCIvPjxlbGxpcHNlIGN4PSIxMDAiIGN5PSI3MCIgcng9IjI2IiByeT0iMzAiIGZpbGw9IiNFQUI2OEMiLz48cGF0aCBkPSJNMTE0IDU2IGEyNiAzMCAwIDAgMSAwIDQwIHoiIGZpbGw9IiNEMTlDNzIiIG9wYWNpdHk9Ii4yNSIvPjxwYXRoIGQ9Ik03MyA2NCBjMC0yNCAxMi0zNCAyNy0zNCBzMjcgMTAgMjcgMzQgYy02LTE0LTE2LTE5LTI3LTE5IHMtMjEgNS0yNyAxOXoiIGZpbGw9IiMyQTFGMTgiLz48cGF0aCBkPSJNOTYgMzIgYzEyIDAgMjIgOCAyNiAyMiAtOC0xMC0xOC0xNC0yNi0xNHoiIGZpbGw9IiMzQzJDMjEiLz48ZWxsaXBzZSBjeD0iOTUiIGN5PSI3MSIgcng9IjMiIHJ5PSIzLjYiIGZpbGw9IiMxNDE0MTQiLz48ZWxsaXBzZSBjeD0iMTE1IiBjeT0iNzEiIHJ4PSIzIiByeT0iMy42IiBmaWxsPSIjMTQxNDE0Ii8+PHBhdGggZD0iTTg0IDU3IHE2IDMgMTIgMyBNMTA2IDYwIHE2IC0zIDEyIC0zIiBzdHJva2U9IiMyQTFGMTgiIHN0cm9rZS13aWR0aD0iMi42IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNOTMgODcgcTcgLTYgMTQgMCIgc3Ryb2tlPSIjMTQxNDE0IiBzdHJva2Utd2lkdGg9IjIuNCIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PGNpcmNsZSBjeD0iODIiIGN5PSI3OCIgcj0iNC41IiBmaWxsPSIjRjI2MDFBIiBvcGFjaXR5PSIuMjIiLz48Y2lyY2xlIGN4PSIxMjAiIGN5PSI3OCIgcj0iNC41IiBmaWxsPSIjRjI2MDFBIiBvcGFjaXR5PSIuMjIiLz48L3N2Zz4=", "seva": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjUwIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjI1MCI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyNTAiIGZpbGw9IiMwRTBFMEUiLz48Y2lyY2xlIGN4PSIxMDAiIGN5PSI2NiIgcj0iODgiIGZpbGw9IiNGMjYwMUEiIG9wYWNpdHk9Ii4wOSIvPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKC02LDApIj48cGF0aCBkPSJNOTYgMTA0IGMtMjEgMC0zMiAxMi0zNCAzMCBsLTUgNjAgaDc4IGwtNS02MCBjLTItMTgtMTMtMzAtMzQtMzB6IiBmaWxsPSIjRjI2MDFBIi8+PHBhdGggZD0iTTg0IDEwNSBsMTIgMTYgMTItMTYgYy00LTItOC0zLTEyLTNzLTggMS0xMiAzeiIgZmlsbD0iI0Y2RjFFQSIvPjxwYXRoIGQ9Ik01NyAxOTIgaDc4IGwtNCAzNCBoLTcweiIgZmlsbD0iIzE0MTQxNCIvPjxyZWN0IHg9IjcyIiB5PSIyMjYiIHdpZHRoPSIxMyIgaGVpZ2h0PSIxNiIgcng9IjUiIGZpbGw9IiNFQUI2OEMiLz48cmVjdCB4PSIxMDciIHk9IjIyNiIgd2lkdGg9IjEzIiBoZWlnaHQ9IjE2IiByeD0iNSIgZmlsbD0iI0VBQjY4QyIvPjxlbGxpcHNlIGN4PSI3OSIgY3k9IjI0MyIgcng9IjExIiByeT0iNiIgZmlsbD0iI0MyNDkwRiIvPjxlbGxpcHNlIGN4PSIxMTQiIGN5PSIyNDMiIHJ4PSIxMSIgcnk9IjYiIGZpbGw9IiNDMjQ5MEYiLz48bGluZSB4MT0iMTI2IiB5MT0iMTI2IiB4Mj0iMTQ2IiB5Mj0iMTY2IiBzdHJva2U9IiNDMjQ5MEYiIHN0cm9rZS13aWR0aD0iMTUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxjaXJjbGUgY3g9IjE1MCIgY3k9IjE3MiIgcj0iOCIgZmlsbD0iI0VBQjY4QyIvPjxyZWN0IHg9IjE1MCIgeT0iMTcyIiB3aWR0aD0iMjgiIGhlaWdodD0iMzIiIHJ4PSI0IiBmaWxsPSIjQzI0OTBGIi8+PHBhdGggZD0iTTE1NCAxNzIgYTExIDExIDAgMCAxIDIwIDAiIHN0cm9rZT0iI0MyNDkwRiIgc3Ryb2tlLXdpZHRoPSIzLjUiIGZpbGw9Im5vbmUiLz48cGF0aCBkPSJNNzYgNzYgYy0yIDI2IDIgNDYgOCA1OCA0LTIyIDItNDAgNi01MnoiIGZpbGw9IiMyQTFGMTgiLz48cGF0aCBkPSJNMTQwIDc2IGMyIDI2LTIgNDYtOCA1OC00LTIyLTItNDAtNi01MnoiIGZpbGw9IiMyQTFGMTgiLz48ZWxsaXBzZSBjeD0iMTA4IiBjeT0iNzAiIHJ4PSIyNiIgcnk9IjMwIiBmaWxsPSIjRUFCNjhDIi8+PHBhdGggZD0iTTEyMiA1NiBhMjYgMzAgMCAwIDEgMCA0MCB6IiBmaWxsPSIjRDE5QzcyIiBvcGFjaXR5PSIuMjUiLz48cGF0aCBkPSJNODEgNjQgYzAtMjQgMTItMzQgMjctMzQgczI3IDEwIDI3IDM0IGMtNi0xNC0xNi0xOS0yNy0xOSBzLTIxIDUtMjcgMTl6IiBmaWxsPSIjMkExRjE4Ii8+PHBhdGggZD0iTTEwNCAzMiBjMTIgMCAyMiA4IDI2IDIyIC04LTEwLTE4LTE0LTI2LTE0eiIgZmlsbD0iIzNDMkMyMSIvPjxlbGxpcHNlIGN4PSIxMDYiIGN5PSI3MSIgcng9IjMiIHJ5PSIzLjYiIGZpbGw9IiMxNDE0MTQiLz48ZWxsaXBzZSBjeD0iMTI2IiBjeT0iNzEiIHJ4PSIzIiByeT0iMy42IiBmaWxsPSIjMTQxNDE0Ii8+PHBhdGggZD0iTTkzIDU4IHE2IDIgMTIgMCBNMTEzIDYwIHE2IC00IDEyIC0xIiBzdHJva2U9IiMyQTFGMTgiIHN0cm9rZS13aWR0aD0iMi40IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNMTAxIDg3IHE3IC02IDE0IDAiIHN0cm9rZT0iIzE0MTQxNCIgc3Ryb2tlLXdpZHRoPSIyLjQiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxjaXJjbGUgY3g9IjkwIiBjeT0iNzgiIHI9IjQuNSIgZmlsbD0iI0YyNjAxQSIgb3BhY2l0eT0iLjIyIi8+PGNpcmNsZSBjeD0iMTI4IiBjeT0iNzgiIHI9IjQuNSIgZmlsbD0iI0YyNjAxQSIgb3BhY2l0eT0iLjIyIi8+PC9nPjwvc3ZnPg=="};
+
+/* ============ 1. CALENTAMIENTO ============ */
+var FRASES = [
+ {t:'"Ya no quiero irritarme cada vez que me rasuro"', r:'evitar',
+  w:'Mira al problema y al pasado. Es válido que lo diga, pero tu trabajo es llevarla al otro lado.'},
+ {t:'"Quiero sentir mi piel lisa todo el tiempo"', r:'lograr',
+  w:'Mira al futuro y al beneficio. Esto es lo que buscamos que ella diga con su voz.'},
+ {t:'"Ya no quiero gastar en cera cada mes"', r:'evitar',
+  w:'Habla de dejar de perder algo, no de ganar algo. Todavía está del lado de la molestia.'},
+ {t:'"Quiero resolverlo de una vez y olvidarme"', r:'lograr',
+  w:'Resultado deseado, en positivo. Esta frase es oro: se repite textual al cotizar.'},
+ {t:'"Ya no quiero estar pendiente antes de salir"', r:'evitar',
+  w:'Empieza con "ya no": señal clarísima de que sigue mirando el problema.'},
+ {t:'"Quiero arreglarme sin pensar en el vello"', r:'lograr',
+  w:'Se está imaginando con el problema resuelto. Ese es el objetivo de la fase.'},
+ {t:'"Ya no quiero que me den pena mis piernas"', r:'evitar',
+  w:'La pena es real, pero dicha así sigue siendo lo que quiere evitar.'},
+ {t:'"Quiero volver a ponerme lo que me gusta"', r:'lograr',
+  w:'Concreto y en positivo. Fíjate que no menciona el tratamiento, solo el resultado.'}
+];
+
+/* ============ 2. LA LIBRETA ============
+   [palabra] = tocable. tipo: buena | negativa | prohibida | relleno
+======================================== */
+var HISTORIA = [
+ {t:'Mira, me rasuro [cada tercer día]. Ya hasta es rutina.'},
+ {t:'Me [irrito] muchísimo y me salen unas [bolitas] horribles.'},
+ {t:'En verano ya ni saco los [shorts], me da [pena] que se vean.'},
+ {t:'Y siempre ando [pendiente antes de salir] por si me tengo que rasurar.'},
+ {t:'El otro día compré un [rastrillo carísimo] y ni así me funcionó.'},
+ {t:'Mi prima se hizo [láser] y quedó feliz, por eso vine.'}
+];
+var PALABRAS = {
+ 'cada tercer día':{tipo:'buena',  pieza:'olvidarte de estar rasurándote cada tercer día'},
+ 'irrito':         {tipo:'buena',  pieza:'tener la piel tranquila'},
+ 'shorts':         {tipo:'buena',  pieza:'volver a ponerte lo que te gusta'},
+ 'pena':           {tipo:'buena',  pieza:'sentirte segura cuando sales'},
+ 'pendiente antes de salir':{tipo:'buena', pieza:'arreglarte sin pensar en el vello'},
+ 'bolitas':        {tipo:'negativa', pieza:'que ya no te salgan esas bolitas',
+                    w:'Esa pieza sigue en negativo: habla de lo que quiere que deje de pasar, no de lo que quiere lograr.'},
+ 'rastrillo carísimo':{tipo:'negativa', pieza:'dejar de gastar en rastrillos',
+                    w:'"Dejar de gastar" mira al problema. El giro de esta fase es hacia lo que quiere conseguir.'},
+ 'láser':          {tipo:'prohibida', pieza:'empezar con el láser cuanto antes',
+                    w:'Aquí todavía no se habla de la solución. En esta fase solo se nombra el resultado que ella quiere.'}
+};
+
+/* ============ MOTOR ============ */
+function $(id){ return document.getElementById(id); }
+function ver(id,m){ var e=$(id); if(e) e.style.display = m ? '' : 'none'; }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function revuelve(a){ var b=a.slice(),i,j,x;
+  for(i=b.length-1;i>0;i--){ j=Math.floor(Math.random()*(i+1)); x=b[i]; b[i]=b[j]; b[j]=x; } return b; }
+
+var jugador='', notas=[], apuntes=[], cIdx=0, cAciertos=0, lote=[];
+var hIdx=0, temporizador=null, tecleo=null;
+var huecos=[null,null], pConfirma=0, pRemate=0, bloqueado=false;
+
+/* ---------- personaje ---------- */
+var VIDOK=false, IMGOK=false, actual='';
+function creaPersona(){
+  var k,v,img=$('fija'),soporta=true,cargados=0;
+  if(img && !img.getAttribute('data-listo')){
+    img.setAttribute('data-listo','1');
+    img.onload=function(){ IMGOK=true; revisa(); };
+    img.onerror=function(){ IMGOK=false; revisa(); };
+    img.src=POSTERS['abre'];
+  }
+  for(k in VIDEOS){ if(VIDEOS.hasOwnProperty(k)){
+    v=$('v-'+k);
+    if(!v||!v.canPlayType||!v.canPlayType('video/mp4')){ soporta=false; break; }
+    if(!v.getAttribute('data-listo')){
+      v.setAttribute('data-listo','1');
+      v.onloadeddata=function(){ cargados++; if(cargados>=2) VIDOK=true; revisa(); };
+      v.onerror=function(){ revisa(); };
+      v.onended=(function(el){ return function(){ try{ el.pause(); }catch(e){} }; })(v);
+      v.poster=POSTERS[k]; v.src=VIDEOS[k];
+      try{ v.load(); }catch(e){}
+    }
+  }}
+  if(!soporta) VIDOK=false;
+  setTimeout(revisa,2500); revisa();
+}
+function revisa(){
+  var usaVid=VIDOK, usaImg=!usaVid&&IMGOK;
+  ver('persona', usaVid||usaImg);
+  if(usaImg){ $('fija').className='on'; } else if(usaVid){ $('fija').className=''; }
+}
+function pose(k){
+  if(k===actual) return;
+  actual=k;
+  if(VIDOK){
+    var j,v;
+    for(j in VIDEOS){ if(VIDEOS.hasOwnProperty(j)){
+      v=$('v-'+j);
+      if(j===k){ v.className='on'; try{ v.currentTime=0; var p=v.play(); if(p&&p['catch']) p['catch'](function(){}); }catch(e){} }
+      else v.className='';
+    }}
+  }else if(IMGOK){
+    var im=$('fija'); im.src=POSTERS[k];
+    im.className='on'; void im.offsetWidth; im.className='on cambia';
+  }
+  $('persona').className='respira';
+}
+
+/* ---------- máquina de escribir ---------- */
+function dice(txt, alTerminar, tocable){
+  if(tecleo){ clearInterval(tecleo); tecleo=null; }
+  var caja=$('dice'), i=0, plano=txt.replace(/\[|\]/g,'');
+  caja.innerHTML='';
+  tecleo=setInterval(function(){
+    i++;
+    caja.innerHTML=esc(plano.substring(0,i));
+    if(i>=plano.length){
+      clearInterval(tecleo); tecleo=null;
+      if(tocable) pintaTocables(txt);
+      if(alTerminar) alTerminar();
+    }
+  },20);
+}
+function pintaTocables(txt){
+  var partes=txt.split(/(\[[^\]]+\])/), h='', i, p;
+  for(i=0;i<partes.length;i++){
+    p=partes[i];
+    if(p.charAt(0)==='['){
+      var pal=p.substring(1,p.length-1);
+      h+='<span class="pal'+(yaAnotada(pal)?' ya':'')+'" data-p="'+esc(pal)+'">'+esc(pal)+'</span>';
+    } else h+=esc(p);
+  }
+  $('dice').innerHTML=h;
+  var spans=$('dice').getElementsByTagName('span'), k;
+  for(k=0;k<spans.length;k++){
+    spans[k].onclick=(function(el){ return function(){ anota(el.getAttribute('data-p'), el); }; })(spans[k]);
+  }
+}
+function yaAnotada(p){ return apuntes.join('|').indexOf(p)>=0; }
+function anota(pal, el){
+  if(yaAnotada(pal)) return;
+  if(apuntes.length>=4){ return; }
+  apuntes.push(pal);
+  el.className='pal ya';
+  pintaNotas();
+}
+function pintaNotas(){
+  var h='', i;
+  for(i=0;i<4;i++){
+    h+='<div class="nota"><div class="notaIn'+(apuntes[i]?' llena':'')+'">'+
+       (apuntes[i]?esc(apuntes[i]):'vacío')+'</div></div>';
+  }
+  $('notas').innerHTML=h;
+  $('libNum').innerHTML=apuntes.length+' / 4';
+}
+
+/* ============ ETAPA 1: CALENTAMIENTO ============ */
+function iniciaCalent(){
+  lote=revuelve(FRASES).slice(0,6); cIdx=0; cAciertos=0;
+  ver('juego',true); creaPersona(); pose('abre');
+  ver('libreta',false); ver('tiempo',false);
+  $('etapa').innerHTML='Calentamiento';
+  pintaCalent();
+}
+function pintaCalent(){
+  var f=lote[cIdx];
+  $('paso').innerHTML=(cIdx+1)+' / 6';
+  $('tip').innerHTML='¿Esto mira al problema o al resultado?';
+  dice(f.t);
+  $('zona').innerHTML='<div class="dos">'+
+    '<button type="button" class="izq" data-r="evitar"><span>Quiere<br>EVITAR</span></button>'+
+    '<button type="button" class="der" data-r="lograr"><span>Quiere<br>LOGRAR</span></button></div>';
+  var bs=$('zona').getElementsByTagName('button'), i;
+  for(i=0;i<bs.length;i++) bs[i].onclick=(function(b){ return function(){ respCalent(b); }; })(bs[i]);
+}
+function respCalent(b){
+  var f=lote[cIdx], bien=(b.getAttribute('data-r')===f.r), bs=$('zona').getElementsByTagName('button'), i;
+  for(i=0;i<bs.length;i++) bs[i].disabled=true;
+  if(bien) cAciertos++; else notas.push(f.t+' — '+f.w);
+  var d=document.createElement('div');
+  d.className='fb'; d.style.borderLeftColor=bien?'#3E9C58':'#B5473A';
+  d.innerHTML='<b style="color:'+(bien?'#7BD69A':'#FF8A72')+'">'+(bien?'Correcto':'Era: quiere '+f.r)+'</b><p>'+f.w+'</p>';
+  $('zona').appendChild(d);
+  var n=document.createElement('button');
+  n.className='btn'; n.type='button';
+  n.innerHTML=(cIdx>=5)?'Ahora sí: llega Mariana':'Siguiente';
+  n.onclick=function(){ if(cIdx>=5) iniciaLibreta(); else { cIdx++; pintaCalent(); } };
+  $('zona').appendChild(n);
+}
+
+/* ============ ETAPA 2: LA LIBRETA ============ */
+function iniciaLibreta(){
+  hIdx=0; apuntes=[];
+  $('etapa').innerHTML='La libreta';
+  ver('libreta',true); pintaNotas(); pose('abre');
+  $('zona').innerHTML='';
+  $('tip').innerHTML='Toca las palabras que quieras guardar · solo caben 4';
+  siguienteMensaje();
+}
+function siguienteMensaje(){
+  if(hIdx>=HISTORIA.length){ ver('tiempo',false); iniciaFrase(); return; }
+  $('paso').innerHTML=(hIdx+1)+' / '+HISTORIA.length;
+  ver('tiempo',true);
+  var barra=$('tiempo').getElementsByTagName('i')[0];
+  barra.style.webkitTransition='none'; barra.style.transition='none'; barra.style.width='100%';
+  dice(HISTORIA[hIdx].t, function(){
+    setTimeout(function(){
+      barra.style.webkitTransition='width 7s linear'; barra.style.transition='width 7s linear';
+      barra.style.width='0%';
+    },30);
+    if(temporizador) clearTimeout(temporizador);
+    temporizador=setTimeout(function(){ hIdx++; siguienteMensaje(); }, 7200);
+  }, true);
+}
+
+/* ============ ETAPA 3: LA FRASE GUÍA ============ */
+function piezasDisponibles(){
+  var lista=[], i, p;
+  for(i=0;i<apuntes.length;i++){
+    p=PALABRAS[apuntes[i]];
+    if(p) lista.push({txt:p.pieza, tipo:p.tipo, w:p.w||'', origen:apuntes[i]});
+  }
+  if(lista.length<2) lista.push({txt:'que esto se resuelva pronto', tipo:'vaga',
+    w:'Es tan general que podría ser de cualquier clienta. Sin sus palabras, la frase no la representa.'});
+  return lista;
+}
+function iniciaFrase(){
+  ver('libreta',true);
+  $('etapa').innerHTML='La frase guía';
+  $('paso').innerHTML='Ármala';
+  pose('piensa');
+  huecos=[null,null];
+  dice('Pues… no sé. Yo nada más quiero que ya no sea tanto rollo.', function(){ pintaFrase(); });
+}
+function pintaFrase(){
+  var lista=piezasDisponibles(), h, i;
+  $('tip').innerHTML='Completa la frase con dos piezas de tu libreta';
+  h='<div id="frase">Por lo que me cuentas, lo que buscas es '+
+    '<span class="hueco'+(huecos[0]?' lleno':'')+'">'+(huecos[0]?esc(huecos[0].txt):'_______')+'</span>'+
+    ' y <span class="hueco'+(huecos[1]?' lleno':'')+'">'+(huecos[1]?esc(huecos[1].txt):'_______')+'</span>…</div>';
+  for(i=0;i<lista.length;i++){
+    var usada=(huecos[0]&&huecos[0].txt===lista[i].txt)||(huecos[1]&&huecos[1].txt===lista[i].txt);
+    h+='<button type="button" class="pieza'+(usada?' usada':'')+'" data-i="'+i+'">'+esc(lista[i].txt)+'</button>';
+  }
+  if(huecos[0]&&huecos[1]) h+='<button type="button" class="btn" id="btnCerrar">Ya quedó, ¿cómo la termino?</button>';
+  if(huecos[0]||huecos[1]) h+='<button type="button" class="btn btnGhost" id="btnBorrar">Borrar y volver a armar</button>';
+  $('zona').innerHTML=h;
+  var bs=$('zona').getElementsByTagName('button'), k;
+  for(k=0;k<bs.length;k++){
+    if(bs[k].getAttribute('data-i')!==null && bs[k].getAttribute('data-i')!==undefined && bs[k].className.indexOf('pieza')>=0){
+      bs[k].onclick=(function(idx){ return function(){ ponPieza(lista[idx]); }; })(parseInt(bs[k].getAttribute('data-i'),10));
+    }
+  }
+  if($('btnCerrar')) $('btnCerrar').onclick=cierreFrase;
+  if($('btnBorrar')) $('btnBorrar').onclick=function(){ huecos=[null,null]; pintaFrase(); };
+}
+function ponPieza(p){
+  if(huecos[0]&&huecos[0].txt===p.txt) return;
+  if(huecos[1]&&huecos[1].txt===p.txt) return;
+  if(!huecos[0]) huecos[0]=p; else if(!huecos[1]) huecos[1]=p;
+  pintaFrase();
+}
+function cierreFrase(){
+  $('tip').innerHTML='¿Y cómo la terminas?';
+  $('zona').innerHTML=
+    '<button type="button" class="opt" data-c="0">…y eso es lo que vamos a resolver.</button>'+
+    '<button type="button" class="opt" data-c="1">…¿cierto?</button>'+
+    '<button type="button" class="opt" data-c="2">…así que déjame te explico el programa.</button>';
+  var bs=$('zona').getElementsByTagName('button'), i;
+  for(i=0;i<bs.length;i++) bs[i].onclick=(function(b){ return function(){ eligeCierre(b); }; })(bs[i]);
+}
+function eligeCierre(b){
+  var c=b.getAttribute('data-c'), bs=$('zona').getElementsByTagName('button'), i, txt, col, tit;
+  for(i=0;i<bs.length;i++){ bs[i].disabled=true; if(bs[i]!==b) bs[i].className='opt optDim'; }
+  if(c==='1'){ pConfirma=1.5; b.className='opt optBien';
+    tit='Sí, justo eso'; col='#7BD69A';
+    txt='Pediste confirmación. Sin ese "¿cierto?" estarías afirmando por ella, y eso no cuenta: la fase se cierra cuando ella lo confirma con su voz.';
+    pose('abre'); }
+  else if(c==='0'){ pConfirma=0.5; b.className='opt optMal';
+    tit='Afirmaste por ella'; col='#FF8A72';
+    txt='Suena bien, pero cerraste tú. Sin el "¿cierto?" no tienes su confirmación, y esa confirmación es el permiso para pasar al cierre.';
+    notas.push('Sin el "¿cierto?" estás afirmando por ella y la fase queda sin confirmar.');
+    pose('piensa'); }
+  else { pConfirma=0; b.className='opt optMal';
+    tit='Te fuiste a la solución'; col='#FF8A72';
+    txt='Mencionaste el programa antes de que ella confirmara lo que quiere lograr. Esta fase termina con su frase, no con la tuya.';
+    notas.push('Todavía no se habla del programa: esta fase solo nombra el resultado que ella quiere.');
+    pose('incomoda'); }
+  var d=document.createElement('div');
+  d.className='fb'; d.style.borderLeftColor=(c==='1'?'#3E9C58':'#B5473A');
+  d.innerHTML='<b style="color:'+col+'">'+tit+'</b><p>'+txt+'</p>';
+  $('zona').appendChild(d);
+  if(c==='1') dice('Sí, justo eso. Sería increíble.');
+  var n=document.createElement('button');
+  n.className='btn'; n.type='button'; n.innerHTML='Ver para qué sirvió';
+  n.onclick=remate; $('zona').appendChild(n);
+}
+
+/* ============ ETAPA 4: EL REMATE ============ */
+function remate(){
+  $('etapa').innerHTML='El remate';
+  $('paso').innerHTML='Última';
+  $('tip').innerHTML='La misma cotización, dicha de dos formas';
+  var suFrase = (huecos[0]?huecos[0].txt:'lo que quieres') + ' y ' + (huecos[1]?huecos[1].txt:'estar tranquila');
+  dice('¿Y entonces cuánto sale?');
+  $('zona').innerHTML='<div class="versus">'+
+    '<div class="vs vsA"><b>Sin esta fase</b>"Son 8 sesiones, te queda en tanto."</div>'+
+    '<div class="vs vsB"><b>Con esta fase</b>"Esto es para '+esc(suFrase)+'. Son 8 sesiones."</div></div>'+
+    '<div style="font-size:14px;line-height:1.5;color:rgba(255,255,255,.6);margin-bottom:12px">Es el mismo precio y las mismas sesiones. ¿Qué cambió?</div>'+
+    '<button type="button" class="opt" data-r="1">Que el precio ahora está justificado con algo que ella misma dijo.</button>'+
+    '<button type="button" class="opt" data-r="0">Que suena más largo y más profesional.</button>'+
+    '<button type="button" class="opt" data-r="0">Que ya sabe cuántas sesiones incluye.</button>';
+  var bs=$('zona').getElementsByTagName('button'), i;
+  for(i=0;i<bs.length;i++) bs[i].onclick=(function(b){ return function(){
+    var ok=(b.getAttribute('data-r')==='1'), bb=$('zona').getElementsByTagName('button'), k;
+    for(k=0;k<bb.length;k++){ bb[k].disabled=true; if(bb[k]!==b) bb[k].className='opt optDim'; }
+    b.className='opt '+(ok?'optBien':'optMal');
+    pRemate = ok?1:0;
+    if(!ok) notas.push('Sin esta fase, al cotizar solo tienes datos técnicos. Con ella, tienes una frase suya que hace que el precio se perciba justo.');
+    var d=document.createElement('div');
+    d.className='fb'; d.style.borderLeftColor=(ok?'#3E9C58':'#B5473A');
+    d.innerHTML='<b style="color:'+(ok?'#7BD69A':'#FF8A72')+'">'+(ok?'Exacto':'No era eso')+'</b>'+
+      '<p>El precio no cambió. Lo que cambió es que ahora está sostenido por lo que ella dijo que quiere lograr. Por eso esta fase parece un rodeo y no lo es.</p>';
+    $('zona').appendChild(d);
+    var n=document.createElement('button');
+    n.className='btn'; n.type='button'; n.innerHTML='Ver mi calificación';
+    n.onclick=termina; $('zona').appendChild(n);
+  }; })(bs[i]);
+}
+
+/* ============ CALIFICACIÓN ============ */
+function termina(){
+  if(tecleo){ clearInterval(tecleo); tecleo=null; }
+  if(temporizador){ clearTimeout(temporizador); temporizador=null; }
+  ver('juego',false);
+
+  var pCal = 2*(cAciertos/6);
+  var buenas=0, i, p;
+  for(i=0;i<apuntes.length;i++){ p=PALABRAS[apuntes[i]]; if(p&&p.tipo==='buena') buenas++; }
+  var pLib = 3*(buenas/4); if(pLib>3) pLib=3;
+  var pFra = 0, malas=[];
+  for(i=0;i<2;i++){
+    if(huecos[i] && huecos[i].tipo==='buena') pFra += 1.25;
+    else if(huecos[i]) malas.push(huecos[i]);
+  }
+  for(i=0;i<malas.length;i++) if(malas[i].w) notas.push(malas[i].w);
+  var nota = Math.round(pCal+pLib+pFra+pConfirma+pRemate);
+  if(nota>10) nota=10; if(nota<0) nota=0;
+
+  var titulo, texto;
+  if(nota>=9){ titulo='Escuchaste y lo usaste';
+    texto='Anotaste lo que importaba, armaste la frase con sus palabras en positivo y pediste confirmación. Esa frase es tu mejor argumento al cotizar.'; }
+  else if(nota>=7){ titulo='Bien, con detalles';
+    texto='Tienes la idea. Afina qué anotas: cada espacio de la libreta que gastas en un dato de relleno es una palabra suya que ya no vas a poder usar.'; }
+  else if(nota>=5){ titulo='Te faltó libreta';
+    texto='La frase guía solo se puede armar con lo que ella ya dijo. Si no lo anotaste, terminas inventando algo genérico que no la representa.'; }
+  else { titulo='A repasar';
+    texto='Esta fase es corta pero decisiva: que ella se imagine con el problema resuelto y lo diga con su voz. Vuelve a la presentación y juega otra vez.'; }
+
+  var unicos=[];
+  for(i=0;i<notas.length;i++){ if(unicos.join('|').indexOf(notas[i])<0) unicos.push(notas[i]); }
+  unicos=unicos.slice(0,3);
+
+  var suFrase='Por lo que me cuentas, lo que buscas es '+
+    (huecos[0]?huecos[0].txt:'—')+' y '+(huecos[1]?huecos[1].txt:'—')+
+    (pConfirma===1.5?', ¿cierto?':'.');
+
+  var h='<div class="kick">Tu calificación</div>'+
+    '<div><span class="nota10'+(nota<5?' notaBaja':'')+'">'+nota+'</span><span class="notaDe">de 10</span></div>'+
+    '<h1 style="font-size:26px;margin-top:12px">'+titulo+'</h1>'+
+    '<p class="lead">'+esc(jugador)+', '+texto+'</p>'+
+    '<div class="sect">La frase que armaste</div>'+
+    '<div style="background:#1C1C1C;border-left:3px solid #F2601A;padding:13px;font-size:14.5px;line-height:1.5">'+esc(suFrase)+'</div>'+
+    '<div class="sect">De dónde sale</div>'+
+    '<div class="fila">Calentamiento<b>'+(Math.round(pCal*10)/10)+' / 2</b></div>'+
+    '<div class="fila">Lo que anotaste<b>'+(Math.round(pLib*10)/10)+' / 3</b></div>'+
+    '<div class="fila">Las piezas de la frase<b>'+(Math.round(pFra*10)/10)+' / 2.5</b></div>'+
+    '<div class="fila">Pediste confirmación<b>'+pConfirma+' / 1.5</b></div>'+
+    '<div class="fila" style="border-bottom:1px solid rgba(255,255,255,.13)">El remate<b>'+pRemate+' / 1</b></div>';
+  if(unicos.length){
+    h+='<div class="sect">Para pulir</div>';
+    for(i=0;i<unicos.length;i++) h+='<div class="tip">'+unicos[i]+'</div>';
+  }
+  h+='<div class="captura"><b>Toma captura de esta pantalla</b> y mándala al grupo con tu calificación.</div>'+
+     '<button class="btn" id="btnOtra" style="margin-top:16px">Jugar otra vez</button>'+
+     '<p class="firma">Método Konecta · Fase 5 Necesidad Resuelta<b>Elaborado por Yahir De la Cruz Escobar</b></p>';
+  $('fin').innerHTML=h; ver('fin',true);
+  try{window.scrollTo(0,0);}catch(e){}
+  if($('btnOtra')) $('btnOtra').onclick=function(){ location.reload(); };
+}
+
+/* ============ ARRANQUE ============ */
+ver('aviso',false); ver('intro',true);
+$('btnStart').onclick=function(){
+  try{
+    var v=$('nombre').value;
+    jugador=(v&&v.replace(/^\s+|\s+$/g,''))?v.replace(/^\s+|\s+$/g,''):'Asesora';
+    notas=[]; pConfirma=0; pRemate=0;
+    ver('intro',false); iniciaCalent();
+    try{window.scrollTo(0,0);}catch(e){}
+  }catch(err){
+    var d=document.createElement('div');
+    d.style.cssText='background:#7A2A18;padding:14px;margin-top:14px;border-radius:10px;font-size:13px';
+    d.innerHTML='No se pudo iniciar: '+(err&&err.message?esc(err.message):'error');
+    $('intro').appendChild(d);
+  }
+};
+$('nombre').onkeydown=function(e){ if(e&&e.keyCode===13){ if(e.preventDefault)e.preventDefault(); $('btnStart').onclick(); } };
+})();
+</script>
+</body>
+</html>
