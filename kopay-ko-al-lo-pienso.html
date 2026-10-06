@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0A0A0A">
+<title>KO al "lo pienso" · Fase 6 Cierre</title>
+<style>
+*{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}
+html,body{margin:0;padding:0;background:#000}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  color:#fff;-webkit-text-size-adjust:100%}
+#wrap{max-width:520px;margin:0 auto;background:#0A0A0A;min-height:100%;padding-bottom:30px;overflow:hidden}
+button{font-family:inherit;cursor:pointer;border:0;background:none;color:#fff}
+
+#aviso{background:#7A2A18;padding:16px;font-size:14px;line-height:1.5}
+#aviso b{display:block;font-size:15px;margin-bottom:6px}
+
+/* ---------- marcador ---------- */
+#hud{background:#141414;padding:10px 14px 12px;border-bottom:2px solid #F2601A}
+#hudTop{overflow:hidden;margin-bottom:9px}
+#asalto{float:left;font-size:12px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#F2601A}
+#combo{float:right;font-size:12px;font-weight:bold;color:#FFB27A}
+#vidas{float:right;margin-left:12px;font-size:16px;letter-spacing:2px}
+#barra{height:16px;background:#241B16;border-radius:4px;overflow:hidden;position:relative}
+#vida{height:16px;width:100%;background:#F2601A;
+  -webkit-transition:width .45s cubic-bezier(.2,.9,.3,1), background .4s;
+  transition:width .45s cubic-bezier(.2,.9,.3,1), background .4s}
+#barraTxt{overflow:hidden;font-size:10.5px;color:#8A8077;margin-top:6px}
+#barraTxt span{float:left}#barraTxt i{float:right;font-style:normal}
+
+/* ---------- ring ---------- */
+#ring{position:relative;height:270px;overflow:hidden;
+  background:#13100E;
+  background-image:-webkit-radial-gradient(50% 20%, circle, rgba(242,96,26,.22), rgba(19,16,14,0) 60%);
+  background-image:radial-gradient(circle at 50% 20%, rgba(242,96,26,.22), rgba(19,16,14,0) 60%)}
+.cuerda{position:absolute;left:0;right:0;height:4px;background:#3A2C23}
+.poste{position:absolute;top:0;width:10px;height:150px;background:#2A2018}
+#lona{position:absolute;left:0;right:0;bottom:0;height:86px;background:#1D1713;border-top:4px solid #2F251E}
+#costal{position:absolute;left:50%;top:26px;width:150px;margin-left:-75px;text-align:center;
+  -webkit-transform-origin:50% 0%;transform-origin:50% 0%;
+  -webkit-animation:colgar 3.2s ease-in-out infinite;animation:colgar 3.2s ease-in-out infinite}
+@-webkit-keyframes colgar{0%,100%{-webkit-transform:rotate(-2.5deg)}50%{-webkit-transform:rotate(2.5deg)}}
+@keyframes colgar{0%,100%{transform:rotate(-2.5deg)}50%{transform:rotate(2.5deg)}}
+#cadena{width:4px;height:22px;background:#6B5B4E;margin:0 auto}
+#saco{background:#F2601A;border-radius:18px 18px 26px 26px;padding:18px 12px 22px;
+  box-shadow:inset -14px 0 0 rgba(0,0,0,.18), 0 10px 26px rgba(0,0,0,.5)}
+#saco p{font-size:17px;font-weight:bold;line-height:1.2;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.25)}
+#saco small{display:block;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#FFD9C4;margin-bottom:8px}
+#costal.golpe{-webkit-animation:golpe .45s;animation:golpe .45s}
+@-webkit-keyframes golpe{0%{-webkit-transform:translateX(0)}25%{-webkit-transform:translateX(26px) rotate(7deg)}
+  60%{-webkit-transform:translateX(-14px) rotate(-5deg)}100%{-webkit-transform:translateX(0)}}
+@keyframes golpe{0%{transform:translateX(0)}25%{transform:translateX(26px) rotate(7deg)}
+  60%{transform:translateX(-14px) rotate(-5deg)}100%{transform:translateX(0)}}
+#costal.ko{-webkit-animation:ko 1.1s forwards;animation:ko 1.1s forwards}
+@-webkit-keyframes ko{100%{-webkit-transform:translateY(150px) rotate(78deg);opacity:.25}}
+@keyframes ko{100%{transform:translateY(150px) rotate(78deg);opacity:.25}}
+.guante{position:absolute;bottom:4px;width:84px;height:84px;border-radius:50% 50% 44% 44%;
+  background:#C2490F;box-shadow:inset -10px -8px 0 rgba(0,0,0,.22);
+  -webkit-transition:-webkit-transform .18s;transition:transform .18s}
+.guante:after{content:"";position:absolute;left:14px;bottom:10px;width:56px;height:10px;background:rgba(0,0,0,.18);border-radius:6px}
+#gi{left:14px}#gd{right:14px}
+#gi.pega{-webkit-animation:pegaI .4s;animation:pegaI .4s}
+#gd.pega{-webkit-animation:pegaD .4s;animation:pegaD .4s}
+@-webkit-keyframes pegaI{40%{-webkit-transform:translate(70px,-120px) scale(1.5)}}
+@keyframes pegaI{40%{transform:translate(70px,-120px) scale(1.5)}}
+@-webkit-keyframes pegaD{40%{-webkit-transform:translate(-70px,-120px) scale(1.5)}}
+@keyframes pegaD{40%{transform:translate(-70px,-120px) scale(1.5)}}
+#dano{position:absolute;left:50%;top:70px;margin-left:-60px;width:120px;text-align:center;
+  font-size:40px;font-weight:bold;color:#FFD9C4;text-shadow:0 3px 0 #8A2E06;opacity:0}
+#dano.go{-webkit-animation:sube .9s ease-out;animation:sube .9s ease-out}
+@-webkit-keyframes sube{0%{opacity:1;-webkit-transform:translateY(0) scale(.6)}30%{-webkit-transform:translateY(-10px) scale(1.2)}100%{opacity:0;-webkit-transform:translateY(-52px)}}
+@keyframes sube{0%{opacity:1;transform:translateY(0) scale(.6)}30%{transform:translateY(-10px) scale(1.2)}100%{opacity:0;transform:translateY(-52px)}}
+#flash{position:absolute;left:0;top:0;right:0;bottom:0;background:#F2601A;opacity:0;pointer-events:none}
+#flash.go{-webkit-animation:flash .35s;animation:flash .35s}
+@-webkit-keyframes flash{0%{opacity:.5}100%{opacity:0}}
+@keyframes flash{0%{opacity:.5}100%{opacity:0}}
+#ring.recibe{-webkit-animation:temblor .45s;animation:temblor .45s}
+@-webkit-keyframes temblor{20%{-webkit-transform:translateX(-10px)}45%{-webkit-transform:translateX(10px)}70%{-webkit-transform:translateX(-6px)}}
+@keyframes temblor{20%{transform:translateX(-10px)}45%{transform:translateX(10px)}70%{transform:translateX(-6px)}}
+#grito{position:absolute;left:12px;right:12px;bottom:96px;text-align:center;font-size:13px;font-style:italic;
+  color:#FFB27A;min-height:18px}
+
+/* ---------- preguntas ---------- */
+#dock{padding:14px 14px 8px}
+#tip{overflow:hidden;margin-bottom:10px}
+#tipT{float:left;font-size:11px;font-weight:bold;letter-spacing:1.5px;text-transform:uppercase;color:#8A8077}
+#reloj{float:right;font-size:13px;font-weight:bold;color:#F2601A}
+#reloj.rush{color:#FF7A5E}
+.opt{display:block;width:100%;text-align:left;background:#1A1512;border:1px solid #2E251F;
+  border-left:4px solid #3A2C23;border-radius:4px 14px 14px 4px;padding:14px;margin-bottom:9px;
+  font-size:15px;line-height:1.4;color:#fff;min-height:56px}
+.optPick{border-left-color:#F2601A;background:#241711}
+.optBien{border-left-color:#3E9C58;background:#16301F}
+.optMal{border-left-color:#C0392B;background:#2E1613}
+.optDim{opacity:.32}
+.fb{border-left:4px solid #8A8077;background:#1A1512;padding:13px 14px;margin-bottom:11px;border-radius:0 10px 10px 0}
+.fb b{display:block;font-size:12px;font-weight:bold;margin-bottom:5px}
+.fb p{margin:0;font-size:14px;line-height:1.5;color:rgba(255,255,255,.7)}
+.btn{display:block;width:100%;background:#F2601A;color:#fff;border-radius:12px;padding:16px;font-size:16px;
+  font-weight:bold;text-align:center;margin-bottom:9px}
+.btnG{background:#1A1512;border:1px solid #2E251F}
+#mute{display:block;width:100%;text-align:center;font-size:11px;color:#6B625A;padding:6px}
+
+/* ---------- pantallas ---------- */
+#intro,#fin,#entre{padding:26px 20px 30px}
+.kick{font-size:11.5px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#F2601A;margin-bottom:10px}
+h1{font-size:38px;line-height:1.05;margin:0 0 12px}
+.lead{font-size:15px;line-height:1.55;color:rgba(255,255,255,.62);margin:0 0 16px}
+.lead b{color:#fff}
+.regla{border-top:1px solid rgba(255,255,255,.12);padding:12px 0;font-size:13.5px;line-height:1.5;
+  color:rgba(255,255,255,.62);overflow:hidden}
+.regla i{float:left;width:26px;font-style:normal}
+.regla div{margin-left:30px}.regla b{color:#fff}
+label{display:block;font-size:13px;color:rgba(255,255,255,.62);margin:20px 0 8px}
+#nombre{width:100%;padding:15px;background:#1A1512;border:1px solid #2E251F;border-radius:12px;
+  font-family:inherit;font-size:16px;font-weight:bold;color:#fff}
+.nota{font-size:74px;font-weight:bold;color:#F2601A;line-height:1}
+.notaBaja{color:#9A938C}
+.notaDe{font-size:15px;color:rgba(255,255,255,.6);margin-left:8px}
+.fila{border-top:1px solid rgba(255,255,255,.12);padding:11px 0;font-size:13.5px;color:rgba(255,255,255,.62);overflow:hidden}
+.fila b{float:right;color:#fff}
+.sect{font-size:11.5px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#F2601A;margin:20px 0 10px}
+.tip2{font-size:13px;line-height:1.5;color:rgba(255,255,255,.62);border-left:2px solid #2E251F;padding-left:12px;margin-bottom:10px}
+.captura{border:2px dashed #F2601A;border-radius:12px;padding:13px;font-size:13px;line-height:1.5;
+  color:rgba(255,255,255,.62);margin-top:18px}
+.captura b{color:#FFB27A}
+.firma{margin-top:22px;font-size:11.5px;line-height:1.8;color:rgba(255,255,255,.38)}
+.firma b{display:block;color:#fff;font-size:12.5px}
+</style>
+</head>
+<body>
+<div id="wrap">
+
+  <div id="aviso">
+    <b>⚠ Este visor no está ejecutando la cápsula</b>
+    La estás abriendo desde una vista previa (Drive, Gmail, WhatsApp o Archivos) que bloquea el contenido
+    interactivo. Ábrela en Chrome o Safari, o pide el enlace en vez del archivo.
+  </div>
+  <noscript><div style="background:#7A2A18;padding:16px;font-size:14px">Activa JavaScript para hacer la cápsula.</div></noscript>
+
+  <div id="intro" style="display:none">
+    <div class="kick">Fase 6 de 6 · Cierre</div>
+    <h1>KO al<br>“lo pienso”</h1>
+    <p class="lead">Tres asaltos contra las objeciones de Laura. <b>Ojo: no peleas contra ella, peleas contra el “no”.</b> Cada respuesta correcta es un golpe; cada error, uno que recibes tú.</p>
+    <div class="regla"><i>🥊</i><div>Respuesta correcta = <b>golpe</b>. Tres golpes buenos tumban la objeción.</div></div>
+    <div class="regla"><i>💢</i><div>Error o tiempo agotado = <b>te pegan</b>. Tienes 3 de aguante.</div></div>
+    <div class="regla" style="border-bottom:1px solid rgba(255,255,255,.12)"><i>⭐</i><div>Tres aciertos seguidos = <b>golpe estrella</b>, daño doble.</div></div>
+    <label for="nombre">¿Cómo te llamas?</label>
+    <input id="nombre" maxlength="24" placeholder="Tu nombre" autocomplete="off">
+    <button class="btn" id="btnStart" style="margin-top:16px">Suena la campana</button>
+    <p class="firma">Método Konecta · Fase 6 Cierre<b>Elaborado por Yahir de la Cruz y Heidy Alvidrez</b></p>
+  </div>
+
+  <div id="juego" style="display:none">
+    <div id="hud">
+      <div id="hudTop"><div id="asalto">Asalto 1 de 3</div><div id="vidas">♥♥♥</div><div id="combo"></div></div>
+      <div id="barra"><div id="vida"></div></div>
+      <div id="barraTxt"><span id="nombreObj">La objeción</span><i id="pct">100%</i></div>
+    </div>
+    <div id="ring">
+      <div class="cuerda" style="top:34px"></div><div class="cuerda" style="top:76px"></div><div class="cuerda" style="top:118px"></div>
+      <div class="poste" style="left:0"></div><div class="poste" style="right:0"></div>
+      <div id="lona"></div>
+      <div id="costal"><div id="cadena"></div><div id="saco"><small>La objeción</small><p id="sacoTxt">—</p></div></div>
+      <div class="guante" id="gi"></div><div class="guante" id="gd"></div>
+      <div id="dano">-35</div><div id="flash"></div>
+      <div id="grito"></div>
+    </div>
+    <div id="dock">
+      <div id="tip"><div id="tipT">¿Qué le contestas?</div><div id="reloj">12</div></div>
+      <div id="zona"></div>
+      <button id="mute">🔊 sonido</button>
+    </div>
+  </div>
+
+  <div id="entre" style="display:none"></div>
+  <div id="fin" style="display:none"></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+function $(id){ return document.getElementById(id); }
+function ver(id,m){ var e=$(id); if(e) e.style.display = m ? '' : 'none'; }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function revuelve(a){ var b=a.slice(),i,j,x; for(i=b.length-1;i>0;i--){ j=Math.floor(Math.random()*(i+1)); x=b[i]; b[i]=b[j]; b[j]=x; } return b; }
+
+/* ===================== CONTENIDO ===================== */
+var ASALTOS=[
+{ obj:'“Se me hace algo caro”', nota:'Primera objeción · escalón 1: cierre buscando el NO',
+  preguntas:[
+  {q:'Laura acaba de decir que le gusta pero se le hace caro. Primer golpe:',
+   opts:[
+   {t:'“Te entiendo. Más que el gasto, es dejar de batallar cada mes. ¿Hay algo más que te haga dudar aparte del precio?”', ok:true,
+    w:'Validas, rediriges al valor y cierras buscando el “no”. Así confirmas si el precio es la verdadera razón.'},
+   {t:'“Es que el láser cuesta eso porque el equipo es de alta tecnología.”',
+    w:'Justificar el precio confirma que es caro. La atención tiene que volver al valor, no a la máquina.'},
+   {t:'“Te dejo el cupón de axilas en $149.”',
+    w:'Te saltaste hasta el cuarto escalón en la primera objeción y regalaste margen. El cupón se juega al final.'},
+   {t:'“Está bien, piénsalo y me avisas.”',
+    w:'Soltaste la venta al primer “no”. Una objeción no termina la venta: abre otra oportunidad para cerrar.'}]},
+  {q:'Ella contesta: “No, nada más el precio.” Segundo golpe:',
+   opts:[
+   {t:'“Perfecto, entonces es solo cuadrar la inversión. ¿Te lo aparto hoy?”', ok:true,
+    w:'Escalón 2: cierre buscando el “sí”. Confirmaste que no hay otro freno y volviste a invitar a decidir.'},
+   {t:'“¿Y de cuánto dispones? Vemos qué te alcanza.”',
+    w:'Bajar el programa al primer freno tira el valor que ya construiste. Primero se agotan los cierres.'},
+   {t:'“Ándale, aprovecha que hoy es el último día.”',
+    w:'Urgencia inventada. Konecta nunca es presión: la decisión se guía, no se empuja.'},
+   {t:'“Sale, cualquier cosa aquí andamos.”',
+    w:'Sin pregunta no hay cierre. Todos los escalones terminan invitando a decidir.'}]},
+  {q:'Antes de seguir, ¿cómo le presentaste el precio?',
+   opts:[
+   {t:'Beneficio emocional, precio regular, precio con descuento y CTA.', ok:true,
+    w:'Ese es el orden de una cotización con valor. El precio llega envuelto en lo que ella gana.'},
+   {t:'Precio con descuento primero, para que se vea barato.',
+    w:'Sin el precio regular, el descuento no se percibe como ventaja y el valor se pierde.'},
+   {t:'“¿Te lo cotizo?” y luego el precio.',
+    w:'“¿Te lo cotizo?” le permite decirte que no. Mejor: “¿te cotizo solo axilas y bikini, o te doy el paquete con bigote?”.'},
+   {t:'Solo el total, para no marearla.',
+    w:'Un número solo se compara con el de enfrente. El beneficio es lo que hace que el precio tenga sentido.'}]}]},
+
+{ obj:'“Lo voy a pensar”', nota:'Escalón 3 · Garantía Kopay y CTA que guía',
+  preguntas:[
+  {q:'Te suelta el clásico “déjame lo pienso”. Golpe:',
+   opts:[
+   {t:'“Claro. Tu programa incluye la Garantía Kopay: si al terminar te falta, lo respaldamos. ¿Lo dejamos apartado?”', ok:true,
+    w:'Escalón 3: la garantía respalda la decisión sin costarte margen, y cierras otra vez con pregunta.'},
+   {t:'“Va, aquí te espero cuando lo decidas.”',
+    w:'Ese “lo pienso” sin fecha es justo lo que la fase busca evitar.'},
+   {t:'“¿Qué te detiene? ¿No confías en nosotros?”',
+    w:'Confrontas y la pones a la defensiva. Nunca se contradice a la clienta.'},
+   {t:'“Te doy el cupón de $149 y la garantía juntos.”',
+    w:'Dos cartas de golpe. Cada escalón tiene su momento; juntarlos te deja sin nada para después.'}]},
+  {q:'Se queda pensando. Toca el llamado a la acción:',
+   opts:[
+   {t:'“Tengo disponibilidad el miércoles y el viernes, ¿cuál te funciona mejor?”', ok:true,
+    w:'El CTA da dos opciones concretas y cierra la puerta a posponer.'},
+   {t:'“¿Qué día te agendamos?”',
+    w:'Deja la decisión en el aire. El CTA propone, no pregunta al vacío.'},
+   {t:'“¿Cómo la ves?”',
+    w:'Esa pregunta invita a posponer. Corto, claro, amable y con acción concreta: apartar, agendar, pagar, decidir.'},
+   {t:'“Si quieres lo vemos después.”',
+    w:'Le facilitaste posponerlo tú misma.'}]},
+  {q:'Dice que lo tiene que consultar con su pareja. Golpe:',
+   opts:[
+   {t:'“Claro que sí. Te lo aparto hoy con el anticipo y si no procede, lo vemos. ¿Te parece?”', ok:true,
+    w:'Validas, no la contradices y vuelves a cerrar con una acción concreta y reversible.'},
+   {t:'“Pero la decisión es tuya, es tu cuerpo.”',
+    w:'La confrontas y la incomodas. Validar primero, siempre.'},
+   {t:'“Ok, cuando hablen me avisan.”',
+    w:'Otra vez sin fecha ni siguiente paso. Toda objeción termina en CTA.'},
+   {t:'“Mejor te mando todo por WhatsApp y ahí lo ven.”',
+    w:'Mandar la info y esperar no es cerrar. Primero el apartado, luego el detalle.'}]}]},
+
+{ obj:'“En otro lado me lo dan más barato”', nota:'Escalón 4 y 5 · cupón, señales y felicitar',
+  preguntas:[
+  {q:'Compara con otra clínica. Golpe:',
+   opts:[
+   {t:'“Te entiendo. Aquí tu programa va por objetivo y trae la Garantía Kopay. ¿Lo dejamos apartado hoy?”', ok:true,
+    w:'Rediriges al valor y al respaldo, sin hablar mal de nadie, y cierras con pregunta.'},
+   {t:'“Sí, pero ahí el equipo no es el mismo y luego no funciona.”',
+    w:'Hablar mal de la competencia la pone a la defensiva y no agrega valor a lo tuyo.'},
+   {t:'“Te igualo el precio, dime cuánto te daban.”',
+    w:'Igualar precio destruye el valor del programa y te deja compitiendo solo por barato.'},
+   {t:'“Pues si te conviene más allá, adelante.”',
+    w:'Te rendiste. Cada “no” es la entrada al siguiente escalón.'}]},
+  {q:'“Mejor espero otra promoción.” Última carta antes de la puerta:',
+   opts:[
+   {t:'“Hoy puedo dejarte el cupón de axilas en $149 para que empieces. ¿Te lo aparto?”', ok:true,
+    w:'Escalón 4: ahora sí el cupón, después de agotar los anteriores. Y termina en pregunta, como todos.'},
+   {t:'“Esta promoción ya no va a volver.”',
+    w:'Urgencia inventada otra vez. Rompe la confianza que llevas construida.'},
+   {t:'“Va, cuando salga otra te aviso.”',
+    w:'Te fuiste a la puerta abierta sin jugar el cupón. Todavía tenías una carta.'},
+   {t:'“¿Entonces sí o no?”',
+    w:'Suena a ultimátum y la empuja al no. El CTA es amable.'}]},
+  {q:'Laura dice que sí y aparta su programa. Golpe final:',
+   opts:[
+   {t:'“¡Felicidades! Vas a tener más tiempo para ti y menos preocupación por el vello.”', ok:true,
+    w:'No damos las gracias: felicitamos. Así no se va con la duda de si tomó una buena decisión.'},
+   {t:'“Muchas gracias por tu compra, de verdad te lo agradezco.”',
+    w:'Agradecer pone el favor de tu lado. Felicitar le confirma que invirtió en ella misma.'},
+   {t:'“Perfecto, ya quedó. Nos vemos el viernes.”',
+    w:'Cerraste el trámite pero no reforzaste la decisión. Ahí aparece el arrepentimiento.'},
+   {t:'“Verás que no te vas a arrepentir.”',
+    w:'Mencionar el arrepentimiento siembra justo esa duda.'}]}]}
+];
+var GRITOS_BIEN=['¡Entró limpio!','¡La tambaleaste!','¡Golpe sólido!','¡Así se cierra!'];
+var GRITOS_MAL=['La objeción se reacomoda…','Se te escapó y contragolpea.','Te agarró mal parada.'];
+
+/* ===================== MOTOR ===================== */
+var jugador='', aIdx=0, qIdx=0, vidaObj=100, aguante=3, combo=0, aciertos=0, total=0, fallos=[], koAsaltos=0;
+var bloqueado=false, reloj=null, tLeft=12, sonido=true, AC=null;
+var TOTALQ=0, i0;
+for(i0=0;i0<ASALTOS.length;i0++) TOTALQ+=ASALTOS[i0].preguntas.length;
+
+function audio(){ if(!AC){ try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return AC; }
+function ruido(dur,freq,tipo,vol){
+  if(!sonido) return; var a=audio(); if(!a) return;
+  try{ var o=a.createOscillator(), g=a.createGain();
+    o.type=tipo||'square'; o.frequency.value=freq; g.gain.value=vol||0.06;
+    o.connect(g); g.connect(a.destination); var t=a.currentTime;
+    g.gain.exponentialRampToValueAtTime(0.001,t+dur); o.start(t); o.stop(t+dur);
+  }catch(e){}
+}
+function sGolpe(){ ruido(.09,160,'square',.09); setTimeout(function(){ruido(.07,90,'triangle',.08);},60); }
+function sRecibe(){ ruido(.22,70,'sawtooth',.09); }
+function sCampana(){ ruido(.5,880,'sine',.07); setTimeout(function(){ruido(.6,660,'sine',.06);},180); }
+function sKO(){ ruido(.5,330,'sine',.08); setTimeout(function(){ruido(.7,220,'sine',.07);},200); }
+
+function pintaHUD(){
+  var a=ASALTOS[aIdx];
+  $('asalto').innerHTML='Asalto '+(aIdx+1)+' de 3';
+  $('vidas').innerHTML = new Array(aguante+1).join('♥') + '<span style="opacity:.25">'+new Array(4-aguante).join('♥')+'</span>';
+  $('combo').innerHTML = combo>=2 ? ('🔥 combo x'+combo) : '';
+  var v=Math.max(0,vidaObj);
+  $('vida').style.width=v+'%';
+  $('vida').style.background = v>60 ? '#F2601A' : (v>30 ? '#E0892C' : '#C0392B');
+  $('pct').innerHTML=v+'%';
+  $('nombreObj').innerHTML=a.obj;
+  $('sacoTxt').innerHTML=a.obj;
+}
+function grito(t){ $('grito').innerHTML=esc(t); }
+
+function cuenta(activa){
+  if(reloj){ clearInterval(reloj); reloj=null; }
+  var r=$('reloj');
+  if(!activa){ r.className=''; return; }
+  tLeft=12; r.innerHTML=tLeft; r.className='';
+  reloj=setInterval(function(){
+    tLeft--; r.innerHTML=Math.max(0,tLeft);
+    if(tLeft<=4) r.className='rush';
+    if(tLeft<=0){ clearInterval(reloj); reloj=null; seTardo(); }
+  },1000);
+}
+function seTardo(){
+  if(bloqueado) return; bloqueado=true;
+  var bs=$('zona').getElementsByTagName('button'), k;
+  for(k=0;k<bs.length;k++) bs[k].disabled=true;
+  recibeGolpe('Te quedaste callada y el silencio hizo el trabajo del “no”.', 'Se te fue el tiempo');
+}
+
+function pregunta(){
+  bloqueado=false;
+  var a=ASALTOS[aIdx], p=a.preguntas[qIdx], z=$('zona'), i;
+  pintaHUD();
+  $('tipT').innerHTML=esc(p.q);
+  grito(a.nota);
+  z.innerHTML='';
+  var ops=revuelve(p.opts);
+  for(i=0;i<ops.length;i++){
+    (function(o){
+      var b=document.createElement('button'); b.className='opt'; b.type='button'; b.innerHTML=esc(o.t);
+      b.onclick=function(){ if(bloqueado) return; responde(o,b); };
+      z.appendChild(b);
+    })(ops[i]);
+  }
+  cuenta(true);
+}
+function responde(o,b){
+  bloqueado=true; cuenta(false);
+  var bs=$('zona').getElementsByTagName('button'), k;
+  for(k=0;k<bs.length;k++){ bs[k].disabled=true; if(bs[k]!==b) bs[k].className='opt optDim'; }
+  b.className='opt '+(o.ok?'optBien':'optMal');
+  total++;
+  if(o.ok){ pega(o.w); } else { fallos.push(o.w); recibeGolpe(o.w,'Fallaste el golpe'); }
+}
+function pega(w){
+  aciertos++; combo++;
+  var critico = (combo>0 && combo%3===0);
+  var dmg = critico ? 70 : 35;
+  vidaObj -= dmg; if(vidaObj<0) vidaObj=0;
+  var g = (combo%2===0) ? $('gd') : $('gi');
+  g.className='guante pega'; setTimeout(function(){ g.className='guante'; }, 420);
+  var c=$('costal'); c.className=''; setTimeout(function(){ c.className='golpe'; }, 10);
+  var dn=$('dano'); dn.innerHTML='-'+dmg; dn.className=''; setTimeout(function(){ dn.className='go'; }, 10);
+  var fl=$('flash'); fl.className=''; setTimeout(function(){ fl.className='go'; }, 10);
+  sGolpe();
+  grito(critico ? '⭐ ¡GOLPE ESTRELLA! daño doble' : GRITOS_BIEN[Math.floor(Math.random()*GRITOS_BIEN.length)]);
+  pintaHUD();
+  setTimeout(function(){ feedback(true, critico?'Golpe estrella':'Golpe limpio', w); }, 520);
+}
+function recibeGolpe(w, titulo){
+  combo=0; aguante--;
+  var r=$('ring'); r.className=''; setTimeout(function(){ r.className='recibe'; }, 10);
+  sRecibe();
+  grito(GRITOS_MAL[Math.floor(Math.random()*GRITOS_MAL.length)]);
+  pintaHUD();
+  setTimeout(function(){
+    if(aguante<=0){ return termina(false); }
+    feedback(false, titulo, w);
+  }, 520);
+}
+function feedback(bien, titulo, texto){
+  var z=$('zona'); z.innerHTML='';
+  var d=document.createElement('div');
+  d.className='fb'; d.style.borderLeftColor = bien ? '#3E9C58' : '#C0392B';
+  d.innerHTML='<b style="color:'+(bien?'#7BD69A':'#FF8A72')+'">'+titulo+'</b><p>'+texto+'</p>';
+  z.appendChild(d);
+  var ko = (vidaObj<=0);
+  var ultimaDelAsalto = (qIdx>=ASALTOS[aIdx].preguntas.length-1);
+  var n=document.createElement('button'); n.className='btn'; n.type='button';
+  n.innerHTML = ko ? '¡KO! Siguiente asalto' : (ultimaDelAsalto ? 'Termina el asalto' : 'Siguiente golpe');
+  n.onclick=function(){
+    if(ko || ultimaDelAsalto){ cierraAsalto(ko); return; }
+    qIdx++; pregunta();
+  };
+  z.appendChild(n);
+}
+function cierraAsalto(ko){
+  if(ko) { koAsaltos++; sKO();
+    var c=$('costal'); c.className='ko';
+  }
+  if(aIdx>=ASALTOS.length-1){ return termina(true); }
+  var h='<div class="kick">'+(ko?'KO en el asalto '+(aIdx+1):'Fin del asalto '+(aIdx+1))+'</div>'+
+    '<h1 style="font-size:30px">'+(ko?'Tumbaste esa objeción':'Esa objeción sigue de pie')+'</h1>'+
+    '<p class="lead">'+(ko?'Pero Laura tiene otra guardada. ':'Aguantó los golpes. ')+
+    'Siguiente rival: <b>'+esc(ASALTOS[aIdx+1].obj)+'</b></p>'+
+    '<div class="regla">'+'<i>♥</i><div>Aguante: <b>'+aguante+' de 3</b></div></div>'+
+    '<div class="regla" style="border-bottom:1px solid rgba(255,255,255,.12)"><i>🥊</i><div>Golpes acertados: <b>'+aciertos+' de '+total+'</b></div></div>'+
+    '<button class="btn" id="sigue" style="margin-top:16px">Suena la campana</button>';
+  $('entre').innerHTML=h; ver('juego',false); ver('entre',true);
+  try{window.scrollTo(0,0);}catch(e){}
+  $('sigue').onclick=function(){
+    ver('entre',false); ver('juego',true);
+    aIdx++; qIdx=0; vidaObj=100;
+    $('costal').className='';
+    sCampana(); pregunta();
+  };
+}
+
+function termina(sobrevivio){
+  cuenta(false);
+  ver('juego',false);
+  var pGolpes = 7*(aciertos/TOTALQ);
+  var pAguante = sobrevivio ? 3*(Math.max(0,aguante)/3) : 0;
+  var nota = Math.round(pGolpes+pAguante); if(nota>10) nota=10; if(nota<0) nota=0;
+  var titulo, texto;
+  if(!sobrevivio){ titulo='Te fuiste a la lona';
+    texto='Tres errores y la objeción ganó. Recuerda: valida, redirige y vuelve a cerrar, un escalón a la vez.'; }
+  else if(nota>=9){ titulo='KO técnico perfecto';
+    texto='Tumbaste las tres objeciones sin justificar precio, sin igualar y sin regalar el cupón antes de tiempo.'; }
+  else if(nota>=7){ titulo='Ganaste por decisión';
+    texto='Llevaste a Laura a decidir. Cuida las cartas que juegas antes de tiempo: cada una que gastas es una que ya no tienes.'; }
+  else { titulo='Aguantaste los tres asaltos';
+    texto='Sobreviviste, pero con muchos golpes recibidos. Repasa la escalera de cierres: cada “no” te acerca a un “sí”.'; }
+  var unicos=[], i;
+  for(i=0;i<fallos.length;i++){ if(unicos.join('|').indexOf(fallos[i])<0) unicos.push(fallos[i]); }
+  unicos=unicos.slice(0,3);
+  var h='<div class="kick">Tarjeta de los jueces</div>'+
+    '<div><span class="nota'+(nota<5?' notaBaja':'')+'">'+nota+'</span><span class="notaDe">de 10</span></div>'+
+    '<h1 style="font-size:28px;margin-top:12px">'+titulo+'</h1>'+
+    '<p class="lead">'+esc(jugador)+', '+texto+'</p>'+
+    '<div class="sect">La pelea</div>'+
+    '<div class="fila">Golpes acertados<b>'+aciertos+' / '+TOTALQ+'</b></div>'+
+    '<div class="fila">Objeciones noqueadas<b>'+koAsaltos+' / 3</b></div>'+
+    '<div class="fila" style="border-bottom:1px solid rgba(255,255,255,.12)">Aguante restante<b>'+Math.max(0,aguante)+' / 3</b></div>'+
+    '<div class="sect">De dónde sale</div>'+
+    '<div class="fila">Golpes<b>'+(Math.round(pGolpes*10)/10)+' / 7</b></div>'+
+    '<div class="fila" style="border-bottom:1px solid rgba(255,255,255,.12)">Aguante<b>'+(Math.round(pAguante*10)/10)+' / 3</b></div>';
+  if(unicos.length){ h+='<div class="sect">Para pulir</div>';
+    for(i=0;i<unicos.length;i++) h+='<div class="tip2">'+unicos[i]+'</div>'; }
+  h+='<div class="captura"><b>Toma captura de esta pantalla</b> y mándala al grupo con tu tarjeta.</div>'+
+     '<button class="btn" id="otra" style="margin-top:16px">Revancha</button>'+
+     '<p class="firma">Método Konecta · Fase 6 Cierre<b>Elaborado por Yahir de la Cruz y Heidy Alvidrez</b></p>';
+  $('fin').innerHTML=h; ver('fin',true);
+  try{window.scrollTo(0,0);}catch(e){}
+  if($('otra')) $('otra').onclick=function(){ location.reload(); };
+}
+
+/* ---------- arranque ---------- */
+ver('aviso',false); ver('intro',true);
+$('mute').onclick=function(){ sonido=!sonido; $('mute').innerHTML = sonido ? '🔊 sonido' : '🔇 sin sonido'; };
+$('btnStart').onclick=function(){
+  try{
+    var v=$('nombre').value;
+    jugador=(v&&v.replace(/^\s+|\s+$/g,''))?v.replace(/^\s+|\s+$/g,''):'Asesora';
+    aIdx=0; qIdx=0; vidaObj=100; aguante=3; combo=0; aciertos=0; total=0; fallos=[]; koAsaltos=0;
+    ver('intro',false); ver('juego',true);
+    audio(); sCampana();
+    pregunta();
+    try{window.scrollTo(0,0);}catch(e){}
+  }catch(err){
+    var d=document.createElement('div');
+    d.style.cssText='background:#7A2A18;padding:14px;margin-top:14px;border-radius:10px;font-size:13px';
+    d.innerHTML='No se pudo iniciar: '+(err&&err.message?esc(err.message):'error');
+    $('intro').appendChild(d);
+  }
+};
+$('nombre').onkeydown=function(e){ if(e&&e.keyCode===13){ if(e.preventDefault)e.preventDefault(); $('btnStart').onclick(); } };
+})();
+</script>
+</body>
+</html>
