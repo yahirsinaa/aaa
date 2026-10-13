@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0F0E0D">
+<title>El expediente · Método Exclusivos</title>
+<style>
+*{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}
+html,body{margin:0;padding:0;background:#0F0E0D}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  color:#1C1917;-webkit-text-size-adjust:100%}
+#wrap{max-width:520px;margin:0 auto;background:#FFFFFF;min-height:100%;padding-bottom:32px;overflow:hidden}
+button{font-family:inherit;cursor:pointer;border:0;background:none;color:#1C1917}
+
+#aviso{background:#7A2A18;color:#fff;padding:16px;font-size:14px;line-height:1.5}
+#aviso b{display:block;font-size:15px;margin-bottom:6px}
+
+/* cabecera */
+#top{background:#1C1917;color:#fff;padding:12px 16px;overflow:hidden}
+#etapa{float:left;font-size:11px;font-weight:bold;letter-spacing:1.5px;text-transform:uppercase;color:#FF8A45}
+#contador{float:right;font-size:11px;font-weight:bold;background:#F2601A;padding:4px 10px;border-radius:20px;color:#fff}
+
+/* ficha de la clienta */
+#ficha{background:#FFF6F1;border-bottom:1px solid #F0DDD0;padding:12px 14px;overflow:hidden}
+#foto{float:left;width:44px;height:44px;border-radius:50%;background:#F2601A;color:#fff;font-size:20px;
+  font-weight:bold;text-align:center;line-height:44px;margin-right:12px}
+#fnom{font-size:16px;font-weight:bold;line-height:1.2}
+#fsub{font-size:12px;color:#8A7F76;margin-top:2px}
+
+/* tarjetas del expediente */
+#tablero{padding:14px 10px 4px;overflow:hidden}
+.carta{float:left;width:50%;padding:0 4px 8px}
+.cartaIn{background:#F7F3EF;border:1.5px solid #E6DED6;border-radius:14px;padding:14px 12px;min-height:104px;
+  text-align:center;-webkit-transition:background .25s;transition:background .25s}
+.cartaIn .ic{font-size:24px;display:block;margin-bottom:6px}
+.cartaIn .t{font-size:13px;font-weight:bold;line-height:1.25}
+.cartaIn .v{font-size:12.5px;line-height:1.3;color:#5B544E;margin-top:6px;display:none}
+.abierta .cartaIn{background:#FFF;border-color:#F2601A;text-align:left;
+  -webkit-animation:revela .4s;animation:revela .4s}
+.abierta .cartaIn .ic{font-size:16px;display:inline;margin-right:6px}
+.abierta .cartaIn .t{display:inline;font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:#C2490F}
+.abierta .cartaIn .v{display:block;font-weight:600;color:#1C1917;font-size:13.5px}
+.inutil.abierta .cartaIn{border-color:#C9C2BB;background:#F2F0ED}
+.inutil.abierta .cartaIn .t{color:#8A7F76}
+@-webkit-keyframes revela{from{-webkit-transform:scale(.9);opacity:.3}}
+@keyframes revela{from{transform:scale(.9);opacity:.3}}
+
+/* escena / diálogo */
+#escena{padding:12px 14px 0}
+#dice{background:#F7F3EF;border-radius:16px 16px 16px 5px;padding:13px 15px;font-size:15.5px;line-height:1.45;
+  font-weight:500;min-height:54px}
+#dice b{display:block;font-size:10.5px;font-weight:bold;letter-spacing:1.2px;text-transform:uppercase;
+  color:#C2490F;margin-bottom:5px}
+
+/* constructor */
+#preview{background:#1C1917;color:#fff;border-radius:14px;padding:14px 16px;font-size:15px;line-height:1.5;
+  margin:0 14px 10px;min-height:76px}
+#preview .hueco{color:#8A7F76;font-style:italic}
+#preview .lleno{color:#FFD9C4}
+.req{overflow:hidden;padding:0 14px 8px}
+.req div{float:left;width:50%;font-size:11.5px;line-height:1.5;color:#A9A099;padding-right:6px}
+.req div.ok{color:#2E7D4F;font-weight:bold}
+
+/* opciones */
+#dock{padding:10px 14px 8px}
+#tip{font-size:11px;font-weight:bold;letter-spacing:1.2px;text-transform:uppercase;color:#8A7F76;margin-bottom:10px}
+.opt{display:block;width:100%;text-align:left;background:#FFFFFF;border:1.5px solid #E6DED6;border-left:4px solid #E6DED6;
+  border-radius:4px 14px 14px 4px;padding:14px;margin-bottom:9px;font-size:15px;line-height:1.4;color:#1C1917;
+  min-height:54px;box-shadow:0 2px 8px rgba(28,25,23,.05)}
+.optBien{border-color:#2E7D4F;border-left-color:#2E7D4F;background:#EDF7F1}
+.optMal{border-color:#C0392B;border-left-color:#C0392B;background:#FDEEEC}
+.optDim{opacity:.38}
+.optBloq{background:#F2F0ED;color:#A9A099;border-style:dashed}
+.fb{border-left:4px solid #8A7F76;background:#FAF7F4;padding:13px 14px;margin-bottom:11px;border-radius:0 10px 10px 0}
+.fb b{display:block;font-size:12px;font-weight:bold;margin-bottom:5px}
+.fb p{margin:0;font-size:14px;line-height:1.5;color:#4A443F}
+.btn{display:block;width:100%;background:#F2601A;color:#fff;border-radius:12px;padding:16px;font-size:16px;
+  font-weight:bold;text-align:center;margin-bottom:9px}
+.btnG{background:#FFF;color:#1C1917;border:1.5px solid #E6DED6}
+
+/* pantallas */
+#intro,#fin{padding:26px 20px 30px}
+.kick{font-size:11.5px;font-weight:bold;letter-spacing:1.5px;text-transform:uppercase;color:#C2490F;margin-bottom:10px}
+h1{font-size:34px;line-height:1.08;margin:0 0 12px}
+.lead{font-size:15px;line-height:1.55;color:#6B6560;margin:0 0 16px}
+.lead b{color:#1C1917}
+.regla{border-top:1px solid #EDE7E1;padding:12px 0;font-size:13.5px;line-height:1.5;color:#6B6560;overflow:hidden}
+.regla i{float:left;width:24px;font-style:normal}
+.regla div{margin-left:28px}.regla b{color:#1C1917}
+label{display:block;font-size:13px;color:#6B6560;margin:20px 0 8px}
+#nombre{width:100%;padding:15px;background:#FAF7F4;border:1.5px solid #E6DED6;border-radius:12px;
+  font-family:inherit;font-size:16px;font-weight:bold;color:#1C1917}
+.nota{font-size:74px;font-weight:bold;color:#F2601A;line-height:1}
+.notaBaja{color:#A9A099}
+.notaDe{font-size:15px;color:#6B6560;margin-left:8px}
+.fila{border-top:1px solid #EDE7E1;padding:11px 0;font-size:13.5px;color:#6B6560;overflow:hidden}
+.fila b{float:right;color:#1C1917}
+.sect{font-size:11.5px;font-weight:bold;letter-spacing:1.5px;text-transform:uppercase;color:#C2490F;margin:20px 0 10px}
+.tip2{font-size:13px;line-height:1.5;color:#6B6560;border-left:2px solid #EDE7E1;padding-left:12px;margin-bottom:10px}
+.captura{border:2px dashed #F2601A;border-radius:12px;padding:13px;font-size:13px;line-height:1.5;color:#6B6560;
+  margin-top:18px;background:#FFF6F1}
+.captura b{color:#C2490F}
+.firma{margin-top:22px;font-size:11.5px;line-height:1.8;color:#A9A099}
+.firma b{display:block;color:#1C1917;font-size:12.5px}
+.propFinal{background:#1C1917;color:#fff;border-radius:14px;padding:16px;font-size:14.5px;line-height:1.55;margin-bottom:12px}
+</style>
+</head>
+<body>
+<div id="wrap">
+
+  <div id="aviso">
+    <b>⚠ Este visor no está ejecutando la cápsula</b>
+    La estás abriendo desde una vista previa (Drive, Gmail, WhatsApp o Archivos) que bloquea el contenido
+    interactivo. Ábrela en Chrome o Safari, o pide el enlace en vez del archivo.
+  </div>
+  <noscript><div style="background:#7A2A18;color:#fff;padding:16px;font-size:14px">Activa JavaScript para hacer la cápsula.</div></noscript>
+
+  <div id="intro" style="display:none">
+    <div class="kick">Método Exclusivos</div>
+    <h1>El expediente</h1>
+    <p class="lead">Mañana viene Paulina. Tienes la noche de hoy para prepararte y <b>solo vas a poder proponerle lo que hayas verificado en el sistema.</b></p>
+    <div class="regla"><i>🔍</i><div><b>Investiga:</b> cinco consultas al expediente. No todas las fichas sirven.</div></div>
+    <div class="regla"><i>👂</i><div><b>Escucha:</b> en la sesión aparecen señales de interés. No las supongas.</div></div>
+    <div class="regla" style="border-bottom:1px solid #EDE7E1"><i>🧩</i><div><b>Arma y defiéndela:</b> solo con datos reales, y aguanta la objeción del precio.</div></div>
+    <label for="nombre">¿Cómo te llamas?</label>
+    <input id="nombre" maxlength="24" placeholder="Tu nombre" autocomplete="off">
+    <button class="btn" id="btnStart" style="margin-top:16px">Abrir el expediente</button>
+    <p class="firma">Método Exclusivos · Kopay<b>Elaborado por Yahir De la Cruz</b></p>
+  </div>
+
+  <div id="juego" style="display:none">
+    <div id="top"><div id="etapa">Antes de la cita</div><div id="contador">5 consultas</div></div>
+    <div id="ficha"><div id="foto">P</div><div><div id="fnom">Paulina Reyes</div><div id="fsub">Cita mañana 11:00 · axilas</div></div></div>
+    <div id="tablero"></div>
+    <div id="escena" style="display:none"><div id="dice"></div></div>
+    <div id="preview" style="display:none"></div>
+    <div class="req" id="req" style="display:none"></div>
+    <div id="dock"><div id="tip">—</div><div id="zona"></div></div>
+  </div>
+
+  <div id="fin" style="display:none"></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+function $(id){ return document.getElementById(id); }
+function ver(id,m){ var e=$(id); if(e) e.style.display = m ? '' : 'none'; }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function revuelve(a){ var b=a.slice(),i,j,x; for(i=b.length-1;i>0;i--){ j=Math.floor(Math.random()*(i+1)); x=b[i]; b[i]=b[j]; b[j]=x; } return b; }
+
+/* ============ EXPEDIENTE ============ */
+var FICHAS=[
+ {id:'fase', ic:'🧭', t:'Fase del viaje', util:true,
+  v:'Sesiones 7 a 9 · mantenimiento y retención. Ya tiene avance visible y confianza.'},
+ {id:'areas', ic:'📍', t:'Áreas contratadas', util:true,
+  v:'Axilas, sesión 8 de 8. Sin bikini ni otras zonas contratadas.'},
+ {id:'sesiones', ic:'📊', t:'Sesiones y avance', util:true,
+  v:'Le queda 1 sesión. Buen avance, aún con vello fino en los bordes.'},
+ {id:'puntos', ic:'⭐', t:'Puntos acumulados', util:true,
+  v:'Tiene puntos suficientes para habilitar un beneficio exclusivo.'},
+ {id:'cupon', ic:'🎟️', t:'Cupón y promoción vigente', util:true,
+  v:'Cupón habilitado en sistema: 5 sesiones de retoque de axilas. Regular $3,695 · con beneficio $3,041.'},
+ {id:'compras', ic:'💳', t:'Compras y forma de pago', util:true,
+  v:'Compró en dos parcialidades con tarjeta. Suele apartar y liquidar después.'},
+ {id:'cumple', ic:'🎂', t:'Fecha de cumpleaños', util:false,
+  v:'15 de marzo. No cambia nada de la propuesta.'},
+ {id:'redes', ic:'📱', t:'Comentarios en redes', util:false,
+  v:'Dio like a una publicación. No es un dato del sistema ni confirma interés.'},
+ {id:'rastrillo', ic:'🪒', t:'Qué usaba antes del láser', util:false,
+  v:'Rastrillo. Dato de la primera cita; no te ayuda a armar el exclusivo.'},
+ {id:'encuesta', ic:'⭐', t:'Encuesta de satisfacción', util:false,
+  v:'Calificó 5 estrellas la última sesión. Bonito, pero no cambia qué proponerle ni a qué precio.'}
+];
+var CONSULTAS=5;
+
+/* ============ SEÑALES EN LA SESIÓN ============ */
+var SESION=[
+ {dice:'“Ya casi termino axilas, ¿verdad? Oye… y el bikini, ¿cómo es? Una amiga me dijo que duele más.”',
+  q:'Esa es una señal. ¿Qué haces?',
+  opts:[
+   {t:'“Sí, vas en la última. ¿Te gustaría que te cuente cómo sería bikini para ti?”', ok:true,
+    w:'Escuchaste la señal y confirmaste el interés real antes de proponer. La propuesta debe partir de lo que ella expresó.'},
+   {t:'Apuntarlo y al final ofrecerle directamente el paquete de bikini.',
+    w:'Suponer el interés es el error clásico. Primero se confirma preguntando; luego se propone.'},
+   {t:'“Vamos terminando axilas y en tu última cita lo vemos con calma.”',
+    w:'Cerraste la puerta que ella abrió. Exclusivos se activa justo cuando aparece una necesidad no resuelta.'},
+   {t:'“Sí duele un poco más, pero se aguanta.”',
+    w:'Respondiste la duda pero dejaste ir la señal de interés, que era lo valioso del momento.'}]},
+ {dice:'“Sí, me interesa bikini. Aunque la verdad en axilas todavía me sale algo de vello fino.”',
+  q:'Con lo que ya revisaste, ¿qué tiene sentido proponerle?',
+  opts:[
+   {t:'El retoque de axilas con su cupón, y de paso abrir la conversación de bikini.', ok:true,
+    w:'Su cupón habilitado es justo de retoque de axilas, y ella misma dijo que le queda vello fino. La propuesta nace del historial real.'},
+   {t:'Un paquete de bikini completo, que es justo lo que ella preguntó.',
+    w:'Preguntó por bikini, sí, pero su cupón habilitado y su vello fino en axilas apuntan al retoque. La propuesta sale del sistema, no solo de lo que suena bien.'},
+   {t:'Prometerle que con una sesión más no le vuelve a salir nada.',
+    w:'Prometer desaparición total o resultados definitivos es alerta crítica. Se habla de avance, no de absolutos.'},
+   {t:'Ofrecerle otra vez el paquete de axilas de 8 sesiones, que ya conoce.',
+    w:'Ya casi lo termina. Proponer algo que ya tiene demuestra que no revisaste su avance.'}]}
+];
+
+/* ============ CONSTRUCTOR DE LA PROPUESTA ============ */
+var PARTES=[
+ {k:'nombre', req:'Su nombre y reconocimiento',
+  opts:[{t:'“Paulina, como ya llevas avance y has sido constante…”', ok:true, need:null,
+         w:'Reconoces su fidelidad por su nombre. Ese es el corazón de Exclusivos: que se sienta reconocida.'},
+        {t:'“Tengo algo que creo que te va a interesar mucho…”',
+         w:'Suena amable, pero sin su nombre ni el reconocimiento de su constancia es una promoción cualquiera, no un exclusivo.'},
+        {t:'“Como has venido muy seguido, te voy a apoyar con algo…”',
+         w:'“Te apoyo” suena a favor personal. El beneficio no lo regalas tú: lo ganó ella con sus puntos, y así hay que nombrarlo.'}]},
+ {k:'beneficio', req:'Beneficio habilitado por sus puntos',
+  opts:[{t:'“tienes un beneficio exclusivo por tus puntos acumulados”', ok:true, need:'puntos',
+         w:'El beneficio se nombra como lo que es: habilitado por sus puntos, verificado en sistema.'},
+        {t:'“te conseguí un precio especial para hoy”',
+         w:'Inventar un descuento fuera del sistema rompe el método y te deja sin respaldo.'},
+        {t:'“me parece que todavía alcanzas la promoción del mes”',
+         w:'“Creo que sigue vigente” no se dice nunca. La promoción se confirma antes de la cita.'}]},
+ {k:'paquete', req:'Paquete específico que le corresponde',
+  opts:[{t:'“un cupón de 5 sesiones de retoque de axilas”', ok:true, need:'cupon',
+         w:'Paquete específico, tomado del cupón habilitado en su sistema y congruente con su avance.'},
+        {t:'“el paquete que prefieras, bikini o lo que tú elijas”',
+         w:'Suena flexible y amable, pero deja de ser algo preparado para ella. El exclusivo es un paquete específico que el sistema le habilitó.'},
+        {t:'“el de bikini, que es por donde seguiría naturalmente”',
+         w:'No es lo que su cupón habilita ni lo que su avance pide. La propuesta debe partir del expediente.'}]},
+ {k:'precio', req:'Precio original y precio final',
+  opts:[{t:'“que en lugar de $3,695 te queda en $3,041”', ok:true, need:'cupon',
+         w:'Precio regular y precio con beneficio, los dos tomados del sistema. Así se percibe el valor del exclusivo.'},
+        {t:'“con tu beneficio te queda en $3,041”',
+         w:'Sin el precio regular, el beneficio no se nota. Siempre van los dos números.'},
+        {t:'“el de axilas anda en tres mil seiscientos, según el manual”',
+         w:'Los precios del manual no son tarifa vigente. Siempre se verifican en sistema antes de decirlos.'}]},
+ {k:'cta', req:'Llamado a la acción',
+  opts:[{t:'“¿Lo aprovechamos ahora?”', ok:true, need:null,
+         w:'Cierra con pregunta directa y acción concreta. Sin CTA, el exclusivo se queda en información.'},
+        {t:'“piénsalo con calma y cuando quieras lo activamos”',
+         w:'Dejaste la decisión en el aire. Exclusivos termina en un siguiente paso claro.'},
+        {t:'“te lo dejo anotado para que lo veas en casa”',
+         w:'Dejarlo anotado se siente considerado, pero no es un cierre. El exclusivo termina con una pregunta que invita a decidir hoy.'}]}
+];
+
+
+/* ============ LA OBJECIÓN DEL PRECIO ============ */
+var OBJECIONES=[
+ {dice:'“Ay, sí me interesa… pero la verdad ahorita está caro.”',
+  q:'La objeción más común. ¿Qué le contestas?',
+  opts:[
+   {t:'“Te entiendo. Mira, el precio regular es $3,695 y con tus puntos te queda en $3,041: ese beneficio ya es tuyo por ser clienta constante.”', ok:true, need:'cupon',
+    w:'Validas y devuelves los dos precios. El exclusivo no se defiende bajando nada: se defiende recordando que el beneficio ya lo ganó ella.'},
+   {t:'“Sí, está un poco elevado, pero de verdad vale la pena.”',
+    w:'Le diste la razón sin redirigir. Admitir que es caro y pedirle fe no mueve la decisión.'},
+   {t:'“Déjame ver si te puedo conseguir algo mejor para hoy.”',
+    w:'Buscar un precio por fuera del sistema rompe el método y deja el beneficio sin respaldo.'},
+   {t:'“Es que si no te haces el retoque, se te va a volver a salir todo.”',
+    w:'Presionar con miedo y con absolutos es alerta crítica. El exclusivo reconoce, no amenaza.'}]},
+ {dice:'“Ya, pero ahorita no traigo todo el dinero.”',
+  q:'Sigue interesada. ¿Cómo lo resuelves?',
+  opts:[
+   {t:'“Lo apartas con un anticipo y lo liquidas en parcialidades con tarjeta, como la vez pasada. ¿Te lo aparto?”', ok:true, need:'compras',
+    w:'Usaste su forma de pago habitual, la que viste en el expediente, y cerraste con pregunta. Eso es personalizar de verdad.'},
+   {t:'“Te guardo el cupón hasta que puedas venir por él.”',
+    w:'El beneficio está habilitado hoy en sistema; prometer guardarlo indefinidamente es ofrecer algo que no controlas.'},
+   {t:'“¿Y cuánto traes? Vemos qué te alcanza.”',
+    w:'Bajar el paquete al primer freno tira el valor del exclusivo que acabas de construir.'},
+   {t:'“No te preocupes, lo dejamos para tu próxima visita.”',
+    w:'Soltaste la oportunidad sin intentar una forma de pago. La propuesta termina en acción concreta, no en “luego”.'}]}
+];
+
+/* ============ MOTOR ============ */
+var jugador='', abiertas={}, usadas=0, utiles=0, sIdx=0, pIdx=0, armado=[], bloqueado=false;
+var pInv=0, pSenales=0, pProp=0, pObj=0, pReg=0, notas=[], oIdx=0, objOk=0, buenasProp=0;
+
+function pintaTablero(){
+  var h='', i, f, ab;
+  var lista=revuelve(FICHAS);
+  if(!pintaTablero.orden) pintaTablero.orden=lista; else lista=pintaTablero.orden;
+  for(i=0;i<lista.length;i++){
+    f=lista[i]; ab=!!abiertas[f.id];
+    h+='<div class="carta '+(ab?'abierta ':'')+(f.util?'':'inutil ')+'" data-id="'+f.id+'">'+
+       '<div class="cartaIn"><span class="ic">'+f.ic+'</span><span class="t">'+f.t+'</span>'+
+       '<span class="v">'+(ab?esc(f.v):'')+'</span></div></div>';
+  }
+  $('tablero').innerHTML=h;
+  var cartas=$('tablero').getElementsByClassName('carta'), k;
+  for(k=0;k<cartas.length;k++){
+    cartas[k].onclick=(function(el){ return function(){ consulta(el.getAttribute('data-id')); }; })(cartas[k]);
+  }
+  $('contador').innerHTML=(CONSULTAS-usadas)+' consulta'+((CONSULTAS-usadas)===1?'':'s');
+}
+function fichaPorId(id){ var i; for(i=0;i<FICHAS.length;i++) if(FICHAS[i].id===id) return FICHAS[i]; return null; }
+function consulta(id){
+  if(bloqueado || abiertas[id] || usadas>=CONSULTAS) return;
+  abiertas[id]=true; usadas++;
+  var f=fichaPorId(id);
+  if(f.util) utiles++;
+  pintaTablero();
+  if(usadas>=CONSULTAS){ cierraInvestigacion(); }
+  else { $('tip').innerHTML='Te quedan '+(CONSULTAS-usadas)+' consultas · toca otra ficha'; }
+}
+function cierraInvestigacion(){
+  bloqueado=true;
+  pInv = 2.5*(utiles/5); if(pInv>2.5) pInv=2.5;
+  var faltan=[], i;
+  for(i=0;i<FICHAS.length;i++) if(FICHAS[i].util && !abiertas[FICHAS[i].id]) faltan.push(FICHAS[i].t);
+  var txt = (utiles===5)
+    ? 'Revisaste las cinco fichas que de verdad importan. Llegas a la cita con información real del sistema.'
+    : 'Gastaste consultas en fichas que no cambian la propuesta. Te quedaste sin ver: '+faltan.join(', ')+'. Lo que no verificaste, no vas a poder usarlo.';
+  if(utiles<5) notas.push('Antes de la cita se revisa: fase del viaje, áreas, sesiones, puntos, cupón vigente y forma de pago. Lo demás es ruido.');
+  var z=$('zona'); z.innerHTML='';
+  $('tip').innerHTML='Se acabaron las consultas';
+  var d=document.createElement('div'); d.className='fb';
+  d.style.borderLeftColor = (utiles===5)?'#2E7D4F':'#C0392B';
+  d.innerHTML='<b style="color:'+((utiles===5)?'#2E7D4F':'#C0392B')+'">'+(utiles===5?'Llegas preparada':'Te faltó expediente')+'</b><p>'+txt+'</p>';
+  z.appendChild(d);
+  var n=document.createElement('button'); n.className='btn'; n.type='button'; n.innerHTML='Al día siguiente: la sesión';
+  n.onclick=iniciaSesion; z.appendChild(n);
+}
+
+/* ---------- sesión ---------- */
+function iniciaSesion(){
+  sIdx=0; ver('tablero',false); ver('escena',true);
+  $('etapa').innerHTML='Durante la atención'; $('contador').innerHTML='Escucha';
+  pregSesion();
+}
+function pregSesion(){
+  bloqueado=false;
+  var s=SESION[sIdx], z=$('zona'), i;
+  $('dice').innerHTML='<b>Paulina</b>'+esc(s.dice);
+  $('tip').innerHTML=s.q;
+  z.innerHTML='';
+  var ops=revuelve(s.opts);
+  for(i=0;i<ops.length;i++){
+    (function(o){
+      var b=document.createElement('button'); b.className='opt'; b.type='button'; b.innerHTML=esc(o.t);
+      b.onclick=function(){
+        if(bloqueado) return; bloqueado=true;
+        var bs=z.getElementsByTagName('button'), k;
+        for(k=0;k<bs.length;k++){ bs[k].disabled=true; if(bs[k]!==b) bs[k].className='opt optDim'; }
+        b.className='opt '+(o.ok?'optBien':'optMal');
+        if(o.ok) pSenales+=0.75; else notas.push(o.w);
+        var d=document.createElement('div'); d.className='fb';
+        d.style.borderLeftColor=(o.ok?'#2E7D4F':'#C0392B');
+        d.innerHTML='<b style="color:'+(o.ok?'#2E7D4F':'#C0392B')+'">'+(o.ok?'Bien escuchado':'Cuidado')+'</b><p>'+o.w+'</p>';
+        z.appendChild(d);
+        var n=document.createElement('button'); n.className='btn'; n.type='button';
+        n.innerHTML=(sIdx>=SESION.length-1)?'Armar la propuesta':'Sigue la sesión';
+        n.onclick=function(){ if(sIdx>=SESION.length-1){ iniciaProp(); } else { sIdx++; pregSesion(); } };
+        z.appendChild(n);
+      };
+      z.appendChild(b);
+    })(ops[i]);
+  }
+}
+
+/* ---------- constructor ---------- */
+function iniciaProp(){
+  pIdx=0; armado=[];
+  ver('escena',false); ver('preview',true); ver('req',true);
+  $('etapa').innerHTML='La propuesta'; $('contador').innerHTML='Pieza 1 de 5';
+  pintaPreview(); pintaReq(); piezas();
+}
+function pintaPreview(){
+  var i, h='', hecho;
+  for(i=0;i<PARTES.length;i++){
+    hecho = armado[i];
+    h += hecho ? ('<span class="lleno">'+esc(hecho.t.replace(/^“|”$/g,''))+'</span> ')
+               : ('<span class="hueco">['+PARTES[i].req.toLowerCase()+'] </span>');
+  }
+  $('preview').innerHTML=h;
+}
+function pintaReq(){
+  var i, h='';
+  for(i=0;i<PARTES.length;i++){
+    h+='<div class="'+((armado[i]&&armado[i].ok)?'ok':'')+'">'+((armado[i]&&armado[i].ok)?'✔ ':'○ ')+PARTES[i].req+'</div>';
+  }
+  $('req').innerHTML=h;
+}
+function piezas(){
+  bloqueado=false;
+  if(pIdx>=PARTES.length){ return cierraProp(); }
+  var P=PARTES[pIdx], z=$('zona'), i;
+  $('contador').innerHTML='Pieza '+(pIdx+1)+' de 5';
+  $('tip').innerHTML='Elige: '+P.req;
+  z.innerHTML='';
+  var ops=revuelve(P.opts);
+  for(i=0;i<ops.length;i++){
+    (function(o){
+      var bloqueada = (o.need && !abiertas[o.need]);
+      var b=document.createElement('button'); b.type='button';
+      b.className='opt'+(bloqueada?' optBloq':'');
+      b.innerHTML = bloqueada ? (esc(o.t)+' <br><small>🔒 no verificaste este dato en el expediente</small>') : esc(o.t);
+      b.onclick=function(){
+        if(bloqueado) return;
+        if(bloqueada){
+          bloqueado=true;
+          var bs0=z.getElementsByTagName('button'), k0;
+          for(k0=0;k0<bs0.length;k0++) bs0[k0].disabled=true;
+          b.className='opt optMal';
+          notas.push('No puedes ofrecer lo que no verificaste. Los puntos y el cupón se confirman en sistema antes de la cita.');
+          armado[pIdx]={t:'(dato sin verificar)', ok:false};
+          pintaPreview(); pintaReq();
+          var d0=document.createElement('div'); d0.className='fb'; d0.style.borderLeftColor='#C0392B';
+          d0.innerHTML='<b style="color:#C0392B">Dato sin verificar</b><p>Esa pieza depende de información que no consultaste en el expediente. En la vida real, eso es una propuesta inventada.</p>';
+          z.appendChild(d0);
+          var n0=document.createElement('button'); n0.className='btn'; n0.type='button'; n0.innerHTML='Continuar';
+          n0.onclick=function(){ pIdx++; piezas(); }; z.appendChild(n0);
+          return;
+        }
+        bloqueado=true;
+        var bs=z.getElementsByTagName('button'), k;
+        for(k=0;k<bs.length;k++){ bs[k].disabled=true; if(bs[k]!==b) bs[k].className='opt optDim'; }
+        b.className='opt '+(o.ok?'optBien':'optMal');
+        armado[pIdx]={t:o.t, ok:!!o.ok};
+        if(o.ok) pProp+=0.7; else notas.push(o.w);
+        pintaPreview(); pintaReq();
+        var d=document.createElement('div'); d.className='fb';
+        d.style.borderLeftColor=(o.ok?'#2E7D4F':'#C0392B');
+        d.innerHTML='<b style="color:'+(o.ok?'#2E7D4F':'#C0392B')+'">'+(o.ok?'Pieza correcta':'Esa pieza falla')+'</b><p>'+o.w+'</p>';
+        z.appendChild(d);
+        var n=document.createElement('button'); n.className='btn'; n.type='button';
+        n.innerHTML=(pIdx>=PARTES.length-1)?'Decírselo a Paulina':'Siguiente pieza';
+        n.onclick=function(){ pIdx++; piezas(); };
+        z.appendChild(n);
+      };
+      z.appendChild(b);
+    })(ops[i]);
+  }
+}
+function cierraProp(){
+  var i; buenasProp=0;
+  for(i=0;i<armado.length;i++) if(armado[i]&&armado[i].ok) buenasProp++;
+  ver('escena',true); ver('preview',false); ver('req',false);
+  $('etapa').innerHTML='La objeción'; $('contador').innerHTML='Precio';
+  oIdx=0; objecion();
+}
+function objecion(){
+  bloqueado=false;
+  var O=OBJECIONES[oIdx], z=$('zona'), i;
+  $('contador').innerHTML='Objeción '+(oIdx+1)+' de 2';
+  $('dice').innerHTML='<b>Paulina</b>'+esc(O.dice);
+  $('tip').innerHTML=O.q;
+  z.innerHTML='';
+  var ops=revuelve(O.opts);
+  for(i=0;i<ops.length;i++){
+    (function(o){
+      var bloqueada=(o.need && !abiertas[o.need]);
+      var b=document.createElement('button'); b.type='button';
+      b.className='opt'+(bloqueada?' optBloq':'');
+      b.innerHTML = bloqueada ? (esc(o.t)+' <br><small>🔒 ese dato no lo verificaste</small>') : esc(o.t);
+      b.onclick=function(){
+        if(bloqueado) return; bloqueado=true;
+        var bs=z.getElementsByTagName('button'), k;
+        for(k=0;k<bs.length;k++){ bs[k].disabled=true; if(bs[k]!==b) bs[k].className='opt optDim'; }
+        var bien = (o.ok && !bloqueada);
+        b.className='opt '+(bien?'optBien':'optMal');
+        if(bien){ pObj+=0.75; objOk++; }
+        else notas.push(bloqueada
+          ? 'Para sostener el precio necesitas los datos del sistema: su cupón y su forma de pago habitual. Sin eso, la objeción te gana.'
+          : o.w);
+        var d=document.createElement('div'); d.className='fb';
+        d.style.borderLeftColor=(bien?'#2E7D4F':'#C0392B');
+        d.innerHTML='<b style="color:'+(bien?'#2E7D4F':'#C0392B')+'">'+
+          (bien?'Así se sostiene':(bloqueada?'Dato sin verificar':'Ahí se cae'))+'</b><p>'+
+          (bloqueada?'Esa respuesta depende de información que no consultaste en el expediente.':o.w)+'</p>';
+        z.appendChild(d);
+        var n=document.createElement('button'); n.className='btn'; n.type='button';
+        n.innerHTML=(oIdx>=OBJECIONES.length-1)?'Ver qué decide Paulina':'Sigue la conversación';
+        n.onclick=function(){ if(oIdx>=OBJECIONES.length-1){ cierreFinal(); } else { oIdx++; objecion(); } };
+        z.appendChild(n);
+      };
+      z.appendChild(b);
+    })(ops[i]);
+  }
+}
+function cierreFinal(){
+  var puntaje = buenasProp + objOk*1.5;
+  var reaccion = (puntaje>=6.5) ? '“Ay, qué bien. Sí, aprovéchamelo.”'
+                : (puntaje>=4 ? '“Mmm… déjame lo pienso y te aviso.”'
+                              : '“No, gracias, así déjalo.”');
+  var acepto = (puntaje>=6.5);
+  $('etapa').innerHTML='El cierre'; $('contador').innerHTML='Último paso';
+  $('dice').innerHTML='<b>Paulina</b>'+esc(reaccion);
+  $('tip').innerHTML = acepto ? 'Aceptó. ¿Qué falta?' : 'No cerró. ¿Qué haces?';
+  var z=$('zona'); z.innerHTML='';
+  var ops = acepto ? [
+    {t:'Registrar en el ticket: “Acepto utilizar mis puntos”.', ok:true,
+     w:'Sin ese registro el beneficio no queda aplicado ni documentado. Es el cierre real de Exclusivos.'},
+    {t:'Aplicar el cupón en caja; el sistema deja constancia solo.',
+     w:'La aceptación de puntos se registra en el ticket. Si no está escrito, no pasó.'},
+    {t:'Avisarle a recepción de viva voz para que lo capturen.',
+     w:'Lo que se dice de pasada se pierde. El registro va en el ticket, en el momento.'}
+  ] : [
+    {t:'Dejar la propuesta cotizada y agendar el seguimiento con fecha.', ok:true,
+     w:'Si no cierra, el exclusivo se deja por escrito y con fecha de seguimiento. Nunca se cierra en “ahí me avisas”.'},
+    {t:'Decirle que lo piense y que cuando quiera lo activamos.',
+     w:'Sin fecha ni registro, esa conversación no regresa sola.'},
+    {t:'Bajarle el precio por tu cuenta para que diga que sí.',
+     w:'Inventar descuentos fuera del sistema rompe el método y te deja sin respaldo.'}
+  ];
+  bloqueado=false;
+  revuelve(ops).forEach(function(o){
+    var b=document.createElement('button'); b.className='opt'; b.type='button'; b.innerHTML=esc(o.t);
+    b.onclick=function(){
+      if(bloqueado) return; bloqueado=true;
+      var bs=z.getElementsByTagName('button'), k;
+      for(k=0;k<bs.length;k++){ bs[k].disabled=true; if(bs[k]!==b) bs[k].className='opt optDim'; }
+      b.className='opt '+(o.ok?'optBien':'optMal');
+      if(o.ok) pReg=1; else notas.push(o.w);
+      var d=document.createElement('div'); d.className='fb';
+      d.style.borderLeftColor=(o.ok?'#2E7D4F':'#C0392B');
+      d.innerHTML='<b style="color:'+(o.ok?'#2E7D4F':'#C0392B')+'">'+(o.ok?'Cerraste bien':'Faltó el cierre')+'</b><p>'+o.w+'</p>';
+      z.appendChild(d);
+      var n=document.createElement('button'); n.className='btn'; n.type='button'; n.innerHTML='Ver mi evaluación';
+      n.onclick=function(){ termina(buenasProp, reaccion); }; z.appendChild(n);
+    };
+    z.appendChild(b);
+  });
+}
+
+/* ---------- evaluación ---------- */
+function termina(buenas, reaccion){
+  ver('juego',false);
+  var nota=Math.round(pInv+pSenales+pProp+pObj+pReg); if(nota>10) nota=10; if(nota<0) nota=0;
+  var titulo, texto;
+  if(nota>=9){ titulo='Propuesta con evidencia';
+    texto='Llegaste con el expediente revisado, escuchaste su señal y le armaste un beneficio que sí le corresponde, con precios reales y con registro.'; }
+  else if(nota>=7){ titulo='Buena propuesta';
+    texto='Le propusiste algo con sentido. Afina el detalle: cada dato que no verificas es una pieza que después no puedes usar.'; }
+  else if(nota>=5){ titulo='Te faltó preparación';
+    texto='La propuesta salió a medias porque llegaste sin parte del expediente. Exclusivos se prepara la noche anterior, no en la cita.'; }
+  else { titulo='Propuesta genérica';
+    texto='Sin historial, sin puntos confirmados y sin cupón verificado, no es un exclusivo: es una promoción cualquiera.'; }
+  var frase='', i;
+  for(i=0;i<armado.length;i++) if(armado[i]) frase += armado[i].t.replace(/^“|”$/g,'')+' ';
+  var unicos=[];
+  for(i=0;i<notas.length;i++){ if(unicos.join('|').indexOf(notas[i])<0) unicos.push(notas[i]); }
+  unicos=unicos.slice(0,3);
+
+  var h='<div class="kick">Tu evaluación</div>'+
+    '<div><span class="nota'+(nota<5?' notaBaja':'')+'">'+nota+'</span><span class="notaDe">de 10</span></div>'+
+    '<h1 style="font-size:26px;margin-top:12px">'+titulo+'</h1>'+
+    '<p class="lead">'+esc(jugador)+', '+texto+'</p>'+
+    '<div class="sect">La propuesta que armaste</div>'+
+    '<div class="propFinal">'+esc(frase)+'</div>'+
+    '<div class="sect">Y Paulina contestó</div><div class="tip2">'+esc(reaccion)+'</div>'+
+    '<div class="sect">De dónde sale</div>'+
+    '<div class="fila">Expediente revisado<b>'+(Math.round(pInv*10)/10)+' / 2.5</b></div>'+
+    '<div class="fila">Señales en la sesión<b>'+(Math.round(pSenales*10)/10)+' / 1.5</b></div>'+
+    '<div class="fila">Piezas de la propuesta<b>'+(Math.round(pProp*10)/10)+' / 3.5</b></div>'+
+    '<div class="fila">La objeción del precio<b>'+(Math.round(pObj*10)/10)+' / 1.5</b></div>'+
+    '<div class="fila" style="border-bottom:1px solid #EDE7E1">Registro final<b>'+pReg+' / 1</b></div>';
+  if(unicos.length){ h+='<div class="sect">Para pulir</div>';
+    for(i=0;i<unicos.length;i++) h+='<div class="tip2">'+unicos[i]+'</div>'; }
+  h+='<div class="captura"><b>Toma captura de esta pantalla</b> y mándala al grupo con tu evaluación.</div>'+
+     '<button class="btn" id="otra" style="margin-top:16px">Volver a intentarlo</button>'+
+     '<p class="firma">Método Exclusivos · Kopay<b>Elaborado por Yahir De la Cruz</b></p>';
+  $('fin').innerHTML=h; ver('fin',true);
+  try{window.scrollTo(0,0);}catch(e){}
+  if($('otra')) $('otra').onclick=function(){ location.reload(); };
+}
+
+/* ---------- arranque ---------- */
+ver('aviso',false); ver('intro',true);
+$('btnStart').onclick=function(){
+  try{
+    var v=$('nombre').value;
+    jugador=(v&&v.replace(/^\s+|\s+$/g,''))?v.replace(/^\s+|\s+$/g,''):'Asesora';
+    abiertas={}; usadas=0; utiles=0; notas=[]; pInv=0; pSenales=0; pProp=0; pObj=0; pReg=0; oIdx=0; objOk=0; bloqueado=false;
+    ver('intro',false); ver('juego',true);
+    pintaTablero();
+    $('tip').innerHTML='Tienes 5 consultas · toca una ficha para revisarla';
+    try{window.scrollTo(0,0);}catch(e){}
+  }catch(err){
+    var d=document.createElement('div');
+    d.style.cssText='background:#7A2A18;color:#fff;padding:14px;margin-top:14px;border-radius:10px;font-size:13px';
+    d.innerHTML='No se pudo iniciar: '+(err&&err.message?esc(err.message):'error');
+    $('intro').appendChild(d);
+  }
+};
+$('nombre').onkeydown=function(e){ if(e&&e.keyCode===13){ if(e.preventDefault)e.preventDefault(); $('btnStart').onclick(); } };
+})();
+</script>
+</body>
+</html>
