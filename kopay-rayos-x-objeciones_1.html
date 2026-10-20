@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0A0A0A">
+<title>Rayos X de la objeción · Taller Konecta</title>
+<style>
+*{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}
+html,body{margin:0;padding:0;background:#000}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  color:#fff;-webkit-text-size-adjust:100%}
+#wrap{max-width:520px;margin:0 auto;background:#0A0A0A;min-height:100%;padding-bottom:30px;overflow:hidden}
+button{font-family:inherit;cursor:pointer;border:0;background:none;color:#fff}
+
+#aviso{background:#7A2A18;padding:16px;font-size:14px;line-height:1.5}
+#aviso b{display:block;font-size:15px;margin-bottom:6px}
+
+/* cabecera */
+#top{background:#141414;padding:11px 14px;border-bottom:2px solid #F2601A;overflow:hidden}
+#etapa{float:left;font-size:11px;font-weight:bold;letter-spacing:1.5px;text-transform:uppercase;color:#F2601A}
+#paso{float:right;font-size:11px;font-weight:bold;color:rgba(255,255,255,.45);
+  border:1px solid rgba(255,255,255,.16);border-radius:20px;padding:4px 10px}
+
+/* escena: lo que dice y lo que piensa */
+#escena{padding:16px 14px 4px;position:relative}
+#pensa{position:relative;background:#141414;border:1px dashed rgba(242,96,26,.5);border-radius:18px;
+  padding:14px 16px;margin-bottom:10px;min-height:68px}
+#pensaT{font-size:10px;font-weight:bold;letter-spacing:1.5px;text-transform:uppercase;color:#8A7F76;margin-bottom:6px}
+#pensaV{font-size:15px;line-height:1.45;color:#FFD9C4;font-style:italic;
+  -webkit-filter:blur(7px);filter:blur(7px);-webkit-transition:-webkit-filter .8s;transition:filter .8s}
+#pensaV.revelado{-webkit-filter:none;filter:none}
+#pensa .burbujas{position:absolute;left:28px;bottom:-14px}
+#pensa .burbujas i{display:inline-block;width:9px;height:9px;border-radius:50%;background:#141414;
+  border:1px dashed rgba(242,96,26,.5);margin-right:5px}
+#dice{background:#fff;color:#141414;border-radius:16px 16px 16px 5px;padding:13px 15px;font-size:16px;
+  line-height:1.45;font-weight:500;min-height:54px;margin-top:14px}
+#dice b{display:block;font-size:10.5px;font-weight:bold;letter-spacing:1.2px;text-transform:uppercase;
+  color:#C2490F;margin-bottom:5px}
+
+/* categorías */
+.cats{overflow:hidden;margin-bottom:4px}
+.cat{float:left;width:50%;padding:0 4px 8px}
+.catIn{background:#1A1512;border:1px solid #2E251F;border-radius:12px;padding:12px 10px;text-align:center;
+  font-size:13.5px;font-weight:bold;line-height:1.25;min-height:62px}
+.catIn small{display:block;font-size:10.5px;font-weight:normal;color:#8A7F76;margin-top:4px}
+.cat.bien .catIn{border-color:#3E9C58;background:#16301F}
+.cat.mal .catIn{border-color:#C0392B;background:#2E1613}
+.cat.dim{opacity:.35}
+
+/* opciones */
+#dock{padding:10px 14px 8px}
+#tip{font-size:11px;font-weight:bold;letter-spacing:1.2px;text-transform:uppercase;color:#8A7F76;margin-bottom:10px}
+.opt{display:block;width:100%;text-align:left;background:#1A1512;border:1px solid #2E251F;border-left:4px solid #3A2C23;
+  border-radius:4px 14px 14px 4px;padding:14px;margin-bottom:9px;font-size:15px;line-height:1.4;color:#fff;min-height:56px}
+.optBien{border-left-color:#3E9C58;background:#16301F}
+.optMal{border-left-color:#C0392B;background:#2E1613}
+.optDim{opacity:.32}
+.fb{border-left:4px solid #8A7F76;background:#1A1512;padding:13px 14px;margin-bottom:11px;border-radius:0 10px 10px 0}
+.fb b{display:block;font-size:12px;font-weight:bold;margin-bottom:5px}
+.fb p{margin:0;font-size:14px;line-height:1.5;color:rgba(255,255,255,.7)}
+.btn{display:block;width:100%;background:#F2601A;color:#fff;border-radius:12px;padding:16px;font-size:16px;
+  font-weight:bold;text-align:center;margin-bottom:9px}
+.btnG{background:#1A1512;border:1px solid #2E251F}
+.vrc{overflow:hidden;margin-bottom:10px}
+.vrc div{float:left;width:33.33%;padding:0 3px}
+.vrc span{display:block;background:#1A1512;border:1px solid #2E251F;border-radius:10px;padding:9px 4px;
+  text-align:center;font-size:11px;font-weight:bold;color:#8A7F76;letter-spacing:1px}
+.vrc .on span{background:#F2601A;border-color:#F2601A;color:#fff}
+
+/* pantallas */
+#intro,#fin{padding:26px 20px 30px}
+.kick{font-size:11.5px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#F2601A;margin-bottom:10px}
+h1{font-size:36px;line-height:1.05;margin:0 0 12px}
+.lead{font-size:15px;line-height:1.55;color:rgba(255,255,255,.62);margin:0 0 16px}
+.lead b{color:#fff}
+.regla{border-top:1px solid rgba(255,255,255,.12);padding:12px 0;font-size:13.5px;line-height:1.5;
+  color:rgba(255,255,255,.62);overflow:hidden}
+.regla i{float:left;width:26px;font-style:normal}
+.regla div{margin-left:30px}.regla b{color:#fff}
+label{display:block;font-size:13px;color:rgba(255,255,255,.62);margin:20px 0 8px}
+#nombre{width:100%;padding:15px;background:#1A1512;border:1px solid #2E251F;border-radius:12px;
+  font-family:inherit;font-size:16px;font-weight:bold;color:#fff}
+.nota{font-size:74px;font-weight:bold;color:#F2601A;line-height:1}
+.notaBaja{color:#9A938C}
+.notaDe{font-size:15px;color:rgba(255,255,255,.6);margin-left:8px}
+.fila{border-top:1px solid rgba(255,255,255,.12);padding:11px 0;font-size:13.5px;color:rgba(255,255,255,.62);overflow:hidden}
+.fila b{float:right;color:#fff}
+.sect{font-size:11.5px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#F2601A;margin:20px 0 10px}
+.tip2{font-size:13px;line-height:1.5;color:rgba(255,255,255,.62);border-left:2px solid #2E251F;padding-left:12px;margin-bottom:10px}
+.captura{border:2px dashed #F2601A;border-radius:12px;padding:13px;font-size:13px;line-height:1.5;
+  color:rgba(255,255,255,.62);margin-top:18px}
+.captura b{color:#FFB27A}
+.firma{margin-top:22px;font-size:11.5px;line-height:1.8;color:rgba(255,255,255,.38)}
+.firma b{display:block;color:#fff;font-size:12.5px}
+</style>
+</head>
+<body>
+<div id="wrap">
+
+  <div id="aviso">
+    <b>⚠ Este visor no está ejecutando la cápsula</b>
+    La estás abriendo desde una vista previa (Drive, Gmail, WhatsApp o Archivos) que bloquea el contenido
+    interactivo. Ábrela en Chrome o Safari, o pide el enlace en vez del archivo.
+  </div>
+  <noscript><div style="background:#7A2A18;padding:16px;font-size:14px">Activa JavaScript para hacer la cápsula.</div></noscript>
+
+  <div id="intro" style="display:none">
+    <div class="kick">Taller práctico · Manejo de objeciones</div>
+    <h1>Rayos X de la objeción</h1>
+    <p class="lead">Una objeción no es un “no”: <b>es información</b>. Lo que la clienta dice casi nunca es lo que la detiene. Tu trabajo es ver debajo.</p>
+    <div class="regla"><i>🩺</i><div><b>Triage:</b> clasifica de qué tipo es cada objeción.</div></div>
+    <div class="regla"><i>🔎</i><div><b>Rayos X:</b> la pregunta correcta revela lo que de verdad está pensando.</div></div>
+    <div class="regla" style="border-bottom:1px solid rgba(255,255,255,.12)"><i>🎯</i><div><b>Cierra:</b> el cierre debe responder a <b>esa</b> duda, no a la que supusiste.</div></div>
+    <label for="nombre">¿Cómo te llamas?</label>
+    <input id="nombre" maxlength="24" placeholder="Tu nombre" autocomplete="off">
+    <button class="btn" id="btnStart" style="margin-top:16px">Encender el escáner</button>
+    <p class="firma">Método Konecta · Taller de objeciones<b>Elaborado por Yahir De la Cruz</b></p>
+  </div>
+
+  <div id="juego" style="display:none">
+    <div id="top"><div id="etapa">Triage</div><div id="paso">1 / 4</div></div>
+    <div id="escena">
+      <div id="pensa" style="display:none">
+        <div id="pensaT">Lo que realmente está pensando</div>
+        <div id="pensaV">— — — — — —</div>
+        <div class="burbujas"><i></i><i style="width:7px;height:7px"></i></div>
+      </div>
+      <div id="dice"></div>
+    </div>
+    <div id="dock"><div id="tip">—</div><div id="zona"></div></div>
+  </div>
+
+  <div id="fin" style="display:none"></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+function $(id){ return document.getElementById(id); }
+function ver(id,m){ var e=$(id); if(e) e.style.display = m ? '' : 'none'; }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function revuelve(a){ var b=a.slice(),i,j,x; for(i=b.length-1;i>0;i--){ j=Math.floor(Math.random()*(i+1)); x=b[i]; b[i]=b[j]; b[j]=x; } return b; }
+
+/* ========== 1. TRIAGE: las 5 categorías ========== */
+var CATS=[
+ {k:'precio', t:'Precio', s:'no alcanza o no ve el valor'},
+ {k:'tiempo', t:'Tiempo', s:'no hay urgencia'},
+ {k:'confianza', t:'Confianza', s:'miedo a que no funcione'},
+ {k:'valor', t:'Necesidad', s:'no ve la diferencia'},
+ {k:'decision', t:'Decisión', s:'depende de alguien más'}
+];
+var TRIAGE=[
+ {d:'“Ya tengo mi rasuradora y la verdad me funciona bien.”', r:'valor',
+  w:'Es de Necesidad o Valor. Detrás está que no se indagó el dolor real: foliculitis, manchas, el tiempo que pierde con el rastrillo.'},
+ {d:'“Déjame lo checo tantito, nunca había oído de ustedes.”', r:'confianza',
+  w:'Es de Confianza. Detrás hay temor a quemaduras, una mala experiencia previa con otro láser o falta de respaldo clínico.'},
+ {d:'“Sí me late, pero ahorita no es buen momento, después regreso.”', r:'tiempo',
+  w:'Es de Tiempo. Detrás hay falta de urgencia o una molestia que todavía no considera prioritaria.'},
+ {d:'“Tengo que verlo con mi esposo, él lleva las cuentas.”', r:'decision',
+  w:'Es de Decisión o Autoridad. Interviene un tercero en las finanzas, o es una salida amable para no decir que no.'},
+ {d:'“En la clínica de la otra cuadra me lo dejan en menos.”', r:'precio',
+  w:'Es de Precio. Detrás hay comparación con otra oferta o percepción insuficiente del valor que entregamos.'}
+];
+
+/* ========== 2. RAYOS X: el “lo voy a pensar” ========== */
+var CASOS=[
+ {dice:'“Mmm… está bien, déjame lo voy a pensar.”',
+  pista:'Primera visita. No ha sentido nunca el láser y se quedó callada cuando hablaste del equipo.',
+  oculta:'Nunca he sentido eso. ¿Y si me quema o me duele muchísimo?',
+  dxCorrecto:'dolor',
+  preguntas:[
+   {t:'“Claro que sí. Oye, por curiosidad: ¿qué es lo que más te pone a pensar en este momento, el proceso o la inversión?”', ok:true,
+    w:'Pregunta abierta de diagnóstico, sin presionar. Le das a elegir entre dos frenos y ella te dice cuál es el suyo.'},
+   {t:'“¿Es por el precio? Te puedo ver una opción más económica.”',
+    w:'Asumiste que era dinero y además abriste la puerta al descuento. Bajar el precio al primer “pero” enseña a regatear.'},
+   {t:'“Claro, piénsalo y me avisas en tu próxima cita.”',
+    w:'Vocabulario prohibido. Despedirla con un “piénsalo y me avisas” regala la venta: ahí se pierde el 80%.'},
+   {t:'“Te explico otra vez cómo funciona nuestro equipo alemán, verás que te convence.”',
+    w:'La tormenta: recitar tecnología por nervios. Una mente confundida nunca compra.'}],
+  cierres:[
+   {t:'“Para que lo pienses habiendo sentido la tecnología real, ¿qué te parece si te hago dos disparos de prueba ahorita, sin costo?”', dx:'dolor',
+    w:'Prueba en piel. Es el escalón que elimina el miedo porque lo sustituye por experiencia real.'},
+   {t:'“¿Quieres ver cómo quedaría tu pago a meses sin intereses?”', dx:'dinero',
+    w:'Esa es la salida para el freno de presupuesto, y su duda no era el dinero.'},
+   {t:'“Te explico cuántas sesiones son y cómo es la primera, para que no te abrume.”', dx:'proceso',
+    w:'Sirve para el desconocimiento del proceso, pero ella no estaba abrumada por las sesiones.'},
+   {t:'“Si te garantizo resultados visibles o te devolvemos tu dinero más 10%, ¿te animarías?”', dx:'garantia',
+    w:'La garantía va cuando el freno es creer que no funcionará, no cuando es miedo al dolor.'}]},
+
+ {dice:'“Me encanta, pero déjame lo pienso y te confirmo.”',
+  pista:'Preguntó dos veces el total y bajó la mirada cuando dijiste el precio de contado.',
+  oculta:'Sí lo quiero, pero hoy no traigo todo y me da pena decirlo.',
+  dxCorrecto:'dinero',
+  preguntas:[
+   {t:'“Para valorarlo con calma: ¿lo que estás evaluando tiene que ver con el presupuesto?”', ok:true,
+    w:'Aísla el freno con una pregunta que puede contestarse con un sí o un no. Así sabes si es dinero sin incomodarla.'},
+   {t:'“¿Te preocupa que te vaya a doler? Mucha gente lo piensa.”',
+    w:'Le pusiste una duda que no tenía. No respondas a lo que crees que quiso decir.'},
+   {t:'“Es una inversión en ti, no un gasto. Piénsalo así.”',
+    w:'Frase bonita que no diagnostica nada. Sin pregunta no hay información.'},
+   {t:'“¿Lo quieres o no lo quieres? Para no quitarte el tiempo.”',
+    w:'Presión directa. La clienta se pone a la defensiva y huye.'}],
+  cierres:[
+   {t:'“¿Te incomodaría si revisamos las opciones a meses sin intereses y tú decides cuál se te acomoda?”', dx:'dinero',
+    w:'Cierre buscando el “no” y opciones de pago: le devuelves el control y resuelves el freno real sin que tenga que confesarlo.'},
+   {t:'“Te hago dos disparos de prueba ahorita sin costo.”', dx:'dolor',
+    w:'Prueba en piel para una clienta que ya está convencida del tratamiento. No era su freno.'},
+   {t:'“Te doy la garantía de devolución más 10%.”', dx:'garantia',
+    w:'La garantía no resuelve la falta de liquidez de hoy.'},
+   {t:'“Te explico cómo es la primera sesión paso a paso.”', dx:'proceso',
+    w:'Información que ella no pidió. Su freno era otro.'}]},
+
+ {dice:'“Déjame lo pienso, es que son muchas sesiones, ¿no?”',
+  pista:'Preguntó tres veces cada cuánto tendría que venir y si le iba a quitar mucho tiempo.',
+  oculta:'Me abruma. No sé si pueda con tantas citas ni cómo va a ser esto.',
+  dxCorrecto:'proceso',
+  preguntas:[
+   {t:'“Me quedo con eso de las sesiones: ¿qué parte te preocupa más, cuántas son o cómo sería la primera?”', ok:true,
+    w:'Tomaste su propia palabra y preguntaste por ahí. Diagnosticar es profundizar en lo que ella dijo, no en lo que tú supones.'},
+   {t:'“Son 8 sesiones cada 7 semanas, con equipo de diodo de última generación…”',
+    w:'La tormenta otra vez. Más datos a alguien que ya se siente abrumada la alejan más.'},
+   {t:'“No son tantas, se pasan rapidísimo.”',
+    w:'Contradecirla, aunque sea con buena intención, activa su defensa.'},
+   {t:'“Si te preocupa el costo de tantas sesiones, lo vemos a meses.”',
+    w:'Diagnosticaste dinero cuando ella habló de tiempo y cantidad.'}],
+  cierres:[
+   {t:'“Déjame contarte cómo sería tu primera sesión y qué vas a notar desde la segunda. ¿Te la agendo para verlo tú misma?”', dx:'proceso',
+    w:'Bajas la montaña a un primer paso concreto y cierras invitando a una acción. Eso desarma el “me abruma”.'},
+   {t:'“Te doy dos disparos de prueba ahorita sin costo.”', dx:'dolor',
+    w:'Útil para el miedo al dolor, pero su freno era la cantidad de citas, no la sensación.'},
+   {t:'“Revisamos el pago a meses sin intereses.”', dx:'dinero',
+    w:'No era presupuesto. Responder al freno equivocado hace que se sienta no escuchada.'},
+   {t:'“Si no te funciona te devolvemos tu dinero más 10%.”', dx:'garantia',
+    w:'La garantía responde al miedo a que no sirva, no al agobio por el número de sesiones.'}]}
+];
+
+/* ========== 3. VOCABULARIO ========== */
+var VOCAB=[
+ {mal:'“Piénsalo y me avisas en tu próxima cita.”',
+  opts:[{t:'“¿Qué es lo que más te pone a pensar en este momento para avanzar?”', ok:true,
+         w:'Cambias la despedida por una pregunta que diagnostica. Esa es la frase que salva ventas.'},
+        {t:'“¿Quieres que te llame la próxima semana para recordarte?”',
+         w:'Suena atento, pero sigue posponiendo sin averiguar el freno real.'},
+        {t:'“Tómate el tiempo que necesites, aquí vamos a estar.”',
+         w:'Amable y vacío: la despides sin información y sin siguiente paso.'}]},
+ {mal:'“No es caro, es que el equipo es de Alemania.”',
+  opts:[{t:'“Más que pagar por una sesión, estás invirtiendo en olvidarte del problema para siempre.”', ok:true,
+         w:'Cambias la defensa del precio por el valor de la transformación. Nunca se justifica el precio con la máquina.'},
+        {t:'“Comparado con lo que gastas en rastrillos al año, sale más barato.”',
+         w:'Suena lógico, pero sigue discutiendo el precio en vez de hablar de lo que ella gana.'},
+        {t:'“Es que incluye equipo certificado y personal capacitado.”',
+         w:'Catálogo frío. Hablar de características no mueve la decisión.'}]},
+ {mal:'“¿Cómo la ves? ¿Qué te parece?”',
+  opts:[{t:'“¿Lo dejamos asegurado hoy a meses sin intereses o con transferencia?”', ok:true,
+         w:'Cierre con dos opciones concretas. “¿Cómo la ves?” deja la decisión en el aire.'},
+        {t:'“¿Te interesaría apartarlo?”',
+         w:'Mejor que nada, pero sigue siendo una puerta abierta a un “no” fácil.'},
+        {t:'“¿Te late? ¿Le entramos?”',
+         w:'Informal y sin acción concreta. El CTA propone un paso, no pide aprobación.'}]},
+ {mal:'“Es la mejor promo que hemos tenido, aprovecha porque ya no habrá más.”',
+  opts:[{t:'“Tienes habilitado un beneficio exclusivo por ser tu primera visita.”', ok:true,
+         w:'El beneficio se nombra como algo suyo, no como urgencia inventada. La falsa urgencia destruye el estatus de clínica.'},
+        {t:'“La promoción termina el viernes, por si te animas.”',
+         w:'Si es verdad, se informa sin amenazar; dicho así sigue sonando a presión.'},
+        {t:'“Es que estos precios no los vas a encontrar en otro lado.”',
+         w:'Compite por precio y te mete en la comparación que querías evitar.'}]}
+];
+
+/* ========== 4. ERRORES EN PISO ========== */
+var ERRORES=[
+ {d:'La clienta dice que está caro y la asesora contesta: “No, para nada, al contrario, está muy accesible.”',
+  opts:[{t:'Contradecir a la clienta', ok:true, w:'Decir “no, eso no es así” hiere su ego y activa su defensa de inmediato.'},
+        {t:'Hablar de más'},{t:'Descuento demasiado rápido'},{t:'No pedir el cierre'}]},
+ {d:'Apenas escucha “déjame lo pienso”, la asesora ofrece un 15% para que se decida hoy.',
+  opts:[{t:'Descuento demasiado rápido', ok:true, w:'Bajar el precio al primer “pero” enseña a regatear y valida que el precio original estaba inflado.'},
+        {t:'Inventar falsa urgencia'},{t:'Tomárselo personal'},{t:'Contradecir a la clienta'}]},
+ {d:'La clienta dijo que no y la asesora se queda seria el resto de la sesión, incómoda.',
+  opts:[{t:'Tomárselo como algo personal', ok:true, w:'La clienta está evaluando una compra, no rechazándote. Separa tu autoestima del resultado comercial.'},
+        {t:'Hablar de más'},{t:'No pedir el cierre'},{t:'Descuento demasiado rápido'}]},
+ {d:'Explica todo perfecto, le entrega su tarjeta y se despide: “Aquí tienes, para que lo pienses con calma.”',
+  opts:[{t:'No pedir el cierre', ok:true, w:'Explicar bien y despedirse con un “piénsalo” es regalar la venta. Toda conversación termina pidiendo un paso concreto.'},
+        {t:'Inventar falsa urgencia'},{t:'Contradecir a la clienta'},{t:'Hablar de más'}]},
+ {d:'Para apurar la decisión, la asesora dice: “Aprovecha hoy porque esta promoción ya no va a volver.”',
+  opts:[{t:'Inventar falsas urgencias', ok:true, w:'Suena a vendedor desesperado y destruye el estatus de clínica médica. Si hay fecha real, se informa sin amenazar.'},
+        {t:'Descuento demasiado rápido'},{t:'Tomárselo personal'},{t:'No pedir el cierre'}]}
+];
+
+/* ========== MOTOR ========== */
+var jugador='', etapa=0, idx=0, bloqueado=false;
+var pTri=0, pDx=0, pCierre=0, pVoc=0, pErr=0, notas=[], dxElegido='';
+var lote1=[], lote3=[], lote4=[];
+
+function muestraPensa(v, revelar){
+  ver('pensa', true);
+  $('pensaV').innerHTML = revelar ? esc(v) : '— — — — — — — — — —';
+  $('pensaV').className = revelar ? 'revelado' : '';
+}
+function dice(t){ $('dice').innerHTML='<b>Clienta</b>'+esc(t); }
+function fbBox(bien, titulo, texto, botonTexto, fn){
+  var z=$('zona'); z.innerHTML='';
+  var d=document.createElement('div'); d.className='fb';
+  d.style.borderLeftColor = bien ? '#3E9C58' : '#C0392B';
+  d.innerHTML='<b style="color:'+(bien?'#7BD69A':'#FF8A72')+'">'+titulo+'</b><p>'+texto+'</p>';
+  z.appendChild(d);
+  var n=document.createElement('button'); n.className='btn'; n.type='button'; n.innerHTML=botonTexto;
+  n.onclick=fn; z.appendChild(n);
+}
+function opciones(lista, alElegir){
+  var z=$('zona'); z.innerHTML=''; var i;
+  var ops=revuelve(lista);
+  for(i=0;i<ops.length;i++){
+    (function(o){
+      var b=document.createElement('button'); b.className='opt'; b.type='button'; b.innerHTML=esc(o.t);
+      b.onclick=function(){
+        if(bloqueado) return; bloqueado=true;
+        var bs=z.getElementsByTagName('button'), k;
+        for(k=0;k<bs.length;k++){ bs[k].disabled=true; if(bs[k]!==b) bs[k].className='opt optDim'; }
+        alElegir(o, b);
+      };
+      z.appendChild(b);
+    })(ops[i]);
+  }
+}
+
+/* ---------- etapa 1: triage ---------- */
+function triage(){
+  bloqueado=false;
+  var t=lote1[idx];
+  $('etapa').innerHTML='Triage'; $('paso').innerHTML=(idx+1)+' / 4';
+  ver('pensa',false);
+  dice(t.d);
+  $('tip').innerHTML='¿De qué tipo es esta objeción?';
+  var z=$('zona'), h='', i;
+  var cats=revuelve(CATS);
+  for(i=0;i<cats.length;i++)
+    h+='<div class="cat" data-k="'+cats[i].k+'"><div class="catIn">'+cats[i].t+'<small>'+cats[i].s+'</small></div></div>';
+  z.innerHTML='<div class="cats">'+h+'</div>';
+  var cs=z.getElementsByClassName('cat'), k;
+  for(k=0;k<cs.length;k++){
+    cs[k].onclick=(function(el){ return function(){
+      if(bloqueado) return; bloqueado=true;
+      var bien=(el.getAttribute('data-k')===t.r), j, todos=z.getElementsByClassName('cat');
+      for(j=0;j<todos.length;j++){
+        if(todos[j].getAttribute('data-k')===t.r) todos[j].className='cat bien';
+        else if(todos[j]===el) todos[j].className='cat mal';
+        else todos[j].className='cat dim';
+      }
+      if(bien) pTri+=0.5; else notas.push(t.w);
+      setTimeout(function(){
+        fbBox(bien, bien?'Bien clasificada':'Era otra categoría', t.w,
+          (idx>=lote1.length-1)?'Pasar a los rayos X':'Siguiente objeción',
+          function(){ if(idx>=lote1.length-1){ etapa=1; idx=0; caso(); } else { idx++; triage(); } });
+      }, 420);
+    }; })(cs[k]);
+  }
+}
+
+/* ---------- etapa 2: rayos X ---------- */
+function caso(){
+  bloqueado=false; dxElegido='';
+  var c=CASOS[idx];
+  $('etapa').innerHTML='Rayos X'; $('paso').innerHTML='Caso '+(idx+1)+' / 3';
+  dice(c.dice);
+  muestraPensa(c.oculta, false);
+  $('tip').innerHTML='Pista: '+c.pista;
+  opciones(c.preguntas, function(o,b){
+    b.className='opt '+(o.ok?'optBien':'optMal');
+    if(o.ok){ pDx+=1; muestraPensa(c.oculta, true); }
+    else { notas.push(o.w); }
+    setTimeout(function(){
+      fbBox(!!o.ok, o.ok?'La hiciste hablar':'No diagnosticaste',
+        o.w + (o.ok ? '' : ' Sin diagnóstico vas a cerrar a ciegas.'),
+        'Ahora cierra', function(){ cierra(c, !!o.ok); });
+    }, 700);
+  });
+}
+function cierra(c, diagnostico){
+  bloqueado=false;
+  $('tip').innerHTML = diagnostico ? 'Ya sabes qué la frena. ¿Con qué cierras?' : 'No sabes qué la frena. Aun así hay que cerrar.';
+  opciones(c.cierres, function(o,b){
+    var bien = (o.dx===c.dxCorrecto);
+    b.className='opt '+(bien?'optBien':'optMal');
+    if(bien) pCierre+=0.5; else notas.push(o.w);
+    if(!diagnostico) muestraPensa(c.oculta, true);
+    var txt = bien
+      ? o.w+' Tu cierre respondió a la duda real.'
+      : o.w+' Lo que de verdad pensaba era: “'+c.oculta+'”.';
+    setTimeout(function(){
+      fbBox(bien, bien?'Cierre acertado':'Cerraste al freno equivocado', txt,
+        (idx>=CASOS.length-1)?'Pasar a vocabulario':'Siguiente clienta',
+        function(){ if(idx>=CASOS.length-1){ etapa=2; idx=0; vocab(); } else { idx++; caso(); } });
+    }, 600);
+  });
+}
+
+/* ---------- etapa 3: vocabulario ---------- */
+function vocab(){
+  bloqueado=false;
+  var v=lote3[idx];
+  $('etapa').innerHTML='Vocabulario'; $('paso').innerHTML=(idx+1)+' / 3';
+  ver('pensa',false);
+  dice(v.mal);
+  $('tip').innerHTML='Esa frase está prohibida. ¿Por cuál la cambias?';
+  opciones(v.opts, function(o,b){
+    b.className='opt '+(o.ok?'optBien':'optMal');
+    if(o.ok) pVoc+=0.5; else notas.push(o.w);
+    fbBox(!!o.ok, o.ok?'Lenguaje de valor':'Sigue siendo lenguaje flojo', o.w,
+      (idx>=lote3.length-1)?'Última parte: errores en piso':'Siguiente frase',
+      function(){ if(idx>=lote3.length-1){ etapa=3; idx=0; errores(); } else { idx++; vocab(); } });
+  });
+}
+
+/* ---------- etapa 4: errores ---------- */
+function errores(){
+  bloqueado=false;
+  var e=lote4[idx];
+  $('etapa').innerHTML='Errores en piso'; $('paso').innerHTML=(idx+1)+' / 4';
+  ver('pensa',false);
+  dice(e.d);
+  $('tip').innerHTML='¿Cuál de los seis errores se está cometiendo?';
+  opciones(e.opts, function(o,b){
+    b.className='opt '+(o.ok?'optBien':'optMal');
+    var correcto=null, i;
+    for(i=0;i<e.opts.length;i++) if(e.opts[i].ok) correcto=e.opts[i];
+    if(o.ok) pErr+=0.5; else notas.push(correcto.w);
+    fbBox(!!o.ok, o.ok?'Lo cachaste':'Era otro error', correcto.w,
+      (idx>=lote4.length-1)?'Ver mi diagnóstico':'Siguiente escena',
+      function(){ if(idx>=lote4.length-1){ termina(); } else { idx++; errores(); } });
+  });
+}
+
+/* ---------- evaluación ---------- */
+function termina(){
+  ver('juego',false);
+  var nota=Math.round(pTri+pDx+pCierre+pVoc+pErr); if(nota>10) nota=10; if(nota<0) nota=0;
+  var titulo, texto;
+  if(nota>=9){ titulo='Diagnóstico de profesional';
+    texto='Clasificaste, preguntaste y cerraste al freno real. Eso es tratar la objeción como información, no como rechazo.'; }
+  else if(nota>=7){ titulo='Buen ojo clínico';
+    texto='Vas bien. Afina la pregunta de diagnóstico: cuando no la haces, terminas cerrando al freno equivocado.'; }
+  else if(nota>=5){ titulo='Respondiste de más, preguntaste de menos';
+    texto='Recuerda la filosofía del taller: las clientas deciden cuando entendemos mejor sus necesidades, no cuando hablamos mejor.'; }
+  else { titulo='A repasar el taller';
+    texto='Una objeción no es un “no”. Antes de responder: escucha, sintoniza y pregunta para comprender la causa real.'; }
+  var unicos=[], i;
+  for(i=0;i<notas.length;i++){ if(unicos.join('|').indexOf(notas[i])<0) unicos.push(notas[i]); }
+  unicos=unicos.slice(0,3);
+  var h='<div class="kick">Tu diagnóstico</div>'+
+    '<div><span class="nota'+(nota<5?' notaBaja':'')+'">'+nota+'</span><span class="notaDe">de 10</span></div>'+
+    '<h1 style="font-size:27px;margin-top:12px">'+titulo+'</h1>'+
+    '<p class="lead">'+esc(jugador)+', '+texto+'</p>'+
+    '<div class="sect">De dónde sale</div>'+
+    '<div class="fila">Triage de objeciones<b>'+(Math.round(pTri*10)/10)+' / 2</b></div>'+
+    '<div class="fila">Preguntas de diagnóstico<b>'+(Math.round(pDx*10)/10)+' / 3</b></div>'+
+    '<div class="fila">Cierres al freno real<b>'+(Math.round(pCierre*10)/10)+' / 1.5</b></div>'+
+    '<div class="fila">Vocabulario de valor<b>'+(Math.round(pVoc*10)/10)+' / 1.5</b></div>'+
+    '<div class="fila" style="border-bottom:1px solid rgba(255,255,255,.12)">Errores detectados<b>'+(Math.round(pErr*10)/10)+' / 2</b></div>';
+  if(unicos.length){ h+='<div class="sect">Para pulir</div>';
+    for(i=0;i<unicos.length;i++) h+='<div class="tip2">'+unicos[i]+'</div>'; }
+  h+='<div class="captura"><b>Toma captura de esta pantalla</b> y mándala al grupo con tu diagnóstico.</div>'+
+     '<button class="btn" id="otra" style="margin-top:16px">Volver a escanear</button>'+
+     '<p class="firma">Método Konecta · Taller de objeciones<b>Elaborado por Yahir De la Cruz</b></p>';
+  $('fin').innerHTML=h; ver('fin',true);
+  try{window.scrollTo(0,0);}catch(e){}
+  if($('otra')) $('otra').onclick=function(){ location.reload(); };
+}
+
+/* ---------- arranque ---------- */
+ver('aviso',false); ver('intro',true);
+$('btnStart').onclick=function(){
+  try{
+    var v=$('nombre').value;
+    jugador=(v&&v.replace(/^\s+|\s+$/g,''))?v.replace(/^\s+|\s+$/g,''):'Asesora';
+    pTri=0; pDx=0; pCierre=0; pVoc=0; pErr=0; notas=[]; etapa=0; idx=0;
+    lote1=revuelve(TRIAGE).slice(0,4);
+    lote3=revuelve(VOCAB).slice(0,3);
+    lote4=revuelve(ERRORES).slice(0,4);
+    ver('intro',false); ver('juego',true); triage();
+    try{window.scrollTo(0,0);}catch(e){}
+  }catch(err){
+    var d=document.createElement('div');
+    d.style.cssText='background:#7A2A18;padding:14px;margin-top:14px;border-radius:10px;font-size:13px';
+    d.innerHTML='No se pudo iniciar: '+(err&&err.message?esc(err.message):'error');
+    $('intro').appendChild(d);
+  }
+};
+$('nombre').onkeydown=function(e){ if(e&&e.keyCode===13){ if(e.preventDefault)e.preventDefault(); $('btnStart').onclick(); } };
+})();
+</script>
+</body>
+</html>
