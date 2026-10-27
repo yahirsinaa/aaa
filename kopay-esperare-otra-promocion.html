@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#F2601A">
+<title>Esperaré otra promoción · Kopay</title>
+<style>
+*{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}
+html,body{margin:0;padding:0;background:#E8DFD3}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  color:#2A241E;-webkit-text-size-adjust:100%}
+#wrap{max-width:520px;margin:0 auto;background:#FAF3EC;min-height:100%;padding-bottom:30px;overflow:hidden}
+button{font-family:inherit;cursor:pointer;border:0;background:none;color:#2A241E}
+
+#aviso{background:#7A2A18;color:#fff;padding:16px;font-size:14px;line-height:1.5}
+#aviso b{display:block;font-size:15px;margin-bottom:6px}
+
+#top{background:#F2601A;color:#fff;padding:12px 16px;overflow:hidden}
+#etapa{float:left;font-size:11px;font-weight:bold;letter-spacing:1.5px;text-transform:uppercase}
+#paso{float:right;font-size:11px;font-weight:bold;background:rgba(255,255,255,.24);padding:4px 10px;border-radius:20px}
+
+/* secuencia */
+#tablero{padding:12px 14px 4px}
+.sq{display:block;width:100%;text-align:left;background:#FFF;border:1.5px solid #EDE2D4;border-left:4px solid #EDE2D4;
+  border-radius:4px 14px 14px 4px;padding:13px 14px;margin-bottom:9px;font-size:14.5px;line-height:1.4;
+  color:#2A241E;box-shadow:0 2px 8px rgba(42,36,30,.05);min-height:56px}
+.sq .num{display:inline-block;width:26px;height:26px;line-height:26px;text-align:center;border-radius:50%;
+  background:#EFE6DA;color:#A49384;font-size:12px;font-weight:bold;margin-right:10px}
+.sq.puesta{border-left-color:#2E7D4F;background:#EDF7F1}
+.sq.puesta .num{background:#2E7D4F;color:#fff}
+.sq.err{border-left-color:#C0392B;background:#FDEEEC}
+.sq .eti{display:block;font-size:9.5px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;
+  color:#C2490F;margin:6px 0 0 36px}
+#marcador{padding:0 14px 8px;font-size:12.5px;color:#8A7F76;overflow:hidden}
+#marcador b{float:right;color:#C2490F}
+
+/* escena */
+#escena{padding:14px 14px 0}
+#dice{background:#FFF;border:1px solid #EDE2D4;border-radius:16px 16px 16px 5px;padding:13px 15px;
+  font-size:16px;line-height:1.45;min-height:54px}
+#dice b{display:block;font-size:10.5px;font-weight:bold;letter-spacing:1.2px;text-transform:uppercase;
+  color:#C2490F;margin-bottom:5px}
+#ruta{padding:10px 14px 0;overflow:hidden}
+.esc{float:left;width:25%;padding:0 3px}
+.escIn{border-radius:8px;padding:7px 3px;text-align:center;font-size:10px;font-weight:bold;line-height:1.2;
+  background:#EFE6DA;color:#A49384}
+.esc.on .escIn{background:#F2601A;color:#fff}
+.esc.hecho .escIn{background:#F7C9AE;color:#8A3B10}
+
+/* opciones */
+#dock{padding:12px 14px 8px}
+#tip{font-size:11px;font-weight:bold;letter-spacing:1.2px;text-transform:uppercase;color:#8A7F76;margin-bottom:10px}
+.opt{display:block;width:100%;text-align:left;background:#FFF;border:1.5px solid #EDE2D4;border-left:4px solid #EDE2D4;
+  border-radius:4px 14px 14px 4px;padding:14px;margin-bottom:9px;font-size:15px;line-height:1.4;color:#2A241E;
+  min-height:56px;box-shadow:0 2px 8px rgba(42,36,30,.05)}
+.optBien{border-color:#2E7D4F;border-left-color:#2E7D4F;background:#EDF7F1}
+.optMal{border-color:#C0392B;border-left-color:#C0392B;background:#FDEEEC}
+.optDim{opacity:.38}
+.chip{display:inline-block;background:#FFF;color:#2A241E;border:1.5px solid #E6D9C8;border-radius:40px;
+  padding:12px 15px;margin:0 7px 8px 0;font-size:14px;font-weight:600}
+.chip.on{background:#F2601A;color:#fff;border-color:#F2601A}
+.chip.bien{background:#EDF7F1;border-color:#2E7D4F;color:#1E6340}
+.chip.mal{background:#FDEEEC;border-color:#C0392B;color:#8F2D22}
+.fb{border-left:4px solid #A49384;background:#FFF;padding:13px 14px;margin-bottom:11px;border-radius:0 10px 10px 0}
+.fb b{display:block;font-size:12px;font-weight:bold;margin-bottom:5px}
+.fb p{margin:0;font-size:14px;line-height:1.5;color:#5B544E}
+.btn{display:block;width:100%;background:#F2601A;color:#fff;border-radius:12px;padding:16px;font-size:16px;
+  font-weight:bold;text-align:center;margin-bottom:9px}
+
+/* pantallas */
+#intro,#fin{padding:26px 20px 30px}
+.kick{font-size:11.5px;font-weight:bold;letter-spacing:1.5px;text-transform:uppercase;color:#C2490F;margin-bottom:10px}
+h1{font-size:34px;line-height:1.06;margin:0 0 12px}
+.lead{font-size:15px;line-height:1.55;color:#6B6560;margin:0 0 16px}
+.lead b{color:#2A241E}
+.regla{border-top:1px solid #EDE2D4;padding:12px 0;font-size:13.5px;line-height:1.5;color:#6B6560;overflow:hidden}
+.regla i{float:left;width:26px;font-style:normal}
+.regla div{margin-left:30px}.regla b{color:#2A241E}
+label{display:block;font-size:13px;color:#6B6560;margin:20px 0 8px}
+#nombre{width:100%;padding:15px;background:#FFF;border:1.5px solid #E6D9C8;border-radius:12px;
+  font-family:inherit;font-size:16px;font-weight:bold;color:#2A241E}
+.nota{font-size:74px;font-weight:bold;color:#F2601A;line-height:1}
+.notaBaja{color:#A49384}
+.notaDe{font-size:15px;color:#6B6560;margin-left:8px}
+.fila{border-top:1px solid #EDE2D4;padding:11px 0;font-size:13.5px;color:#6B6560;overflow:hidden}
+.fila b{float:right;color:#2A241E}
+.sect{font-size:11.5px;font-weight:bold;letter-spacing:1.5px;text-transform:uppercase;color:#C2490F;margin:20px 0 10px}
+.tip2{font-size:13px;line-height:1.5;color:#6B6560;border-left:2px solid #EDE2D4;padding-left:12px;margin-bottom:10px}
+.captura{border:2px dashed #F2601A;border-radius:12px;padding:13px;font-size:13px;line-height:1.5;color:#6B6560;
+  margin-top:18px;background:#FFF4EC}
+.captura b{color:#C2490F}
+.firma{margin-top:22px;font-size:11.5px;line-height:1.8;color:#A49384}
+.firma b{display:block;color:#2A241E;font-size:12.5px}
+.ficha{background:#FFF;border:1.5px solid #EDE2D4;border-radius:12px;padding:14px;margin-bottom:12px;font-size:14px;line-height:1.6}
+.ficha b{color:#C2490F}
+</style>
+</head>
+<body>
+<div id="wrap">
+
+  <div id="aviso">
+    <b>⚠ Este visor no está ejecutando la cápsula</b>
+    La estás abriendo desde una vista previa (Drive, Gmail, WhatsApp o Archivos) que bloquea el contenido
+    interactivo. Ábrela en Chrome o Safari, o pide el enlace en vez del archivo.
+  </div>
+  <noscript><div style="background:#7A2A18;color:#fff;padding:16px;font-size:14px">Activa JavaScript para hacer la cápsula.</div></noscript>
+
+  <div id="intro" style="display:none">
+    <div class="kick">Manejo de objeciones</div>
+    <h1>“Esperaré otra promoción”</h1>
+    <p class="lead">La promoción puede mejorar el precio, pero <b>empezar hoy adelanta los resultados</b>. Dos partes: primero ordenas la conversación, luego la sostienes con Laura.</p>
+    <div class="regla"><i>🪜</i><div><b>La secuencia:</b> pon las cinco frases en el orden en que se dicen.</div></div>
+    <div class="regla"><i>🔀</i><div><b>El camino:</b> decide si va por promoción publicada o por la escalera.</div></div>
+    <div class="regla" style="border-bottom:1px solid #EDE2D4"><i>🤝</i><div><b>El preacuerdo:</b> si decide esperar, nadie se va sin siguiente paso.</div></div>
+    <label for="nombre">¿Cómo te llamas?</label>
+    <input id="nombre" maxlength="24" placeholder="Tu nombre" autocomplete="off">
+    <button class="btn" id="btnStart" style="margin-top:16px">Empezar</button>
+    <p class="firma">Kopay · Capacitación de ventas<b>Elaborado por Yahir De la Cruz</b></p>
+  </div>
+
+  <div id="juego" style="display:none">
+    <div id="top"><div id="etapa">La secuencia</div><div id="paso">0 / 5 en orden</div></div>
+    <div id="ruta" style="display:none"></div>
+    <div id="tablero"></div>
+    <div id="marcador" style="display:none">Errores de orden<b id="falladas">0</b></div>
+    <div id="escena" style="display:none"><div id="dice"></div></div>
+    <div id="dock"><div id="tip">—</div><div id="zona"></div></div>
+  </div>
+
+  <div id="fin" style="display:none"></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+function $(id){ return document.getElementById(id); }
+function ver(id,m){ var e=$(id); if(e) e.style.display = m ? '' : 'none'; }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function revuelve(a){ var b=a.slice(),i,j,x; for(i=b.length-1;i>0;i--){ j=Math.floor(Math.random()*(i+1)); x=b[i]; b[i]=b[j]; b[j]=x; } return b; }
+
+/* ========== EL CAMINO ========== */
+var ESCALONES=['Buscar el no','Buscar el sí','Opciones','Preacuerdo'];
+
+/* ========== MOTOR ========== */
+var jugador='', orden=[], paso=0, errores=0, bloqueado=false;
+var pMemo=0, pCamino=0, pCierre=0, notas=[], escActual=0;
+
+var SECUENCIA=[
+ {eti:'1 · Validar', t:'“Claro, a todas nos gusta aprovechar una buena promoción.”'},
+ {eti:'2 · Buscar el no', t:'“Tú ya sabes lo cómodo que es olvidarte del vello en axilas. ¿Crees que sería mala idea empezar a disfrutarlo también en piernas?”'},
+ {eti:'3 · Buscar el sí', t:'“¿No sería padrísimo empezar a disfrutarlo esta misma semana?”'},
+ {eti:'4 · Mostrar opciones', t:'“¿Aprovechas los meses sin intereses o lo apartas con solo $X?”'},
+ {eti:'5 · Preacuerdo', t:'“¿Qué promoción tendría que salir para que digas: esta es?”'}
+];
+
+function pintaSec(){
+  var h='', i, c, puesta;
+  for(i=0;i<orden.length;i++){
+    c=orden[i]; puesta=(c.pos>0);
+    h+='<button type="button" class="sq'+(puesta?' puesta':'')+'" data-i="'+i+'"'+(puesta?' disabled':'')+'>'+
+       '<span class="num">'+(puesta?c.pos:'?')+'</span>'+esc(c.t)+
+       (puesta?'<span class="eti">'+esc(c.eti)+'</span>':'')+'</button>';
+  }
+  $('tablero').innerHTML=h;
+  var bs=$('tablero').getElementsByTagName('button'), k;
+  for(k=0;k<bs.length;k++){
+    bs[k].onclick=(function(el){ return function(){ eligeSec(parseInt(el.getAttribute('data-i'),10), el); }; })(bs[k]);
+  }
+  $('paso').innerHTML=paso+' / 5 en orden';
+  $('falladas').innerHTML=errores;
+}
+function eligeSec(i, el){
+  if(bloqueado) return;
+  var c=orden[i];
+  if(c.pos>0) return;
+  if(c.real===paso+1){
+    paso++; c.pos=paso; pintaSec();
+    if(paso===5) cierraSec();
+  }else{
+    errores++;
+    el.className='sq err';
+    $('falladas').innerHTML=errores;
+    bloqueado=true;
+    var correcta=null, j;
+    for(j=0;j<orden.length;j++) if(orden[j].real===paso+1) correcta=orden[j];
+    $('tip').innerHTML='Esa no va en el '+(paso+1)+'º lugar. Toca: '+correcta.eti.split(' · ')[1].toLowerCase();
+    setTimeout(function(){ el.className='sq'; bloqueado=false; }, 700);
+  }
+}
+function cierraSec(){
+  var extra = errores-2; if(extra<0) extra=0;
+  pMemo = 3 - (extra*0.4); if(pMemo<0.5) pMemo=0.5; if(pMemo>3) pMemo=3;
+  pMemo = Math.round(pMemo*100)/100;
+  if(errores>3) notas.push('El orden no es decorativo: validar primero baja la defensa, el “no” da permiso y el “sí” conecta con el beneficio. Si adelantas las opciones, estás negociando precio sin haber construido el motivo.');
+  var z=$('zona'); z.innerHTML='';
+  $('tip').innerHTML='Secuencia completa';
+  var d=document.createElement('div'); d.className='fb';
+  d.style.borderLeftColor = (errores<=2)?'#2E7D4F':'#C0392B';
+  d.innerHTML='<b style="color:'+((errores<=2)?'#2E7D4F':'#C0392B')+'">'+
+    (errores<=2?'Te sabes el orden':'Te costó el orden')+'</b><p>Terminaste con '+errores+
+    ' errores de orden. Los tres primeros escalones son una sola conversación: validar, buscar el no y buscar el sí. Las opciones llegan después, y el preacuerdo solo si decide esperar.</p>';
+  z.appendChild(d);
+  var n=document.createElement('button'); n.className='btn'; n.type='button'; n.innerHTML='Ahora llega Laura';
+  n.onclick=iniciaCamino; z.appendChild(n);
+}
+
+/* ---------- el camino ---------- */
+var PASOS=[
+ {tipo:'decision', esc:0,
+  dice:'“Sí me interesa piernas, pero mejor esperaré a que salga otra promoción.”',
+  tip:'Antes de contestarle, ¿qué defines primero?',
+  opts:[
+   {t:'Si la promoción que ella espera ya está publicada o no: eso decide el camino.', ok:true,
+    w:'Hay dos caminos. Si ya está publicada, va el cierre condicional. Si no, se sube la escalera. Todo lo demás depende de eso.'},
+   {t:'Cuánto podría bajarle para que se decida hoy.',
+    w:'Bajar el precio por tu cuenta no es ninguno de los dos caminos y devalúa la promoción real.'},
+   {t:'Si le alcanza o no, preguntándole su presupuesto.',
+    w:'Todavía no sabes si el freno es el dinero: ella habló de esperar una promoción, no de que no le alcance.'},
+   {t:'Qué área le conviene más según su historial.',
+    w:'Eso ya lo trabajaste antes. Aquí la decisión es cómo atender la objeción.'}]},
+ {tipo:'decision', esc:0,
+  dice:'Revisas el documento: la promoción que ella espera ya está publicada, aunque su vigencia empieza el lunes.',
+  tip:'Camino A. ¿Cómo lo usas?',
+  opts:[
+   {t:'“Si te aplico la promoción hoy, ¿empezamos?”', ok:true,
+    w:'Cierre condicional: ofreces el beneficio como condición y lo aplicas después del sí. Ese es el camino A completo.'},
+   {t:'“Mira, te la aplico desde hoy aunque empiece el lunes.”',
+    w:'Regalaste el beneficio antes del sí. Se ofrece como condición, no como obsequio.'},
+   {t:'“Vente el lunes que ya entra la promoción.”',
+    w:'La mandaste a su casa. El documento indica que puede aplicarse hoy: ahí estaba tu cierre.'},
+   {t:'“Déjame preguntarle a mi encargada si se puede.”',
+    w:'Pierdes el momento y la seguridad. Si el documento lo indica, la decisión es tuya.'}]},
+ {tipo:'decision', esc:1,
+  dice:'Caso real: la promoción que ella espera todavía no sale. Laura insiste en esperar.',
+  tip:'Camino B, escalón 1. ¿Qué le dices?',
+  opts:[
+   {t:'“Claro, a todas nos gusta aprovechar una buena promoción. Tú ya sabes lo cómodo que es olvidarte del vello en axilas: ¿crees que sería mala idea empezar a disfrutarlo también en piernas?”', ok:true,
+    w:'Validas y buscas el “no”, conectando con el área que ya se trató. Si contesta “no, pues no”, ya tienes permiso para avanzar.'},
+   {t:'“Entiendo, pero las promociones casi no cambian, siempre es lo mismo.”',
+    w:'La contradices y devalúas tus propias promociones.'},
+   {t:'“¿Y si te aparto piernas con un anticipo pequeño?”',
+    w:'Brincaste a opciones sin haber validado ni buscado el no. La escalera se sube en orden.'},
+   {t:'“Va, cuando salga te aviso.”',
+    w:'Soltaste la conversación en el primer escalón, sin preacuerdo ni seguimiento.'}]},
+ {tipo:'decision', esc:2,
+  dice:'Laura: “No, pues mala idea no sería… la verdad sí me gustaría tenerlo listo.”',
+  tip:'Dijo que no sería mala idea. Escalón 2.',
+  opts:[
+   {t:'“¿No sería padrísimo empezar a disfrutarlo esta misma semana? Entonces déjame enseñarte cómo lo podemos hacer posible.”', ok:true,
+    w:'Buscas el sí conectando con el beneficio, y enlazas directo con las opciones. Los tres escalones son una sola conversación.'},
+   {t:'“Perfecto, entonces te agendo y ya vemos el pago después.”',
+    w:'Agendaste sin cerrar la forma de pago. Las opciones son parte de la conversación, no un trámite posterior.'},
+   {t:'“¿Entonces sí le entras o sigues esperando?”',
+    w:'Suena a ultimátum y la empuja a defenderse.'},
+   {t:'“Ándale, además esta promoción ya casi se acaba.”',
+    w:'Urgencia inventada. Destruye la confianza y el estatus de la clínica.'}]},
+ {tipo:'decision', esc:3,
+  dice:'Laura: “Sí me late, pero de verdad ahorita no quiero gastar tanto.”',
+  tip:'Escalón 3. Le muestras opciones.',
+  opts:[
+   {t:'“¿Te gustaría aprovechar los meses sin intereses o prefieres apartarlo con solo $500?”', ok:true,
+    w:'Dos opciones concretas, con la mensualidad lista y el apartado expresado en pesos. Si elige una: “déjame buscarte un espacio”.'},
+   {t:'“Te puedo hacer un precio especial si lo tomas hoy.”',
+    w:'Inventar descuentos fuera de la promoción vigente es justo lo que el método evita.'},
+   {t:'“¿De cuánto dispones? Vemos qué te alcanza.”',
+    w:'Bajar el paquete al primer freno tira el valor. Primero se muestran las formas de pago.'},
+   {t:'“Hay meses sin intereses, por si te sirve.”',
+    w:'Dicho al aire no es una opción: falta la pregunta que la hace elegir.'}]}
+];
+
+function pintaRuta(){
+  var h='', i, cl;
+  for(i=0;i<ESCALONES.length;i++){
+    cl = (i+1===escActual) ? 'esc on' : ((i+1<escActual) ? 'esc hecho' : 'esc');
+    h+='<div class="'+cl+'"><div class="escIn">'+(i+1)+'. '+ESCALONES[i]+'</div></div>';
+  }
+  $('ruta').innerHTML=h;
+}
+var pIdx=0;
+function iniciaCamino(){
+  pIdx=0; escActual=0;
+  ver('tablero',false); ver('marcador',false); ver('escena',true); ver('ruta',true);
+  $('etapa').innerHTML='El camino';
+  pintaRuta(); pasoCamino();
+}
+function pasoCamino(){
+  bloqueado=false;
+  var P=PASOS[pIdx], z=$('zona'), i;
+  escActual=P.esc; pintaRuta();
+  $('paso').innerHTML='Paso '+(pIdx+1)+' / '+PASOS.length;
+  $('dice').innerHTML='<b>'+((pIdx===1)?'La escena':'Laura')+'</b>'+esc(P.dice);
+  $('tip').innerHTML=P.tip;
+  z.innerHTML='';
+  var ops=revuelve(P.opts);
+  for(i=0;i<ops.length;i++){
+    (function(o){
+      var b=document.createElement('button'); b.className='opt'; b.type='button'; b.innerHTML=esc(o.t);
+      b.onclick=function(){
+        if(bloqueado) return; bloqueado=true;
+        var bs=z.getElementsByTagName('button'), k;
+        for(k=0;k<bs.length;k++){ bs[k].disabled=true; if(bs[k]!==b) bs[k].className='opt optDim'; }
+        b.className='opt '+(o.ok?'optBien':'optMal');
+        if(o.ok) pCamino+=1; else notas.push(o.w);
+        var d=document.createElement('div'); d.className='fb';
+        d.style.borderLeftColor=(o.ok?'#2E7D4F':'#C0392B');
+        d.innerHTML='<b style="color:'+(o.ok?'#2E7D4F':'#C0392B')+'">'+(o.ok?'Bien jugado':'Ahí se pierde')+'</b><p>'+o.w+'</p>';
+        z.appendChild(d);
+        var n=document.createElement('button'); n.className='btn'; n.type='button';
+        n.innerHTML=(pIdx>=PASOS.length-1)?'Laura decide':'Continuar';
+        n.onclick=function(){ if(pIdx>=PASOS.length-1){ preacuerdo(); } else { pIdx++; pasoCamino(); } };
+        z.appendChild(n);
+      };
+      z.appendChild(b);
+    })(ops[i]);
+  }
+}
+
+/* ---------- preacuerdo y seguimiento ---------- */
+function preacuerdo(){
+  bloqueado=false;
+  escActual=4; pintaRuta();
+  $('etapa').innerHTML='El preacuerdo'; $('paso').innerHTML='Registro';
+  $('dice').innerHTML='<b>Laura</b>'+esc('“Déjame esperar a esa promoción, porfa. Esta sí la quiero aprovechar.”');
+  $('tip').innerHTML='Decidió esperar. ¿Qué registras del preacuerdo? Marca las tres correctas';
+  var items=[{t:'Área o paquete que quiere',ok:true},{t:'Qué promoción espera',ok:true},
+             {t:'Forma de contacto',ok:true},{t:'Su fecha de cumpleaños'},
+             {t:'Cuánto gastó la vez pasada'},{t:'Si vino acompañada'}];
+  var sel={}, z=$('zona'); z.innerHTML='';
+  var box=document.createElement('div');
+  revuelve(items).forEach(function(it){
+    var b=document.createElement('button'); b.className='chip'; b.type='button'; b.innerHTML=esc(it.t);
+    b.onclick=function(){ if(bloqueado) return;
+      if(sel[it.t]){ delete sel[it.t]; b.className='chip'; } else { sel[it.t]=1; b.className='chip on'; } };
+    box.appendChild(b);
+  });
+  z.appendChild(box);
+  var ok=document.createElement('button'); ok.className='btn'; ok.type='button'; ok.innerHTML='Registrar';
+  ok.onclick=function(){
+    if(bloqueado) return; bloqueado=true;
+    var bien=true, i, chips=box.getElementsByTagName('button');
+    for(i=0;i<items.length;i++){
+      if(items[i].ok && !sel[items[i].t]) bien=false;
+      if(!items[i].ok && sel[items[i].t]) bien=false;
+    }
+    for(i=0;i<chips.length;i++){
+      chips[i].disabled=true;
+      var txt=chips[i].innerHTML, j, esOk=false;
+      for(j=0;j<items.length;j++) if(esc(items[j].t)===txt && items[j].ok) esOk=true;
+      chips[i].className = esOk ? 'chip bien' : (sel[txt.replace(/&amp;/g,'&')]?'chip mal':'chip');
+    }
+    ok.disabled=true;
+    if(bien) pCierre+=1; else notas.push('El preacuerdo se registra con tres datos: el área o paquete, qué promoción espera y por dónde la vas a contactar. Lo demás no sirve para el seguimiento.');
+    var d=document.createElement('div'); d.className='fb';
+    d.style.borderLeftColor=(bien?'#2E7D4F':'#C0392B');
+    d.innerHTML='<b style="color:'+(bien?'#2E7D4F':'#C0392B')+'">'+(bien?'Preacuerdo completo':'Registro incompleto')+
+      '</b><p>Área o paquete, qué promoción espera y forma de contacto. Con eso el seguimiento se puede ejecutar aunque la atienda otra persona.</p>';
+    z.appendChild(d);
+    var n=document.createElement('button'); n.className='btn'; n.type='button'; n.innerHTML='Y el día que salga la promoción…';
+    n.onclick=seguimiento; z.appendChild(n);
+  };
+  z.appendChild(ok);
+}
+function seguimiento(){
+  bloqueado=false;
+  $('etapa').innerHTML='Seguimiento'; $('paso').innerHTML='Último paso';
+  $('dice').innerHTML='<b>La escena</b>'+esc('Pasaron dos semanas y hoy por fin salió la promoción que Laura estaba esperando.');
+  $('tip').innerHTML='¿Qué haces?';
+  var opts=[
+   {t:'Le escribo a primera hora con su paquete ya calculado y le ofrezco espacio esta semana.', ok:true,
+    w:'El día que sale la promoción se escribe a primera hora, con el precio y la mensualidad ya calculados, y se ofrece agenda. Si no responde, llamada al día siguiente.'},
+   {t:'Espero a que ella escriba, porque quedó de avisarme.',
+    w:'El preacuerdo lo ejecutas tú. Si esperas, el seguimiento no existe.'},
+   {t:'Le mando la promoción general que salió, como a todas.',
+    w:'Pierdes lo personalizado. Ella espera su paquete calculado, no el flyer.'},
+   {t:'Le escribo cuando tenga un hueco en la agenda esta semana.',
+    w:'La promoción tiene vigencia; escribir tarde es perder el motivo por el que ella aceptó esperar.'}];
+  var z=$('zona'); z.innerHTML='';
+  revuelve(opts).forEach(function(o){
+    var b=document.createElement('button'); b.className='opt'; b.type='button'; b.innerHTML=esc(o.t);
+    b.onclick=function(){
+      if(bloqueado) return; bloqueado=true;
+      var bs=z.getElementsByTagName('button'), k;
+      for(k=0;k<bs.length;k++){ bs[k].disabled=true; if(bs[k]!==b) bs[k].className='opt optDim'; }
+      b.className='opt '+(o.ok?'optBien':'optMal');
+      if(o.ok) pCierre+=1; else notas.push(o.w);
+      var d=document.createElement('div'); d.className='fb';
+      d.style.borderLeftColor=(o.ok?'#2E7D4F':'#C0392B');
+      d.innerHTML='<b style="color:'+(o.ok?'#2E7D4F':'#C0392B')+'">'+(o.ok?'Así se cumple el preacuerdo':'Ahí se cae el seguimiento')+'</b><p>'+o.w+'</p>';
+      z.appendChild(d);
+      var n=document.createElement('button'); n.className='btn'; n.type='button'; n.innerHTML='Ver mi resultado';
+      n.onclick=termina; z.appendChild(n);
+    };
+    z.appendChild(b);
+  });
+}
+
+/* ---------- resultado ---------- */
+function termina(){
+  ver('juego',false);
+  var nota=Math.round(pMemo+pCamino+pCierre); if(nota>10) nota=10; if(nota<0) nota=0;
+  var titulo, texto;
+  if(nota>=9){ titulo='Conversación completa';
+    texto='Te sabes las frases, elegiste bien el camino y dejaste el preacuerdo con seguimiento. Así una clienta que decide esperar sigue siendo una venta.'; }
+  else if(nota>=7){ titulo='Buen manejo';
+    texto='Sostuviste la conversación. Cuida el orden de la escalera: validar, buscar el no, buscar el sí y hasta entonces las opciones.'; }
+  else if(nota>=5){ titulo='Te brincaste escalones';
+    texto='Avanzaste, pero adelantaste pasos o soltaste la conversación. Los tres primeros escalones son una sola plática, no tres intentos sueltos.'; }
+  else { titulo='A repasar el material';
+    texto='Recuerda la idea base: la promoción puede mejorar el precio, pero empezar hoy adelanta los resultados.'; }
+  var unicos=[], i;
+  for(i=0;i<notas.length;i++){ if(unicos.join('|').indexOf(notas[i])<0) unicos.push(notas[i]); }
+  unicos=unicos.slice(0,3);
+  var h='<div class="kick">Tu resultado</div>'+
+    '<div><span class="nota'+(nota<5?' notaBaja':'')+'">'+nota+'</span><span class="notaDe">de 10</span></div>'+
+    '<h1 style="font-size:26px;margin-top:12px">'+titulo+'</h1>'+
+    '<p class="lead">'+esc(jugador)+', '+texto+'</p>'+
+    '<div class="sect">De dónde sale</div>'+
+    '<div class="fila">La secuencia<b>'+pMemo+' / 3</b></div>'+
+    '<div class="fila">El camino con Laura<b>'+pCamino+' / 5</b></div>'+
+    '<div class="fila" style="border-bottom:1px solid #EDE2D4">Preacuerdo y seguimiento<b>'+pCierre+' / 2</b></div>'+
+    '<div class="sect">Las cinco frases</div>'+
+    '<div class="ficha"><b>Validar:</b> “a todas nos gusta aprovechar una buena promoción”.<br>'+
+    '<b>Buscar el no:</b> “¿crees que sería mala idea empezar a disfrutarlo desde ahora?”<br>'+
+    '<b>Buscar el sí:</b> “¿no sería padrísimo empezar esta misma semana?”<br>'+
+    '<b>Opciones:</b> “¿meses sin intereses o lo apartas con solo $X?”<br>'+
+    '<b>Preacuerdo:</b> “¿qué promoción tendría que salir para que digas: esta es?”</div>';
+  if(unicos.length){ h+='<div class="sect">Para pulir</div>';
+    for(i=0;i<unicos.length;i++) h+='<div class="tip2">'+unicos[i]+'</div>'; }
+  h+='<div class="captura"><b>Toma captura de esta pantalla</b> y mándala al grupo con tu resultado.</div>'+
+     '<button class="btn" id="otra" style="margin-top:16px">Jugar otra vez</button>'+
+     '<p class="firma">Kopay · Capacitación de ventas<b>Elaborado por Yahir De la Cruz</b></p>';
+  $('fin').innerHTML=h; ver('fin',true);
+  try{window.scrollTo(0,0);}catch(e){}
+  if($('otra')) $('otra').onclick=function(){ location.reload(); };
+}
+
+/* ---------- arranque ---------- */
+ver('aviso',false); ver('intro',true);
+$('btnStart').onclick=function(){
+  try{
+    var v=$('nombre').value;
+    jugador=(v&&v.replace(/^\s+|\s+$/g,''))?v.replace(/^\s+|\s+$/g,''):'Asesora';
+    pMemo=0; pCamino=0; pCierre=0; notas=[]; paso=0; errores=0; bloqueado=false;
+    orden=[];
+    var i;
+    for(i=0;i<SECUENCIA.length;i++) orden.push({real:i+1, pos:0, eti:SECUENCIA[i].eti, t:SECUENCIA[i].t});
+    orden=revuelve(orden);
+    ver('intro',false); ver('juego',true); ver('marcador',true);
+    $('tip').innerHTML='Toca las frases en el orden en que se dicen';
+    pintaSec();
+    try{window.scrollTo(0,0);}catch(e){}
+  }catch(err){
+    var d=document.createElement('div');
+    d.style.cssText='background:#7A2A18;color:#fff;padding:14px;margin-top:14px;border-radius:10px;font-size:13px';
+    d.innerHTML='No se pudo iniciar: '+(err&&err.message?esc(err.message):'error');
+    $('intro').appendChild(d);
+  }
+};
+$('nombre').onkeydown=function(e){ if(e&&e.keyCode===13){ if(e.preventDefault)e.preventDefault(); $('btnStart').onclick(); } };
+})();
+</script>
+</body>
+</html>
