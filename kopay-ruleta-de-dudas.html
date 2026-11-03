@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1A1512">
+<title>La ruleta de las dudas · Kopay</title>
+<style>
+*{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}
+html,body{margin:0;padding:0;background:#120F0D}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  color:#fff;-webkit-text-size-adjust:100%}
+#wrap{max-width:520px;margin:0 auto;background:#1A1512;min-height:100%;padding-bottom:30px;overflow:hidden}
+button{font-family:inherit;cursor:pointer;border:0;background:none;color:#fff}
+
+#aviso{background:#7A2A18;padding:16px;font-size:14px;line-height:1.5}
+#aviso b{display:block;font-size:15px;margin-bottom:6px}
+
+#top{background:#241B16;padding:11px 14px;border-bottom:2px solid #F2601A;overflow:hidden}
+#etapa{float:left;font-size:11px;font-weight:bold;letter-spacing:1.5px;text-transform:uppercase;color:#F2601A}
+#racha{float:right;font-size:12px;font-weight:bold;color:#FFB27A}
+#tiros{float:right;margin-right:12px;font-size:11px;font-weight:bold;color:rgba(255,255,255,.45);
+  border:1px solid rgba(255,255,255,.16);border-radius:20px;padding:4px 10px}
+
+/* ruleta */
+#zonaRueda{padding:16px 14px 6px;text-align:center;position:relative}
+#aguja{width:0;height:0;margin:0 auto -8px;border-left:13px solid transparent;border-right:13px solid transparent;
+  border-top:20px solid #FFB27A;position:relative;z-index:3}
+#ruedaBox{width:250px;height:250px;margin:0 auto;position:relative}
+#rueda{width:250px;height:250px;border-radius:50%;position:relative;
+  background:#F2601A;
+  background:-webkit-radial-gradient(circle, #FF8A45 0%, #F2601A 62%, #C2490F 100%);
+  background:radial-gradient(circle, #FF8A45 0%, #F2601A 62%, #C2490F 100%);
+  border:6px solid #241B16;box-shadow:0 10px 30px rgba(0,0,0,.5);
+  -webkit-transition:-webkit-transform 3.1s cubic-bezier(.17,.67,.21,1);
+  transition:transform 3.1s cubic-bezier(.17,.67,.21,1)}
+.linea{position:absolute;left:50%;top:0;width:2px;height:119px;background:rgba(36,27,22,.45);
+  margin-left:-1px;-webkit-transform-origin:50% 119px;transform-origin:50% 119px}
+.sec{position:absolute;left:50%;top:14px;width:62px;margin-left:-31px;font-size:11px;font-weight:bold;
+  line-height:1.2;color:#2A1A10;-webkit-transform-origin:50% 105px;transform-origin:50% 105px}
+#centro{position:absolute;left:50%;top:50%;width:66px;height:66px;margin:-33px 0 0 -33px;border-radius:50%;
+  background:#241B16;border:4px solid #FFB27A;line-height:58px;font-size:11px;font-weight:bold;color:#FFB27A}
+#girar{display:block;width:100%;background:#F2601A;color:#fff;border-radius:12px;padding:16px;font-size:16px;
+  font-weight:bold;text-align:center;margin:14px 0 2px}
+#girar.off{background:#3A2C23;color:#8A7F76}
+
+/* duda */
+#duda{background:#fff;color:#1C1917;border-radius:16px;padding:14px 16px;font-size:16px;line-height:1.45;
+  margin:14px 14px 0;font-weight:600;min-height:56px}
+#duda b{display:block;font-size:10.5px;font-weight:bold;letter-spacing:1.2px;text-transform:uppercase;
+  color:#C2490F;margin-bottom:5px}
+#reloj{text-align:center;font-size:13px;font-weight:bold;color:#F2601A;margin-top:8px}
+#reloj.rush{color:#FF7A5E}
+
+#dock{padding:12px 14px 8px}
+#tip{font-size:11px;font-weight:bold;letter-spacing:1.2px;text-transform:uppercase;color:#8A7F76;margin-bottom:10px}
+.opt{display:block;width:100%;text-align:left;background:#241B16;border:1px solid #3A2C23;border-left:4px solid #3A2C23;
+  border-radius:4px 14px 14px 4px;padding:14px;margin-bottom:9px;font-size:15px;line-height:1.4;color:#fff;min-height:56px}
+.optBien{border-left-color:#3E9C58;background:#16301F}
+.optMal{border-left-color:#C0392B;background:#2E1613}
+.optDim{opacity:.32}
+.fb{border-left:4px solid #8A7F76;background:#241B16;padding:13px 14px;margin-bottom:11px;border-radius:0 10px 10px 0}
+.fb b{display:block;font-size:12px;font-weight:bold;margin-bottom:5px}
+.fb p{margin:0;font-size:14px;line-height:1.5;color:rgba(255,255,255,.72)}
+.btn{display:block;width:100%;background:#F2601A;color:#fff;border-radius:12px;padding:16px;font-size:16px;
+  font-weight:bold;text-align:center;margin-bottom:9px}
+
+#intro,#fin{padding:26px 20px 30px}
+.kick{font-size:11.5px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#F2601A;margin-bottom:10px}
+h1{font-size:36px;line-height:1.05;margin:0 0 12px}
+.lead{font-size:15px;line-height:1.55;color:rgba(255,255,255,.62);margin:0 0 16px}
+.lead b{color:#fff}
+.regla{border-top:1px solid rgba(255,255,255,.12);padding:12px 0;font-size:13.5px;line-height:1.5;
+  color:rgba(255,255,255,.62);overflow:hidden}
+.regla i{float:left;width:26px;font-style:normal}
+.regla div{margin-left:30px}.regla b{color:#fff}
+label{display:block;font-size:13px;color:rgba(255,255,255,.62);margin:20px 0 8px}
+#nombre{width:100%;padding:15px;background:#241B16;border:1px solid #3A2C23;border-radius:12px;
+  font-family:inherit;font-size:16px;font-weight:bold;color:#fff}
+.nota{font-size:74px;font-weight:bold;color:#F2601A;line-height:1}
+.notaBaja{color:#9A938C}
+.notaDe{font-size:15px;color:rgba(255,255,255,.6);margin-left:8px}
+.fila{border-top:1px solid rgba(255,255,255,.12);padding:11px 0;font-size:13.5px;color:rgba(255,255,255,.62);overflow:hidden}
+.fila b{float:right;color:#fff}
+.sect{font-size:11.5px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#F2601A;margin:20px 0 10px}
+.tip2{font-size:13px;line-height:1.5;color:rgba(255,255,255,.62);border-left:2px solid #3A2C23;padding-left:12px;margin-bottom:10px}
+.captura{border:2px dashed #F2601A;border-radius:12px;padding:13px;font-size:13px;line-height:1.5;
+  color:rgba(255,255,255,.62);margin-top:18px}
+.captura b{color:#FFB27A}
+.firma{margin-top:22px;font-size:11.5px;line-height:1.8;color:rgba(255,255,255,.38)}
+.firma b{display:block;color:#fff;font-size:12.5px}
+</style>
+</head>
+<body>
+<div id="wrap">
+
+  <div id="aviso">
+    <b>⚠ Este visor no está ejecutando la cápsula</b>
+    La estás abriendo desde una vista previa (Drive, Gmail, WhatsApp o Archivos) que bloquea el contenido
+    interactivo. Ábrela en Chrome o Safari, o pide el enlace en vez del archivo.
+  </div>
+  <noscript><div style="background:#7A2A18;padding:16px;font-size:14px">Activa JavaScript para hacer la cápsula.</div></noscript>
+
+  <div id="intro" style="display:none">
+    <div class="kick">“Esperaré otra promoción”</div>
+    <h1>La ruleta de las dudas</h1>
+    <p class="lead">No son preguntas de examen: son <b>las dudas que de verdad salen en piso</b> con esta objeción. Las que nadie pregunta en la capacitación y luego cuestan ventas.</p>
+    <div class="regla"><i>🎡</i><div>Gira la ruleta: cae una duda real y la contestas.</div></div>
+    <div class="regla"><i>⏱️</i><div>Tienes <b>18 segundos</b>. En piso tampoco te dan más.</div></div>
+    <div class="regla" style="border-bottom:1px solid rgba(255,255,255,.12)"><i>🔥</i><div>Tres seguidas te dan <b>racha</b> y puntos extra.</div></div>
+    <label for="nombre">¿Cómo te llamas?</label>
+    <input id="nombre" maxlength="24" placeholder="Tu nombre" autocomplete="off">
+    <button class="btn" id="btnStart" style="margin-top:16px">Girar por primera vez</button>
+    <p class="firma">Kopay · Manejo de objeciones<b>Elaborado por Yahir De la Cruz</b></p>
+  </div>
+
+  <div id="juego" style="display:none">
+    <div id="top"><div id="etapa">Tiro 1 de 6</div><div id="racha"></div><div id="tiros">0 aciertos</div></div>
+    <div id="zonaRueda">
+      <div id="aguja"></div>
+      <div id="ruedaBox"><div id="rueda"></div><div id="centro">DUDAS<br>KOPAY</div></div>
+      <button id="girar">Girar la ruleta</button>
+    </div>
+    <div id="duda" style="display:none"></div>
+    <div id="reloj" style="display:none">18</div>
+    <div id="dock"><div id="tip">—</div><div id="zona"></div></div>
+  </div>
+
+  <div id="fin" style="display:none"></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+function $(id){ return document.getElementById(id); }
+function ver(id,m){ var e=$(id); if(e) e.style.display = m ? '' : 'none'; }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function revuelve(a){ var b=a.slice(),i,j,x; for(i=b.length-1;i>0;i--){ j=Math.floor(Math.random()*(i+1)); x=b[i]; b[i]=b[j]; b[j]=x; } return b; }
+
+/* ===== LAS DUDAS QUE SALEN EN PISO ===== */
+var DUDAS=[
+ {corto:'Promo del lunes',
+  q:'La promoción que ella espera ya está publicada, pero entra en vigencia el lunes. ¿Se la puedes aplicar hoy?',
+  opts:[
+   {t:'Sí, y se ofrece como condición: “si te aplico la promoción hoy, ¿empezamos?”', ok:true},
+   {t:'Sí, se la aplico de una vez para que vea mi disposición.'},
+   {t:'No, tiene que regresar el lunes cuando ya esté vigente.'},
+   {t:'Solo si mi encargada lo autoriza en ese momento.'}],
+  w:'Si ya está publicada, puedes aplicarla hoy. Lo que no se hace es regalarla antes del sí: se ofrece como condición y se aplica después de que acepta.'},
+
+ {corto:'¿Cuándo sale la otra?',
+  q:'Te pregunta: “¿y cuándo sale la próxima promoción?”. ¿Qué contestas?',
+  opts:[
+   {t:'“No tengo fecha, pero dime: ¿qué promoción tendría que salir para que digas: esta es?”', ok:true},
+   {t:'“Normalmente cada mes, así que como en tres semanas.”'},
+   {t:'“La verdad nunca se sabe, salen cuando salen.”'},
+   {t:'“Yo te aviso en cuanto me enteré, déjame tu número.”'}],
+  w:'No inventes fechas que no controlas. Convierte la pregunta en el preacuerdo: qué promoción espera, y de ahí registras área y forma de contacto.'},
+
+ {corto:'Igualar el precio',
+  q:'Para que no espere, ¿puedes bajarle tú el precio hasta igualar la promoción que viene?',
+  opts:[
+   {t:'No. Lo que sí puedes mover son las formas de pago: meses sin intereses o apartado.', ok:true},
+   {t:'Sí, con tal de no perder la venta de hoy.'},
+   {t:'Sí, pero solo si ella promete no contarlo.'},
+   {t:'Depende de cuánto falte para que salga la promoción.'}],
+  w:'Inventar descuentos devalúa la promoción real y enseña a regatear. El margen de maniobra está en cómo paga, no en cuánto paga.'},
+
+ {corto:'¿Estoy insistiendo?',
+  q:'Ya le hiciste dos preguntas y sigues en la escalera. ¿No es insistir de más?',
+  opts:[
+   {t:'No: son preguntas que puede contestar con un “no”. Si aparecen señales de fastidio, pasas al preacuerdo.', ok:true},
+   {t:'Sí, con una pregunta basta; si no cierra, mejor soltarlo.'},
+   {t:'No, hay que insistir hasta que diga que sí.'},
+   {t:'Sí, por eso conviene saltar directo a las opciones de pago.'}],
+  w:'La escalera no es insistencia: cada escalón le devuelve el control. Lo que sí es insistir es ignorar las señales, y ahí toca cerrar con calidez y preacuerdo.'},
+
+ {corto:'“La pasada era mejor”',
+  q:'Te dice: “es que la promoción del mes pasado estaba mucho mejor”. ¿Qué haces?',
+  opts:[
+   {t:'Validar sin discutir y regresar a lo que gana empezando hoy, con opciones de pago.', ok:true},
+   {t:'Explicarle que esa promoción en realidad no era tan buena.'},
+   {t:'Decirle que seguramente vuelve a salir igual.'},
+   {t:'Reconocer que sí estaba mejor y sugerirle esperar.'}],
+  w:'Nunca contradigas ni prometas que una promoción volverá. Valida, redirige al beneficio de empezar hoy y cierra con una pregunta.'},
+
+ {corto:'¿Ya la perdí?',
+  q:'Decidió esperar la promoción. ¿Perdiste la venta?',
+  opts:[
+   {t:'No, si queda preacuerdo: área, qué promoción espera y forma de contacto.', ok:true},
+   {t:'Sí, ya nada más queda esperar a ver si regresa.'},
+   {t:'No, porque de todos modos va a volver a su cita.'},
+   {t:'Sí, salvo que le mandes la promoción general cuando salga.'}],
+  w:'Una clienta que espera con preacuerdo sigue siendo una venta agendada. Sin preacuerdo, es una clienta perdida con cita.'},
+
+ {corto:'Urgencia',
+  q:'¿Puedes decirle que esta promoción ya no va a volver, para que se apure?',
+  opts:[
+   {t:'No. Si hay fecha real se informa sin amenazar; inventarla destruye la confianza.', ok:true},
+   {t:'Sí, es una forma válida de generar urgencia.'},
+   {t:'Sí, porque técnicamente nunca sale exactamente igual.'},
+   {t:'Solo si de verdad es la última semana del mes.'}],
+  w:'La falsa urgencia suena a vendedor desesperado y tira el estatus de clínica. El apuro honesto es el resultado: entre antes empiece, antes lo disfruta.'},
+
+ {corto:'El apartado',
+  q:'Vas a ofrecer apartar. ¿Cómo lo dices?',
+  opts:[
+   {t:'Con la cantidad exacta: “lo apartas con solo $500”.', ok:true},
+   {t:'“Lo puedes apartar con un anticipo pequeño.”'},
+   {t:'“¿Con cuánto te gustaría apartarlo?”'},
+   {t:'“Déjame algo de enganche y lo guardamos.”'}],
+  w:'La cifra concreta hace la decisión fácil; “un anticipo” obliga a ella a adivinar y a ti a improvisar. Siempre en pesos y autorizado.'},
+
+ {corto:'No contesta',
+  q:'Salió la promoción, le escribiste a primera hora y no responde. ¿Qué sigue?',
+  opts:[
+   {t:'Llamarle al día siguiente, con su paquete ya calculado.', ok:true},
+   {t:'Esperar, para no presionarla.'},
+   {t:'Volver a mandarle el mismo mensaje cada día.'},
+   {t:'Darla por perdida y pasar a otra clienta.'}],
+  w:'El preacuerdo lo ejecutas tú: mensaje el día que sale, llamada al día siguiente si no responde. Ni acoso ni olvido.'},
+
+ {corto:'Opciones de pago',
+  q:'¿Conviene mencionar los meses sin intereses desde el principio para convencerla?',
+  opts:[
+   {t:'No: van en el tercer escalón, después de validar, buscar el no y buscar el sí.', ok:true},
+   {t:'Sí, es lo que más convence y ahorra tiempo.'},
+   {t:'Sí, si se ve que trae prisa.'},
+   {t:'Da igual el momento, lo importante es que se entere.'}],
+  w:'Si abres con formas de pago, la conversación se vuelve financiera antes de construir el motivo. Primero el deseo de empezar, luego el cómo.'}
+];
+
+var TIROS=6, SEG=18;
+var jugador='', lote=[], idx=0, aciertos=0, racha=0, mejorRacha=0, bonus=0, notas=[];
+var girando=false, bloqueado=false, reloj=null, tLeft=SEG, anguloActual=0;
+
+function pintaRueda(){
+  var h='', i, n=DUDAS.length, paso=360/n;
+  for(i=0;i<n;i++){
+    h+='<div class="linea" style="-webkit-transform:rotate('+(i*paso)+'deg);transform:rotate('+(i*paso)+'deg)"></div>';
+  }
+  for(i=0;i<n;i++){
+    h+='<div class="sec" style="-webkit-transform:rotate('+(i*paso)+'deg);transform:rotate('+(i*paso)+'deg)">'+
+       esc(DUDAS[i].corto)+'</div>';
+  }
+  $('rueda').innerHTML=h;
+}
+function pintaHUD(){
+  $('etapa').innerHTML='Tiro '+Math.min(idx+1,TIROS)+' de '+TIROS;
+  $('tiros').innerHTML=aciertos+' acierto'+(aciertos===1?'':'s');
+  $('racha').innerHTML = racha>=2 ? ('🔥 x'+racha) : '';
+}
+function cuenta(on){
+  if(reloj){ clearInterval(reloj); reloj=null; }
+  var r=$('reloj');
+  if(!on){ ver('reloj',false); return; }
+  ver('reloj',true); tLeft=SEG; r.innerHTML=tLeft; r.className='';
+  reloj=setInterval(function(){
+    tLeft--; r.innerHTML=Math.max(0,tLeft);
+    if(tLeft<=5) r.className='rush';
+    if(tLeft<=0){ clearInterval(reloj); reloj=null; seAcabo(); }
+  },1000);
+}
+function seAcabo(){
+  if(bloqueado) return; bloqueado=true;
+  var bs=$('zona').getElementsByTagName('button'), k;
+  for(k=0;k<bs.length;k++) bs[k].disabled=true;
+  racha=0; pintaHUD();
+  var d=lote[idx];
+  notas.push(d.w);
+  feedback(false,'Se acabó el tiempo','En piso, dudar demasiado también es una respuesta. '+d.w);
+}
+function gira(){
+  if(girando) return;
+  girando=true;
+  $('girar').className='off'; $('girar').innerHTML='Girando…';
+  ver('duda',false);
+  var destino=lote[idx].pos;
+  var paso=360/DUDAS.length;
+  var base=Math.ceil(anguloActual/360)*360;
+  anguloActual = base + 360*4 + (360 - destino*paso);
+  $('rueda').style.webkitTransform='rotate('+anguloActual+'deg)';
+  $('rueda').style.transform='rotate('+anguloActual+'deg)';
+  setTimeout(function(){
+    girando=false;
+    $('girar').innerHTML='Girar la ruleta';
+    muestraDuda();
+  }, 3200);
+}
+function muestraDuda(){
+  bloqueado=false;
+  var d=lote[idx], z=$('zona'), i;
+  ver('duda',true);
+  $('duda').innerHTML='<b>Duda '+(idx+1)+'</b>'+esc(d.q);
+  $('tip').innerHTML='Contesta antes de que se acabe el tiempo';
+  z.innerHTML='';
+  var ops=revuelve(d.opts);
+  for(i=0;i<ops.length;i++){
+    (function(o){
+      var b=document.createElement('button'); b.className='opt'; b.type='button'; b.innerHTML=esc(o.t);
+      b.onclick=function(){
+        if(bloqueado) return; bloqueado=true; cuenta(false);
+        var bs=z.getElementsByTagName('button'), k;
+        for(k=0;k<bs.length;k++){ bs[k].disabled=true; if(bs[k]!==b) bs[k].className='opt optDim'; }
+        b.className='opt '+(o.ok?'optBien':'optMal');
+        if(o.ok){
+          aciertos++; racha++; if(racha>mejorRacha) mejorRacha=racha;
+          if(racha>0 && racha%3===0){ bonus+=0.5; }
+        }else{ racha=0; notas.push(d.w); }
+        pintaHUD();
+        feedback(!!o.ok, o.ok ? (racha>0&&racha%3===0?'🔥 Racha de '+racha:'Correcto') : 'No es por ahí', d.w);
+      };
+      z.appendChild(b);
+    })(ops[i]);
+  }
+  cuenta(true);
+}
+function feedback(bien, titulo, texto){
+  var z=$('zona');
+  var d=document.createElement('div'); d.className='fb';
+  d.style.borderLeftColor = bien ? '#3E9C58' : '#C0392B';
+  d.innerHTML='<b style="color:'+(bien?'#7BD69A':'#FF8A72')+'">'+titulo+'</b><p>'+texto+'</p>';
+  z.appendChild(d);
+  var n=document.createElement('button'); n.className='btn'; n.type='button';
+  n.innerHTML=(idx>=TIROS-1)?'Ver mi resultado':'Siguiente tiro';
+  n.onclick=function(){
+    if(idx>=TIROS-1){ termina(); return; }
+    idx++; bloqueado=false; pintaHUD();
+    ver('duda',false); cuenta(false);
+    $('tip').innerHTML='Gira para la siguiente duda';
+    z.innerHTML='';
+    $('girar').className='';
+  };
+  z.appendChild(n);
+}
+function termina(){
+  cuenta(false);
+  ver('juego',false);
+  var pAciertos = 9*(aciertos/TIROS);
+  var nota=Math.round(pAciertos+bonus); if(nota>10) nota=10; if(nota<0) nota=0;
+  var titulo, texto;
+  if(nota>=9){ titulo='Nada te agarra fuera de base';
+    texto='Sabes qué se puede y qué no: aplicar una promoción publicada, mover formas de pago y nunca inventar fechas ni urgencias.'; }
+  else if(nota>=7){ titulo='Bien parada';
+    texto='Contestas lo importante. Repasa los casos que fallaste: suelen ser los que más cuestan ventas en piso.'; }
+  else if(nota>=5){ titulo='Te falta seguridad';
+    texto='Varias dudas te agarraron. Cuando no sabes qué se vale, improvisas descuentos o fechas, y ahí se cae la confianza.'; }
+  else { titulo='A repasar el material';
+    texto='La regla base: la promoción puede mejorar el precio, pero empezar hoy adelanta los resultados. Y lo que se mueve es la forma de pago, no el precio.'; }
+  var unicos=[], i;
+  for(i=0;i<notas.length;i++){ if(unicos.join('|').indexOf(notas[i])<0) unicos.push(notas[i]); }
+  unicos=unicos.slice(0,3);
+  var h='<div class="kick">Tu resultado</div>'+
+    '<div><span class="nota'+(nota<5?' notaBaja':'')+'">'+nota+'</span><span class="notaDe">de 10</span></div>'+
+    '<h1 style="font-size:27px;margin-top:12px">'+titulo+'</h1>'+
+    '<p class="lead">'+esc(jugador)+', '+texto+'</p>'+
+    '<div class="sect">La partida</div>'+
+    '<div class="fila">Dudas resueltas<b>'+aciertos+' / '+TIROS+'</b></div>'+
+    '<div class="fila">Mejor racha<b>x'+mejorRacha+'</b></div>'+
+    '<div class="fila" style="border-bottom:1px solid rgba(255,255,255,.12)">Puntos de racha<b>+'+bonus+'</b></div>';
+  if(unicos.length){ h+='<div class="sect">Para pulir</div>';
+    for(i=0;i<unicos.length;i++) h+='<div class="tip2">'+unicos[i]+'</div>'; }
+  h+='<div class="captura"><b>Toma captura de esta pantalla</b> y mándala al grupo con tu resultado.</div>'+
+     '<button class="btn" id="otra" style="margin-top:16px">Otra ronda</button>'+
+     '<p class="firma">Kopay · Manejo de objeciones<b>Elaborado por Yahir De la Cruz</b></p>';
+  $('fin').innerHTML=h; ver('fin',true);
+  try{window.scrollTo(0,0);}catch(e){}
+  if($('otra')) $('otra').onclick=function(){ location.reload(); };
+}
+
+/* ---------- arranque ---------- */
+ver('aviso',false); ver('intro',true);
+$('girar').onclick=function(){ if(!girando && !bloqueado) gira(); };
+$('btnStart').onclick=function(){
+  try{
+    var v=$('nombre').value;
+    jugador=(v&&v.replace(/^\s+|\s+$/g,''))?v.replace(/^\s+|\s+$/g,''):'Asesora';
+    idx=0; aciertos=0; racha=0; mejorRacha=0; bonus=0; notas=[]; anguloActual=0; bloqueado=false; girando=false;
+    var conPos=[], i;
+    for(i=0;i<DUDAS.length;i++){ DUDAS[i].pos=i; conPos.push(DUDAS[i]); }
+    lote=revuelve(conPos).slice(0,TIROS);
+    ver('intro',false); ver('juego',true);
+    pintaRueda(); pintaHUD();
+    $('tip').innerHTML='Gira la ruleta para tu primera duda';
+    $('zona').innerHTML='';
+    try{window.scrollTo(0,0);}catch(e){}
+    setTimeout(gira, 350);
+  }catch(err){
+    var d=document.createElement('div');
+    d.style.cssText='background:#7A2A18;padding:14px;margin-top:14px;border-radius:10px;font-size:13px';
+    d.innerHTML='No se pudo iniciar: '+(err&&err.message?esc(err.message):'error');
+    $('intro').appendChild(d);
+  }
+};
+$('nombre').onkeydown=function(e){ if(e&&e.keyCode===13){ if(e.preventDefault)e.preventDefault(); $('btnStart').onclick(); } };
+})();
+</script>
+</body>
+</html>
