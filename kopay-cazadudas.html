@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0A0A0A">
+<title>Cazadudas · ¿Y si no me funciona?</title>
+<style>
+*{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}
+html,body{margin:0;padding:0;background:#0A0A0A}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  color:#FFFFFF;-webkit-text-size-adjust:100%}
+#wrap{max-width:520px;margin:0 auto;background:#1A1512;min-height:100%;padding-bottom:32px;overflow:hidden}
+button{font-family:inherit;cursor:pointer;border:0;background:none;color:#FFFFFF}
+
+#aviso{background:#7A2A18;color:#fff;padding:16px;font-size:15px;line-height:1.5}
+#aviso b{display:block;font-size:15px;margin-bottom:6px}
+
+/* HUD */
+#top{background:#0A0A0A;padding:12px 16px;overflow:hidden;border-bottom:1px solid #2E2621}
+#etapa{float:left;font-size:12px;font-weight:bold;letter-spacing:1.2px;text-transform:uppercase;color:#FF8A45;line-height:26px}
+#contador{float:right;font-size:13px;font-weight:bold;background:#F2601A;padding:4px 12px;border-radius:20px;color:#fff;line-height:18px}
+#combo{float:right;font-size:13px;font-weight:bold;color:#FF8A45;margin-right:10px;line-height:26px;display:none}
+#combo.pop{-webkit-animation:pop .4s;animation:pop .4s}
+
+/* escalera de herramientas */
+#herr{background:#0A0A0A;padding:0 10px 12px;overflow:hidden}
+#herr div{float:left;width:20%;padding:0 3px;text-align:center}
+#herr span{display:block;border:1.5px solid #3A302A;border-radius:4px 12px 12px 4px;padding:6px 0 5px;font-size:18px;line-height:1;color:#8A7F76}
+#herr small{display:block;font-size:10px;font-weight:bold;letter-spacing:.5px;text-transform:uppercase;margin-top:4px}
+#herr .ahora span{border-color:#F2601A;background:#2A1C14;color:#FFFFFF;-webkit-animation:late 1.2s infinite;animation:late 1.2s infinite}
+#herr .bien span{border-color:#2E7D4F;background:#16261C;color:#FFFFFF}
+#herr .mal span{border-color:#C0392B;background:#2A1514;color:#FFFFFF}
+
+/* la casa */
+#casa{position:relative;height:200px;overflow:hidden;background:#120E0C;
+  background-image:-webkit-radial-gradient(28% 55%,circle,rgba(242,96,26,.28),rgba(242,96,26,0) 120px);
+  background-image:radial-gradient(circle at 28% 55%,rgba(242,96,26,.28),rgba(242,96,26,0) 120px)}
+#casa.susto{-webkit-animation:tiembla .45s;animation:tiembla .45s}
+.ventana{position:absolute;top:40px;width:42px;height:50px;border:3px solid #2E2621;background:#0A0A0A}
+.ventana i{position:absolute;left:50%;top:0;width:3px;height:100%;margin-left:-1px;background:#2E2621}
+#v1{left:8%}#v2{left:78%}
+#luna{position:absolute;left:60%;top:44px;width:20px;height:20px;border-radius:50%;background:#FF8A45;opacity:.85}
+#piso{position:absolute;left:0;right:0;bottom:0;height:26px;background:#241D18;border-top:2px solid #3A302A}
+#miedoBox{position:absolute;left:12px;right:12px;top:10px;height:10px}
+#miedoLbl{position:absolute;left:0;top:12px;font-size:11px;font-weight:bold;color:#FF8A45;letter-spacing:1px}
+#miedoBar{height:8px;border-radius:4px;background:#2E2621;overflow:hidden}
+#miedoFill{height:8px;width:100%;background:#F2601A;-webkit-transition:width .6s;transition:width .6s}
+#clienta{position:absolute;left:16%;bottom:22px;width:56px;text-align:center}
+#clienta .cab{width:44px;height:44px;margin:0 auto;border-radius:50%;background:#F2601A;color:#fff;font-weight:bold;font-size:20px;line-height:44px;border:3px solid #FFFFFF}
+#clienta .cue{width:50px;height:30px;margin:2px auto 0;border-radius:20px 20px 4px 4px;background:#FFFFFF}
+#clienta small{display:block;font-size:11px;color:#FFFFFF;margin-top:3px;font-weight:bold}
+#fWrap{position:absolute;left:44%;top:50px;width:76px;height:96px;-webkit-transition:-webkit-transform .5s;transition:transform .5s}
+#fant{position:absolute;left:6px;top:0;width:64px;height:74px;background:#FFFFFF;border-radius:32px 32px 8px 8px;
+  box-shadow:0 0 26px rgba(242,96,26,.55);-webkit-animation:flota 2.4s infinite;animation:flota 2.4s infinite}
+#fant .ojo{position:absolute;top:24px;width:10px;height:14px;border-radius:50%;background:#0A0A0A}
+#fant .o1{left:16px}#fant .o2{right:16px}
+#fant .boca{position:absolute;left:24px;top:44px;width:16px;height:12px;border-radius:50%;background:#0A0A0A}
+#fant .ola{position:absolute;bottom:-9px;width:22px;height:20px;border-radius:50%;background:#FFFFFF}
+#fant .w1{left:0}#fant .w2{left:21px}#fant .w3{right:0}
+#fant .gorro{position:absolute;left:18px;top:-20px;font-size:24px;line-height:1}
+#fNom{position:absolute;left:-30px;right:-30px;top:84px;text-align:center;font-size:11px;font-weight:bold;letter-spacing:1px;
+  text-transform:uppercase;color:#FF8A45}
+#fWrap.risa #fant{-webkit-animation:risa .5s 2;animation:risa .5s 2}
+#fWrap.atrapado{-webkit-animation:atrapa 1s forwards;animation:atrapa 1s forwards}
+#fWrap.escapa{-webkit-animation:escapa 1.2s forwards;animation:escapa 1.2s forwards}
+#burbuja{position:absolute;left:58%;top:6px;max-width:40%;background:#FFFFFF;color:#0A0A0A;font-size:13px;font-weight:bold;
+  border-radius:12px 12px 12px 3px;padding:6px 9px;display:none;-webkit-animation:pop .3s;animation:pop .3s}
+#trampa{position:absolute;right:8%;bottom:24px;width:46px;height:30px;background:#F2601A;border:3px solid #0A0A0A;border-radius:4px;
+  background-image:-webkit-repeating-linear-gradient(45deg,#F2601A 0,#F2601A 6px,#C2490F 6px,#C2490F 12px);
+  background-image:repeating-linear-gradient(45deg,#F2601A 0,#F2601A 6px,#C2490F 6px,#C2490F 12px)}
+#trampa i{position:absolute;left:4px;right:4px;top:-8px;height:6px;background:#FFFFFF;border-radius:3px}
+#trampa.abre i{-webkit-transform:translateY(-6px) rotate(-20deg);transform:translateY(-6px) rotate(-20deg)}
+.chispa{position:absolute;font-size:22px;-webkit-animation:chispa .9s forwards;animation:chispa .9s forwards}
+@-webkit-keyframes flota{0%,100%{-webkit-transform:translateY(0)}50%{-webkit-transform:translateY(-8px)}}
+@keyframes flota{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@-webkit-keyframes risa{25%{-webkit-transform:rotate(-12deg) scale(1.15)}75%{-webkit-transform:rotate(12deg) scale(1.15)}}
+@keyframes risa{25%{transform:rotate(-12deg) scale(1.15)}75%{transform:rotate(12deg) scale(1.15)}}
+@-webkit-keyframes atrapa{0%{opacity:1}100%{-webkit-transform:translate(110px,90px) scale(.05) rotate(540deg);opacity:0}}
+@keyframes atrapa{0%{opacity:1}100%{transform:translate(110px,90px) scale(.05) rotate(540deg);opacity:0}}
+@-webkit-keyframes escapa{0%{opacity:1}100%{-webkit-transform:translate(60px,-140px) scale(.6);opacity:0}}
+@keyframes escapa{0%{opacity:1}100%{transform:translate(60px,-140px) scale(.6);opacity:0}}
+@-webkit-keyframes tiembla{20%{-webkit-transform:translateX(-6px)}40%{-webkit-transform:translateX(6px)}60%{-webkit-transform:translateX(-4px)}80%{-webkit-transform:translateX(4px)}}
+@keyframes tiembla{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+@-webkit-keyframes pop{0%{-webkit-transform:scale(.6);opacity:0}70%{-webkit-transform:scale(1.1)}100%{-webkit-transform:scale(1);opacity:1}}
+@keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+@-webkit-keyframes late{0%,100%{-webkit-transform:scale(1)}50%{-webkit-transform:scale(1.07)}}
+@keyframes late{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+@-webkit-keyframes chispa{0%{-webkit-transform:translateY(0) scale(.5);opacity:1}100%{-webkit-transform:translateY(-50px) scale(1.3);opacity:0}}
+@keyframes chispa{0%{transform:translateY(0) scale(.5);opacity:1}100%{transform:translateY(-50px) scale(1.3);opacity:0}}
+
+/* diálogo */
+#escena{padding:14px 14px 0}
+#dice{background:#241D18;border-radius:16px 16px 16px 5px;padding:13px 15px;font-size:15.5px;line-height:1.45;font-weight:500;min-height:54px}
+#dice b{display:block;font-size:11px;font-weight:bold;letter-spacing:1.2px;text-transform:uppercase;color:#FF8A45;margin-bottom:5px}
+
+/* opciones */
+#dock{padding:12px 14px 8px}
+#tip{font-size:12px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:#A9A099;margin-bottom:10px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;background:#241D18;border:1.5px solid #3A302A;border-left:4px solid #F2601A;
+  border-radius:4px 14px 14px 4px;padding:14px;margin-bottom:9px;font-size:15px;line-height:1.4;color:#FFFFFF;
+  min-height:56px;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+.optBien{border-color:#2E7D4F;border-left-color:#2E7D4F;background:#16261C}
+.optMal{border-color:#C0392B;border-left-color:#C0392B;background:#2A1514}
+.optDim{opacity:.35}
+.fb{border-left:4px solid #8A7F76;background:#241D18;padding:13px 14px;margin-bottom:11px;border-radius:0 10px 10px 0;
+  -webkit-animation:pop .3s;animation:pop .3s}
+.fb b{display:block;font-size:14px;font-weight:bold;margin-bottom:5px}
+.fb p{margin:0;font-size:15px;line-height:1.5;color:#E6DED6}
+.btn{display:block;width:100%;background:#F2601A;color:#fff;border-radius:12px;padding:16px;font-size:16px;
+  font-weight:bold;text-align:center;margin-bottom:9px;min-height:56px;box-shadow:0 4px 0 #C2490F}
+
+/* pantallas */
+#intro,#fin{padding:26px 20px 30px}
+.kick{font-size:12px;font-weight:bold;letter-spacing:1.5px;text-transform:uppercase;color:#FF8A45;margin-bottom:10px}
+h1{font-size:40px;line-height:1.05;margin:0 0 12px}
+h1 span{color:#F2601A}
+.lead{font-size:15px;line-height:1.55;color:#C9C2BB;margin:0 0 16px}
+.lead b{color:#FFFFFF}
+.regla{border-top:1px solid #2E2621;padding:12px 0;font-size:15px;line-height:1.5;color:#C9C2BB;overflow:hidden}
+.regla i{float:left;width:28px;font-style:normal;font-size:18px}
+.regla div{margin-left:32px}.regla b{color:#FFFFFF}
+.galeria{overflow:hidden;margin:14px 0 4px}
+.galeria div{float:left;width:50%;padding:0 4px 8px}
+.galeria p{margin:0;background:#241D18;border-left:4px solid #F2601A;border-radius:4px 14px 14px 4px;padding:10px 10px;font-size:13px;line-height:1.35;color:#C9C2BB;min-height:70px}
+.galeria p b{display:block;color:#FFFFFF;font-size:14px;margin-bottom:3px}
+label{display:block;font-size:15px;color:#C9C2BB;margin:20px 0 8px}
+#nombre{width:100%;padding:15px;background:#241D18;border:1.5px solid #3A302A;border-radius:12px;
+  font-family:inherit;font-size:16px;font-weight:bold;color:#FFFFFF;min-height:56px}
+.nota{font-size:80px;font-weight:bold;color:#F2601A;line-height:1}
+.notaBaja{color:#8A7F76}
+.notaDe{font-size:16px;color:#C9C2BB;margin-left:8px}
+.fila{border-top:1px solid #2E2621;padding:11px 0;font-size:15px;color:#C9C2BB;overflow:hidden}
+.fila b{float:right;color:#FFFFFF}
+.fila small{display:block;font-size:13px;color:#8A7F76;margin-top:2px}
+.sect{font-size:12px;font-weight:bold;letter-spacing:1.5px;text-transform:uppercase;color:#FF8A45;margin:20px 0 10px}
+.tip2{font-size:15px;line-height:1.5;color:#C9C2BB;border-left:2px solid #F2601A;padding-left:12px;margin-bottom:10px}
+.captura{border:2px dashed #F2601A;border-radius:12px;padding:13px;font-size:15px;line-height:1.5;color:#C9C2BB;margin-top:18px;background:#241D18}
+.captura b{color:#FF8A45}
+.firma{margin-top:22px;font-size:12px;line-height:1.8;color:#8A7F76}
+.firma b{display:block;color:#FFFFFF;font-size:13px}
+.trofeo{font-size:44px;line-height:1;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div id="wrap">
+
+  <div id="aviso">
+    <b>⚠ Este visor no está ejecutando la cápsula</b>
+    La estás abriendo desde una vista previa (Drive, Gmail, WhatsApp o Archivos) que bloquea el contenido
+    interactivo. Ábrela en Chrome o Safari, o pide el enlace en vez del archivo.
+  </div>
+  <noscript><div style="background:#7A2A18;color:#fff;padding:16px;font-size:15px">Activa JavaScript para jugar la cápsula.</div></noscript>
+
+  <div id="intro" style="display:none">
+    <div class="kick">Objeción · “¿Y si no me funciona?”</div>
+    <h1>Caza<span>dudas</span> 👻</h1>
+    <p class="lead">Cuando una clienta dice <b>“¿y si no me funciona?”</b> no es un no: es un <b>fantasma de duda</b> que no la deja decidir. Ella no es el problema; el fantasma sí. Tu misión: encontrarlo, saber cuál es y atraparlo subiendo la escalera.</p>
+    <div class="sect" style="margin-top:4px">Los 4 fantasmas de la casa</div>
+    <div class="galeria">
+      <div><p><b>🔁 El Ex-Láser</b>“Ya lo intenté y no funcionó”. Mala experiencia en otra clínica.</p></div>
+      <div><p><b>🔍 La Excepción</b>“Mi caso es diferente”. Piel morena, vello claro o canas, zonas sensibles.</p></div>
+      <div><p><b>🌱 El Rebrote</b>“Mi cuerpo no coopera”. Teme que el vello regrese.</p></div>
+      <div><p><b>💸 El Billetero</b>“No quiero perder mi dinero”. Duda de la inversión y de quién la respalda.</p></div>
+    </div>
+    <div class="regla"><i>🔦</i><div><b>Linterna</b> · Buscar el No: valida sin discutir y pregunta.</div></div>
+    <div class="regla"><i>📓</i><div><b>Diario</b> · Con la pista, identifica qué fantasma es.</div></div>
+    <div class="regla"><i>🧲</i><div><b>Trampa</b> · Luego el Sí: certeza para <em>ese</em> miedo.</div></div>
+    <div class="regla"><i>🚪</i><div><b>Dos puertas</b> · Dar opciones: que elija cómo empezar, no si empieza.</div></div>
+    <div class="regla" style="border-bottom:1px solid #2E2621"><i>🔒</i><div><b>Sello</b> · Microcompromiso: un sí con fecha y hora.</div></div>
+    <label for="nombre">¿Cómo te llamas, cazadora?</label>
+    <input id="nombre" maxlength="24" placeholder="Tu nombre" autocomplete="off">
+    <button class="btn" id="btnStart" type="button" style="margin-top:16px">🔦 Entrar a la casa</button>
+    <p class="firma">Manejo de objeciones · Kopay<b>Elaborado por Yahir De la Cruz</b></p>
+  </div>
+
+  <div id="juego" style="display:none">
+    <div id="top"><div id="etapa">Misión 1/3</div><div id="contador">👻 0</div><div id="combo"></div></div>
+    <div id="herr">
+      <div id="h0"><span>🔦</span><small>Linterna</small></div>
+      <div id="h1"><span>📓</span><small>Diario</small></div>
+      <div id="h2"><span>🧲</span><small>Trampa</small></div>
+      <div id="h3"><span>🚪</span><small>Puertas</small></div>
+      <div id="h4"><span>🔒</span><small>Sello</small></div>
+    </div>
+    <div id="casa">
+      <div class="ventana" id="v1"><i></i></div><div class="ventana" id="v2"><i></i></div><div id="luna"></div>
+      <div id="miedoBox"><div id="miedoBar"><div id="miedoFill"></div></div><div id="miedoLbl">MIEDO 100%</div></div>
+      <div id="clienta"><div class="cab" id="inicial">R</div><div class="cue"></div><small id="cnom">—</small></div>
+      <div id="fWrap"><div id="fant"><span class="gorro" id="gorro">❓</span><i class="ojo o1"></i><i class="ojo o2"></i><i class="boca"></i>
+        <i class="ola w1"></i><i class="ola w2"></i><i class="ola w3"></i></div><div id="fNom">¿Fantasma?</div></div>
+      <div id="burbuja"></div>
+      <div id="trampa"><i></i></div>
+      <div id="piso"></div>
+    </div>
+    <div id="escena"><div id="dice"></div></div>
+    <div id="dock"><div id="tip">—</div><div id="zona"></div></div>
+  </div>
+
+  <div id="fin" style="display:none"></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+function $(id){ return document.getElementById(id); }
+function ver(id,m){ var e=$(id); if(e) e.style.display = m ? '' : 'none'; }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function revuelve(a){ var b=a.slice(),i,j,x; for(i=b.length-1;i>0;i--){ j=Math.floor(Math.random()*(i+1)); x=b[i]; b[i]=b[j]; b[j]=x; } return b; }
+
+/* ============ LO QUE SE CALIFICA (la escalera) ============ */
+var CATS=[
+ {k:'no', t:'1 · Buscar el No', sub:'Linterna y diario', max:4},
+ {k:'si', t:'2 · Luego el Sí', sub:'La trampa', max:2},
+ {k:'op', t:'3 · Dar opciones', sub:'Las dos puertas', max:2},
+ {k:'mi', t:'4 · Microcompromisos', sub:'El sello', max:2}
+];
+var HERR=[
+ {ic:'🔦', t:'Linterna'}, {ic:'📓', t:'Diario'}, {ic:'🧲', t:'Trampa'}, {ic:'🚪', t:'Dos puertas'}, {ic:'🔒', t:'Sello'}
+];
+var FANTASMAS={
+ exlaser:{n:'El Ex-Láser', g:'🔁'},
+ excepcion:{n:'La Excepción', g:'🔍'},
+ rebrote:{n:'El Rebrote', g:'🌱'},
+ billetero:{n:'El Billetero', g:'💸'}
+};
+var RISAS=['¡BUUU! Eso me alimenta','¡Jajaja! Más miedo para mí','¡Uy, qué rico susto!','¡Me quedo a vivir aquí!'];
+var AYES=['¡Ay, me quemó la luz!','¡Nooo, eso me debilita!','¡Me estoy encogiendo!','¡Esa sí dolió!'];
+
+/* ============ LAS CASAS (una por clienta) ============ */
+var CASOS=[
+ {id:'rocio', nom:'Rocío', f:'exlaser', pasos:[
+  {cat:'no', dice:'“Suena bien… pero ¿y si no me funciona?”', q:'Prende la linterna. ¿Qué le dices?',
+   opts:[
+    {t:'“Es normal preguntarlo. ¿Es por una experiencia anterior o tu piel?”', ok:true,
+     w:'Validas sin discutir y preguntas para sacar el No real que hay detrás. No respondes la objeción: encuentras la raíz.'},
+    {t:'“Tranquila, a todas nuestras clientas les funciona al 100%, de verdad.”',
+     w:'Prometer “a todas les funciona al 100%” pierde la venta. Nunca prometemos que funciona igual para todas.'},
+    {t:'“Ay, no pasa nada, aquí sí te va a funcionar, te lo digo yo, en serio.”',
+     w:'Minimizar el miedo con “no pasa nada” no lo quita, lo esconde. Valida y pregunta qué te hace pensarlo.'},
+    {t:'“Mira, nuestro láser diodo llega directo a la raíz del folículo, ¿eh?”',
+     w:'Hablar de tecnología sin diagnosticar pierde la venta. Primero diagnosticas, después explicas.'}]},
+  {cat:'no', diario:true, dice:'“Es que ya fui a otra clínica con luz pulsada y no vi nada. Ya no le creo a nadie.”', q:'Abre el diario. ¿Qué fantasma es?',
+   opts:[
+    {t:'El Ex-Láser: “Ya lo intenté y no funcionó”', ok:true,
+     w:'Mala experiencia en otra clínica y desconfianza de todo el sector: es El Ex-Láser.'},
+    {t:'La Excepción: “Mi caso es diferente”',
+     w:'No habló de su piel ni de su vello: habló de una mala experiencia en otra clínica. Es El Ex-Láser.'},
+    {t:'El Rebrote: “Mi cuerpo no coopera”',
+     w:'No teme que el vello regrese: no vio resultados en otra clínica y ya no confía. Es El Ex-Láser.'},
+    {t:'El Billetero: “No quiero perder mi dinero”',
+     w:'Su miedo no viene del dinero sino de una mala experiencia previa con luz pulsada. Es El Ex-Láser.'}]},
+  {cat:'si', dice:'Ya sabes que es El Ex-Láser. Toca construir certeza.', q:'Arma la trampa. ¿Con qué frase?',
+   opts:[
+    {t:'“¿Sería mala idea hacerte dos disparos de prueba para que veas tu vello?”', ok:true,
+     w:'A quien ya la defraudaron no le basta una promesa: necesita evidencia en su propia piel. Disparos de prueba de cortesía, sin forzar.'},
+    {t:'“Aquí sí funciona igual para todas, no como en esa otra clínica, ¿eh?”',
+     w:'“Funciona igual para todas” es una promesa que nunca hacemos. Y hablar mal de otra clínica no le da certeza.'},
+    {t:'“Con una sola sesión aquí vas a notar que es otra cosa, ya lo verás.”',
+     w:'“Con una sesión es suficiente” está en la lista de lo que nunca prometemos. Se acuerda lo realista: reducción por sesiones.'},
+    {t:'“Si supieras que el vello no regresa grueso, ¿empezarías esta semana?”',
+     w:'Esa trampa es para El Rebrote. Rocío no teme que regrese: no cree que funcione. Necesita evidencia.'}]},
+  {cat:'op', dice:'“Ok… sí me hizo reacción. ¿Y cuál me convendría?”', q:'Abre las dos puertas. ¿Cómo le das opciones?',
+   opts:[
+    {t:'“Tengo dos caminos: Transforma o Impulsa. ¿Con cuál comienzas hoy?”', ok:true,
+     w:'Dos opciones según su objetivo, mostrando primero la más completa. La pregunta deja de ser “¿lo hago?” y se vuelve “¿cuál me conviene?”.'},
+    {t:'“¿Entonces sí lo quieres hacer o prefieres pensarlo un poquito más?”',
+     w:'Es el dilema de comprar o no comprar. Las opciones son sobre cómo empezar, no sobre si empieza.'},
+    {t:'“Te dejo los cuatro programas aquí y tú escoges el que más te guste.”',
+     w:'Suena flexible, pero son demasiadas. Se presentan dos o tres opciones según su objetivo.'},
+    {t:'“Empieza con Impulsa y, si te gusta, después te subes a Transforma.”',
+     w:'Se muestra primero la opción más completa. Empezar por la menor la deja sin ver lo que más le conviene.'}]},
+  {cat:'mi', dice:'“Va, me late Transforma.”', q:'Pon el sello. ¿Cómo cierras?',
+   opts:[
+    {t:'“¿Te queda mejor el jueves por la tarde o el sábado por la mañana?”', ok:true,
+     w:'Un sí fácil con fecha: la primera sesión queda agendada hoy. Sin siguiente paso concreto, la certeza se enfría al salir.'},
+    {t:'“Piénsalo con calma y, cuando estés lista, me avisas, ¿va?”',
+     w:'Aceptar “piénsalo y me avisas” pierde la venta. Se propone un siguiente paso con fecha.'},
+    {t:'“Te mando toda la info por WhatsApp para que lo veas en casa.”',
+     w:'Se siente atento, pero la certeza se enfría al salir de la sucursal. Se agenda ahí mismo.'},
+    {t:'“Ven el día que quieras, la verdad tenemos lugar a cualquier hora.”',
+     w:'Sin fecha no hay compromiso, y mostrar tanta disponibilidad le quita valor. Pide un sí con día y hora.'}]}
+ ]},
+
+ {id:'karen', nom:'Karen', f:'excepcion', pasos:[
+  {cat:'no', dice:'“Me encanta la idea… pero ¿y si a mí no me funciona?”', q:'Prende la linterna. ¿Qué le dices?',
+   opts:[
+    {t:'“Es natural tener esa duda. ¿Qué te hace pensarlo?”', ok:true,
+     w:'Validar y preguntar “¿qué te hace pensarlo?” gana la venta: sacas a la luz el No real.'},
+    {t:'“No te preocupes, funciona igual en todos los tipos de piel.”',
+     w:'“Funciona igual para todos” es de lo que nunca prometemos. Primero averigua qué la preocupa.'},
+    {t:'“Mira, te explico cómo el diodo absorbe el pigmento del vello.”',
+     w:'Hablar de tecnología sin diagnosticar pierde la venta. Todavía no sabes cuál es su miedo.'},
+    {t:'“Ay, no pasa nada, eso lo pregunta todo mundo, no es problema.”',
+     w:'Suena tranquilizador, pero minimiza su miedo. Valida y pregunta: “¿qué te hace pensarlo?”.'}]},
+  {cat:'no', diario:true, dice:'“Es que tengo la piel morena y el vello medio clarito. ¿Y si en mí no agarra?”', q:'Abre el diario. ¿Qué fantasma es?',
+   opts:[
+    {t:'El Ex-Láser: “Ya lo intenté y no funcionó”',
+     w:'No ha probado otra clínica. Habló de su piel morena y su vello claro: es La Excepción.'},
+    {t:'La Excepción: “Mi caso es diferente”', ok:true,
+     w:'Piel morena y vello claro: cree que su caso es diferente. Es La Excepción.'},
+    {t:'El Rebrote: “Mi cuerpo no coopera”',
+     w:'No teme que el vello regrese: teme que en su tipo de piel y vello no funcione. Es La Excepción.'},
+    {t:'El Billetero: “No quiero perder mi dinero”',
+     w:'No mencionó el dinero. Su duda es su piel y su vello: es La Excepción.'}]},
+  {cat:'si', dice:'Ya sabes que es La Excepción. Toca construir certeza.', q:'Arma la trampa. ¿Con qué frase?',
+   opts:[
+    {t:'“¿Te haría sentido un plan para tu piel, con revisión cada sesión?”', ok:true,
+     w:'Si siente que su caso es diferente, la certeza es un plan para su piel y su vello, con seguimiento y ajuste en cada sesión.'},
+    {t:'“Tu resultado va a ser igual al de mi otra clienta morena, ya verás.”',
+     w:'“Tu resultado será igual al de otra persona” es una promesa que nunca hacemos. Cada caso se valora.'},
+    {t:'“¿Te incomodaría si te muestro la Garantía Kopay que protege tu dinero?”',
+     w:'Esa trampa es para El Billetero. Karen no duda del dinero: duda de que su piel y su vello respondan.'},
+    {t:'“¿Verdad que lo que más quieres es dejar de gastar en rastrillos?”',
+     w:'Es un sí genérico que ignora su raíz. Su miedo es su tipo de piel: el sí tiene que tocar eso.'}]},
+  {cat:'op', dice:'“Ya me quedé más tranquila. ¿Y cómo le hago para empezar?”', q:'Abre las dos puertas. ¿Cómo le das opciones?',
+   opts:[
+    {t:'“¿Meses sin intereses hoy, o lo apartas con un anticipo?”', ok:true,
+     w:'Doble alternativa cómoda: cambias el dilema de comprar o no por elegir cómo pagar. Eliminas la fricción financiera.'},
+    {t:'“¿Lo vas a querer hoy o mejor lo dejamos para otra ocasión, tú dime?”',
+     w:'Le pones en la mesa la opción de no comprar. Las dos puertas tienen que ser formas de empezar.'},
+    {t:'“Hay varias formas de pago, ya después vemos cuál te acomoda más.”',
+     w:'Dejarlo para después no elimina la fricción. Se ofrecen dos opciones concretas, hoy.'},
+    {t:'“Te enseño primero el paquete más chico para que no te espantes.”',
+     w:'Suena considerado, pero se muestra primero la opción más completa. Empezar por la menor le resta valor.'}]},
+  {cat:'mi', dice:'“Sí, con meses sin intereses.”', q:'Pon el sello. ¿Cómo cierras?',
+   opts:[
+    {t:'“Hoy tomamos tu foto y en tu tercera sesión la comparamos. ¿Te late?”', ok:true,
+     w:'Un sí pequeño y fácil que la compromete hoy y le muestra que habrá evidencia de su avance.'},
+    {t:'“Te agendo cuando ya estés segurísima, la verdad no hay ninguna prisa.”',
+     w:'Suena paciente, pero sin siguiente paso concreto la certeza se enfría al salir de la sucursal.'},
+    {t:'“Descárgate la app y ahí te agendas tú cuando tengas un huequito.”',
+     w:'La dejas sola con la decisión. Cada paso tiene que ser un sí fácil que quede hecho hoy.'},
+    {t:'“Platícalo en tu casa y si te animas me escribes por aquí, ¿sale?”',
+     w:'Es aceptar “piénsalo y me avisas”, que pierde la venta. Propón un siguiente paso con fecha.'}]}
+ ]},
+
+ {id:'ivonne', nom:'Ivonne', f:'rebrote', pasos:[
+  {cat:'no', dice:'“Sí me interesa, pero… ¿y si no me funciona?”', q:'Prende la linterna. ¿Qué le dices?',
+   opts:[
+    {t:'“Es normal preguntártelo. ¿Lo dices por algo de tu piel o tu vello?”', ok:true,
+     w:'Validas sin discutir y preguntas hasta identificar cuál de las cuatro raíces es.'},
+    {t:'“Eso aquí no pasa: con nosotros el vello ya no te vuelve nunca jamás.”',
+     w:'Prometer absolutos pierde la venta. Lo que se explica es el resultado realista para su caso.'},
+    {t:'“No pasa nada, de verdad, muchas lo piensan y luego ni se acuerdan.”',
+     w:'Minimizar el miedo pierde la venta. Valida y pregunta para encontrar la raíz.'},
+    {t:'“Te explico cómo trabaja el diodo sobre el folículo, mira, es así…”',
+     w:'Hablar de tecnología sin diagnosticar pierde la venta. Primero diagnosticas, luego explicas.'}]},
+  {cat:'no', diario:true, dice:'“Es que mi prima se hizo láser y dice que le volvió a salir. ¿Y si me regresa todo?”', q:'Abre el diario. ¿Qué fantasma es?',
+   opts:[
+    {t:'El Ex-Láser: “Ya lo intenté y no funcionó”',
+     w:'Ella no lo ha intentado; teme que el vello regrese como le pasó a su prima. Es El Rebrote.'},
+    {t:'La Excepción: “Mi caso es diferente”',
+     w:'No habló de su tipo de piel ni de vello: teme que vuelva a salir. Es El Rebrote.'},
+    {t:'El Rebrote: “Mi cuerpo no coopera”', ok:true,
+     w:'Teme que el vello regrese: es El Rebrote, “mi cuerpo no coopera”.'},
+    {t:'El Billetero: “No quiero perder mi dinero”',
+     w:'Su miedo no es el dinero sino que el vello regrese. Es El Rebrote.'}]},
+  {cat:'si', dice:'Ya sabes que es El Rebrote. Toca construir certeza.', q:'Arma la trampa. ¿Con qué frase?',
+   opts:[
+    {t:'“Si supieras que no vuelve a salir grueso, ¿no sería padrísimo empezar ya?”', ok:true,
+     w:'Le habla directo a su miedo con lo realista: el vello no vuelve a salir grueso. Un sí apoyado en una promesa que sí cumplimos.'},
+    {t:'“Con una sola sesión vas a ver que ya no te regresa nada, en serio.”',
+     w:'“Con una sesión es suficiente” está en la lista de lo que nunca prometemos.'},
+    {t:'“A tu prima le fue mal, pero a ti te va a quedar igualito que a mí.”',
+     w:'“Tu resultado será igual al de otra persona” es una promesa que nunca hacemos.'},
+    {t:'“¿Te incomodaría si te muestro la Garantía Kopay por escrito?”',
+     w:'Esa trampa es para El Billetero. Ivonne no duda del dinero: teme que el vello regrese.'}]},
+  {cat:'op', dice:'“Ok, eso me deja más tranquila. ¿Y cómo lo pagaría?”', q:'Abre las dos puertas. ¿Cómo le das opciones?',
+   opts:[
+    {t:'“¿Liquidas a 6 pagos fijos o congelas hoy la promo con un anticipo?”', ok:true,
+     w:'Doble alternativa cómoda de financiamiento o apartado: ya no decide si compra, decide cómo.'},
+    {t:'“Es de contado o a meses, pero primero dime si de verdad lo quieres.”',
+     w:'Le regresas el dilema de comprar o no. Las dos puertas son formas de empezar.'},
+    {t:'“Te paso todas las formas de pago por mensaje y tú me dices cuál.”',
+     w:'Sacas la decisión de la sucursal y la dejas sola. Dale dos opciones concretas, ahí mismo.'},
+    {t:'“Si quieres empieza con una zona chiquita y ya luego vemos lo demás.”',
+     w:'Se muestra primero la opción más completa según su objetivo, no la más chica.'}]},
+  {cat:'mi', dice:'“Mejor a 6 pagos.”', q:'Pon el sello. ¿Cómo cierras?',
+   opts:[
+    {t:'“Te dejo tu plan y la Garantía por escrito. ¿Jueves tarde o sábado?”', ok:true,
+     w:'Resumes lo que se lleva y pides un sí con fecha: la primera sesión queda agendada hoy.'},
+    {t:'“Ya quedó el pago, cuando quieras empezar me marcas y lo vemos, ¿va?”',
+     w:'Sin cita agendada, la certeza se enfría al salir. Pide un sí en fecha y hora.'},
+    {t:'“Listo, ya eres clienta. La agenda la ves con recepción otro día.”',
+     w:'Dejas el último sí sin pedir. Agenda la primera sesión con fecha y hora antes de que se vaya.'},
+    {t:'“Tenemos citas a la hora que tú gustes, nada más ven cuando puedas.”',
+     w:'Demasiada disponibilidad y ningún compromiso. El sello es un sí con día y hora.'}]}
+ ]},
+
+ {id:'paty', nom:'Paty', f:'billetero', pasos:[
+  {cat:'no', dice:'“Está padre… pero ¿y si no me funciona?”', q:'Prende la linterna. ¿Qué le dices?',
+   opts:[
+    {t:'“Entiendo el temor de invertir sin seguridad. ¿Qué te detiene más?”', ok:true,
+     w:'Validas sin discutir y preguntas por el No real que hay detrás de la duda.'},
+    {t:'“No es tanto, si lo divides por sesión sale bien poquito, mira.”',
+     w:'Le discutes la objeción en vez de encontrar su raíz. Primero valida y pregunta.'},
+    {t:'“Te prometo que a todas les funciona, no vas a perder nada de nada.”',
+     w:'Prometer que a todas les funciona pierde la venta. Nunca prometemos resultados iguales.'},
+    {t:'“Mira, el diodo es la tecnología más avanzada que hay ahorita.”',
+     w:'Hablar de tecnología sin diagnosticar pierde la venta. Aún no sabes qué la detiene.'}]},
+  {cat:'no', diario:true, dice:'“Es mucho dinero. ¿Y si pago todo y al final no veo nada? ¿Quién me responde?”', q:'Abre el diario. ¿Qué fantasma es?',
+   opts:[
+    {t:'El Ex-Láser: “Ya lo intenté y no funcionó”',
+     w:'No ha tenido una mala experiencia en otra clínica. Duda de la inversión y de quién la respalda: es El Billetero.'},
+    {t:'La Excepción: “Mi caso es diferente”',
+     w:'No habló de su piel ni de su vello. Su duda es la inversión: es El Billetero.'},
+    {t:'El Rebrote: “Mi cuerpo no coopera”',
+     w:'No teme que el vello regrese. Teme pagar y no ver nada: es El Billetero.'},
+    {t:'El Billetero: “No quiero perder mi dinero”', ok:true,
+     w:'No duda del láser: duda de la inversión y de quién la respalda. Es El Billetero.'}]},
+  {cat:'si', dice:'Ya sabes que es El Billetero. Toca construir certeza.', q:'Arma la trampa. ¿Con qué frase?',
+   opts:[
+    {t:'“¿Te da paz la Garantía Kopay? 100% más 10% si en la sesión 10 no ves cambios.”', ok:true,
+     w:'Anclas la certeza en la Garantía Kopay: si en la sesión 10 no ha visto cambios, se reembolsa el 100% más un 10% adicional.'},
+    {t:'“Con una sola sesión vas a ver que valió cada peso, de verdad te lo digo.”',
+     w:'“Con una sesión es suficiente” es una promesa que nunca hacemos.'},
+    {t:'“Si supieras que no vuelve a salir grueso, ¿no sería padrísimo empezar ya?”',
+     w:'Esa trampa es para El Rebrote. Paty no teme que regrese: teme perder su dinero.'},
+    {t:'“¿Te haría sentido un plan para tu piel, con revisión cada sesión?”',
+     w:'Esa trampa es para La Excepción. A Paty le da certeza quién respalda su inversión: la Garantía.'}]},
+  {cat:'op', dice:'“Ah, ¿por escrito? Ok… ¿y cómo se paga?”', q:'Abre las dos puertas. ¿Cómo le das opciones?',
+   opts:[
+    {t:'“¿Te conviene más diferir a meses sin intereses o un anticipo flexible?”', ok:true,
+     w:'Para no comprometer sus gastos del mes, dos formas cómodas de empezar. Eliminas la fricción financiera.'},
+    {t:'“¿Lo tomas o lo dejas? Te digo porque la promo se acaba pronto, ¿eh?”',
+     w:'Es presión y además el dilema de comprar o no. Las opciones son sobre cómo empezar.'},
+    {t:'“Si se te hace mucho, empieza con lo mínimo y luego vemos, ¿no crees?”',
+     w:'Se muestra primero la opción más completa. Empezar por lo mínimo le resta valor a la garantía.'},
+    {t:'“Tenemos un montón de opciones de pago, la que tú decidas está bien.”',
+     w:'Demasiadas opciones abiertas no eliminan la fricción. Dale dos, concretas.'}]},
+  {cat:'mi', dice:'“A meses, va.”', q:'Pon el sello. ¿Cómo cierras?',
+   opts:[
+    {t:'“Perfecto, quedas el jueves a las 5. Un día antes te escribo, ¿va?”', ok:true,
+     w:'Confirmas día y hora y resumes el siguiente paso: la primera sesión queda agendada hoy.'},
+    {t:'“Perfecto. Cuando te llegue el primer cargo me avisas y ya agendamos.”',
+     w:'Sin fecha, la certeza se enfría al salir de la sucursal. Agenda hoy la primera sesión.'},
+    {t:'“Muchas gracias por confiar en nosotras, cualquier cosa aquí estamos.”',
+     w:'Suena amable, pero no pide el último sí. El sello es la primera sesión con fecha y hora.'},
+    {t:'“Ya quedó. Si un día pasas por aquí, entras y te atendemos, ¿va?”',
+     w:'Ningún compromiso concreto. Pide un sí en cada detalle: zona, horario y pago.'}]}
+ ]}
+];
+var MISIONES=3;
+
+/* ============ SONIDO (opcional) ============ */
+var audio=null;
+function tono(f1,f2,dur,tipo){
+  try{
+    if(!audio){ var AC=window.AudioContext||window.webkitAudioContext; if(!AC) return; audio=new AC(); }
+    var o=audio.createOscillator(), g=audio.createGain(), t=audio.currentTime;
+    o.type=tipo||'square'; o.frequency.value=f1; g.gain.value=0.06;
+    o.connect(g); g.connect(audio.destination);
+    o.start(t);
+    if(f2){ try{ o.frequency.linearRampToValueAtTime(f2, t+dur); }catch(e1){} }
+    g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    o.stop(t+dur);
+  }catch(e){}
+}
+
+/* ============ MOTOR ============ */
+var jugador='', ruta=[], mIdx=0, pIdx=0, bloqueado=false;
+var porCat={}, notas=[], combo=0, mejorCombo=0, atrapados=0, miedo=100, aciertosMision=0;
+
+function eligeCasos(){
+  var vistos='', i, nuevos=[], viejos=[];
+  try{ vistos=localStorage.getItem('kopayCazadudas')||''; }catch(e){ vistos=''; }
+  for(i=0;i<CASOS.length;i++){ if(vistos.indexOf(CASOS[i].id)>=0) viejos.push(CASOS[i]); else nuevos.push(CASOS[i]); }
+  var lista=revuelve(nuevos).concat(revuelve(viejos)).slice(0,MISIONES);
+  var ids=[]; for(i=0;i<lista.length;i++) ids.push(lista[i].id);
+  try{ localStorage.setItem('kopayCazadudas', (nuevos.length>MISIONES? vistos+','+ids.join(',') : ids.join(','))); }catch(e2){}
+  return lista;
+}
+function anima(id,cls,ms){
+  var e=$(id); if(!e) return;
+  var base=e.className.replace(new RegExp('\\s*'+cls,'g'),'');
+  e.className=base;
+  setTimeout(function(){ e.className=base+' '+cls; }, 20);
+  if(ms) setTimeout(function(){ e.className=e.className.replace(' '+cls,''); }, ms+40);
+}
+function burbuja(txt){
+  var b=$('burbuja'); b.innerHTML=esc(txt); b.style.display='block';
+  anima('burbuja','x',0);
+  clearTimeout(burbuja.t); burbuja.t=setTimeout(function(){ b.style.display='none'; }, 2200);
+}
+function chispa(txt,left,top){
+  var c=document.createElement('div'); c.className='chispa'; c.innerHTML=txt;
+  c.style.left=left+'%'; c.style.top=top+'px'; $('casa').appendChild(c);
+  setTimeout(function(){ if(c.parentNode) c.parentNode.removeChild(c); }, 950);
+}
+function pintaMiedo(){
+  if(miedo<0) miedo=0; if(miedo>100) miedo=100;
+  $('miedoFill').style.width=miedo+'%';
+  $('miedoLbl').innerHTML='MIEDO '+miedo+'%';
+  var s=0.55+0.45*(miedo/100);
+  $('fWrap').style.webkitTransform='scale('+s+')'; $('fWrap').style.transform='scale('+s+')';
+}
+function pintaHerr(){
+  var C=ruta[mIdx], i, e, est;
+  for(i=0;i<5;i++){
+    e=$('h'+i); est=C.res[i];
+    e.className = (est===true)?'bien':((est===false)?'mal':((i===pIdx)?'ahora':''));
+  }
+}
+function pintaCombo(){
+  var c=$('combo');
+  if(combo>=2){ c.style.display=''; c.innerHTML='🔥 x'+combo; anima('combo','pop',400); }
+  else c.style.display='none';
+}
+function iniciaMision(){
+  var C=ruta[mIdx];
+  C.res=[]; pIdx=0; miedo=100; aciertosMision=0;
+  $('etapa').innerHTML='Misión '+(mIdx+1)+'/'+MISIONES+' · '+esc(C.nom);
+  $('inicial').innerHTML=esc(C.nom.charAt(0)); $('cnom').innerHTML=esc(C.nom);
+  $('gorro').innerHTML='❓'; $('fNom').innerHTML='¿Qué fantasma es?';
+  $('fWrap').className=''; $('trampa').className='';
+  pintaMiedo();
+  paso();
+}
+function paso(){
+  bloqueado=false;
+  var C=ruta[mIdx], P=C.pasos[pIdx], z=$('zona'), i;
+  pintaHerr();
+  var esDicho = P.dice.charAt(0)==='“';
+  $('dice').innerHTML='<b>'+(esDicho?esc(C.nom):'En la casa')+'</b>'+esc(P.dice);
+  $('tip').innerHTML=HERR[pIdx].ic+' '+HERR[pIdx].t+' · '+esc(P.q);
+  z.innerHTML='';
+  var ops=revuelve(P.opts);
+  for(i=0;i<ops.length;i++){
+    (function(o){
+      var b=document.createElement('button'); b.className='opt'; b.type='button'; b.innerHTML=esc(o.t);
+      b.onclick=function(){ responde(o,b,P); };
+      z.appendChild(b);
+    })(ops[i]);
+  }
+  try{window.scrollTo(0,0);}catch(e){}
+}
+function responde(o,b,P){
+  if(bloqueado) return; bloqueado=true;
+  var C=ruta[mIdx], z=$('zona'), bs=z.getElementsByTagName('button'), k;
+  for(k=0;k<bs.length;k++){ bs[k].disabled=true; if(bs[k]!==b) bs[k].className='opt optDim'; }
+  b.className='opt '+(o.ok?'optBien':'optMal');
+  C.res[pIdx]=!!o.ok;
+  var titulo;
+  if(o.ok){
+    porCat[P.cat]=(porCat[P.cat]||0)+1; aciertosMision++;
+    combo++; if(combo>mejorCombo) mejorCombo=combo;
+    miedo-=20; pintaMiedo();
+    burbuja(AYES[Math.floor(Math.random()*AYES.length)]);
+    chispa('✨',50,40); chispa(HERR[pIdx].ic,40,70);
+    tono(660,1320,0.25,'square');
+    titulo = combo>=3 ? '¡COMBO x'+combo+'! 🔥' : '¡Le diste! ✨';
+  } else {
+    notas.push(o.w);
+    combo=0;
+    miedo+=10; pintaMiedo();
+    anima('fWrap','risa',1000); anima('casa','susto',450);
+    burbuja(RISAS[Math.floor(Math.random()*RISAS.length)]);
+    tono(220,110,0.5,'sawtooth');
+    titulo='¡BUUU! El fantasma se rió 👻';
+  }
+  if(P.diario){
+    var F=FANTASMAS[C.f];
+    $('gorro').innerHTML=F.g; $('fNom').innerHTML=esc(F.n);
+  }
+  pintaCombo(); pintaHerr();
+  var d=document.createElement('div'); d.className='fb';
+  d.style.borderLeftColor=(o.ok?'#2E7D4F':'#C0392B');
+  d.innerHTML='<b style="color:'+(o.ok?'#4FBF7F':'#E0665A')+'">'+titulo+'</b><p>'+esc(o.w)+'</p>';
+  z.appendChild(d);
+  var n=document.createElement('button'); n.className='btn'; n.type='button'; n.id='sigue';
+  n.innerHTML=(pIdx>=4)?'🧲 ¡Activar la trampa!':('Siguiente: '+HERR[pIdx+1].ic+' '+HERR[pIdx+1].t);
+  n.onclick=function(){ if(pIdx>=4){ finMision(); } else { pIdx++; paso(); } };
+  z.appendChild(n);
+}
+function finMision(){
+  var C=ruta[mIdx], F=FANTASMAS[C.f], atrapado=(aciertosMision>=4), z=$('zona');
+  pIdx=5; pintaHerr();
+  $('trampa').className='abre';
+  if(atrapado){
+    atrapados++;
+    anima('fWrap','atrapado',0);
+    chispa('💥',80,110); chispa('⭐',72,90);
+    tono(523,1046,0.6,'triangle');
+    $('dice').innerHTML='<b>'+esc(C.nom)+'</b>'+'“Ya me siento segura. ¡Vamos a hacerlo!”';
+  } else {
+    anima('fWrap','escapa',0);
+    tono(300,90,0.8,'sawtooth');
+    $('dice').innerHTML='<b>'+esc(C.nom)+'</b>'+'“Mmm… no sé, todavía me quedé con la duda.”';
+  }
+  $('contador').innerHTML='👻 '+atrapados;
+  $('tip').innerHTML='Fin de la misión '+(mIdx+1);
+  z.innerHTML='';
+  var d=document.createElement('div'); d.className='fb';
+  d.style.borderLeftColor=(atrapado?'#2E7D4F':'#C0392B');
+  d.innerHTML='<b style="color:'+(atrapado?'#4FBF7F':'#E0665A')+'">'+(atrapado?'¡'+esc(F.n)+' atrapado! '+F.g:'¡'+esc(F.n)+' se escapó!')+'</b>'+
+    '<p>'+aciertosMision+' de 5 herramientas bien usadas. '+(atrapado?'El miedo de '+esc(C.nom)+' quedó en la trampa y ella decide hoy.':'Necesitabas al menos 4 para atraparlo. Ese fantasma sigue en la cabeza de '+esc(C.nom)+'.')+'</p>';
+  z.appendChild(d);
+  var n=document.createElement('button'); n.className='btn'; n.type='button'; n.id='sigue';
+  n.innerHTML=(mIdx>=MISIONES-1)?'🏆 Ver mi calificación':'🔦 Siguiente casa';
+  n.onclick=function(){ if(mIdx>=MISIONES-1){ termina(); } else { mIdx++; iniciaMision(); } };
+  z.appendChild(n);
+}
+
+/* ---------- calificación ---------- */
+function termina(){
+  ver('juego',false);
+  var nota=0, i, filas='', c, n, pts;
+  for(i=0;i<CATS.length;i++){
+    c=porCat[CATS[i].k]||0; n=(CATS[i].k==='no')?MISIONES*2:MISIONES;
+    pts=Math.round(CATS[i].max*(c/n)*(c/n)*10)/10; nota+=pts;
+    filas+='<div class="fila"'+(i===CATS.length-1?' style="border-bottom:1px solid #2E2621"':'')+'>'+CATS[i].t+
+      '<b>'+pts+' / '+CATS[i].max+'</b><small>'+CATS[i].sub+' · '+c+' de '+n+' bien</small></div>';
+  }
+  nota=Math.round(nota*10)/10; if(nota>10) nota=10;
+  var titulo, texto, trofeo;
+  if(nota>=9.5){ trofeo='🏆'; titulo='Leyenda Cazadudas';
+    texto='ningún fantasma te asustó. Buscaste el No, construiste el Sí, abriste las dos puertas y sellaste con fecha.'; }
+  else if(nota>=7){ trofeo='🥈'; titulo='Cazadudas Pro';
+    texto='atrapaste casi todo. Revisa abajo dónde se te rió el fantasma y vuelve a entrar a la casa.'; }
+  else if(nota>=4){ trofeo='🔦'; titulo='Aprendiz con linterna';
+    texto='ya ves a los fantasmas, pero todavía se te escapan. Recuerda: primero encuentra la raíz y luego dale certeza para ESE miedo.'; }
+  else { trofeo='👻'; titulo='Te asustaste tú';
+    texto='los fantasmas ganaron esta vez. Repasa las cuatro raíces y la escalera: buscar el No, luego el Sí, dar opciones y microcompromisos.'; }
+  var unicos=[];
+  for(i=0;i<notas.length;i++){ if(unicos.join('|').indexOf(notas[i])<0) unicos.push(notas[i]); }
+  unicos=unicos.slice(0,3);
+  var nombres=[]; for(i=0;i<ruta.length;i++) nombres.push(ruta[i].nom);
+
+  var h='<div class="trofeo">'+trofeo+'</div><div class="kick">Tu calificación</div>'+
+    '<div><span class="nota'+(nota<6?' notaBaja':'')+'" id="notaFinal">'+nota+'</span><span class="notaDe">de 10</span></div>'+
+    '<h1 style="font-size:28px;margin-top:12px">'+titulo+'</h1>'+
+    '<p class="lead">'+esc(jugador)+', '+texto+'</p>'+
+    '<div class="fila">Fantasmas atrapados<b>👻 '+atrapados+' / '+MISIONES+'</b><small>Casas: '+esc(nombres.join(', '))+'</small></div>'+
+    '<div class="fila">Mejor combo<b>🔥 x'+mejorCombo+'</b></div>'+
+    '<div class="sect">De dónde sale tu nota</div>'+filas+
+    '<div class="tip2" style="margin-top:10px;font-size:13px">Cada escalón se gana completo: los fallos pesan doble, porque la certeza a medias no cierra.</div>';
+  if(unicos.length){ h+='<div class="sect">Para pulir</div>';
+    for(i=0;i<unicos.length;i++) h+='<div class="tip2">'+esc(unicos[i])+'</div>'; }
+  h+='<div class="captura"><b>Toma captura de esta pantalla</b> y mándala al grupo. ¿Quién atrapa más fantasmas? 👻</div>'+
+     '<button class="btn" id="otra" type="button" style="margin-top:16px">🔦 Jugar otra vez</button>'+
+     '<p class="firma">Manejo de objeciones · Kopay<b>Elaborado por Yahir De la Cruz</b></p>';
+  $('fin').innerHTML=h; ver('fin',true);
+  try{window.scrollTo(0,0);}catch(e){}
+  if($('otra')) $('otra').onclick=function(){ location.reload(); };
+}
+
+/* ---------- arranque ---------- */
+ver('aviso',false); ver('intro',true);
+$('btnStart').onclick=function(){
+  try{
+    var v=$('nombre').value;
+    jugador=(v&&v.replace(/^\s+|\s+$/g,''))?v.replace(/^\s+|\s+$/g,''):'Cazadora';
+    ruta=eligeCasos(); mIdx=0; pIdx=0; porCat={}; notas=[]; combo=0; mejorCombo=0; atrapados=0; bloqueado=false;
+    $('contador').innerHTML='👻 0'; pintaCombo();
+    ver('intro',false); ver('juego',true);
+    tono(196,392,0.5,'triangle');
+    iniciaMision();
+  }catch(err){
+    var d=document.createElement('div');
+    d.style.cssText='background:#7A2A18;color:#fff;padding:14px;margin-top:14px;border-radius:10px;font-size:15px';
+    d.innerHTML='No se pudo iniciar: '+(err&&err.message?esc(err.message):'error');
+    $('intro').appendChild(d);
+  }
+};
+$('nombre').onkeydown=function(e){ if(e&&e.keyCode===13){ if(e.preventDefault)e.preventDefault(); $('btnStart').onclick(); } };
+})();
+</script>
+</body>
+</html>
